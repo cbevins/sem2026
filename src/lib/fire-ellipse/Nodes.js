@@ -52,9 +52,21 @@ export class FireDist extends Node {
     }
 }
 
+export class FireLwr extends Node {
+    constructor(value=1, units=U.fireLwr) {
+        super('lwr', value, units)
+    }
+}
+
 export class FireRos extends Node {
     constructor(value=0, units=U.fireRos) {
         super('ros', value, units)
+    }
+}
+
+export class FireTime extends Node {
+    constructor(value=0, units=U.fireTime) {
+        super('time', value, units)
     }
 }
 

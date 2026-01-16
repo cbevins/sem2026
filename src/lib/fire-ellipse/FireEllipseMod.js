@@ -32,8 +32,10 @@ export class EllipseAxisMod extends Stem {
 }
 
 export class FireEllipseMod extends Stem {
-    constructor(key) {
+    constructor(key, input={lwr: null, headRos:null, headDegNorth:null, time:null}) {
         super(key,
+            new Node.FireLwr(),
+            new Node.FireTime(),
             new EllipseAxisMod('length'),
             new EllipseAxisMod('width'),
             new EllipseAxisMod('majorRadius'),
@@ -48,5 +50,12 @@ export class FireEllipseMod extends Stem {
             new FireVectorMod('psi'),
             new FireVectorMod('theta'),
         )
+        Object.defineProperty(this, 'input', {
+            value: input,           // reference to this object's parent object
+            enumerable: false,      // not visible to loops like for...in or to Object.keys()
+            configurable: true,     // prevents propery deletion
+            writable: true,         // *** must to be able to set this after instantiation
+        })
+
     }
 }

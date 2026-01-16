@@ -9,25 +9,7 @@
  * as 'enumerable' properties of the parent object, while meta data about the
  * parent/child are stored in a non-enumerable properties.
  * 
- * Usage:
- *  const mammals = new Stem('mammals',
- *      new Stem('canines',
- *          new Leaf('wolf'),
- *          new Leaf('hyenea'),
- *          new Stem('dogs',
- *              new Leaf('poodle'),
- *              new Leaf('hound')), // end dogs stem
- *      ), // end canines stem
- *      new Stem('felines',
- *          new Leaf('tiger'),
- *          new Leaf('lion'),
- *          new Stem('housecats',
- *              new Leaf('tabby'),
- *              new Leaf('Cheshire')) // end housecats stem
- *      ), // end felines stem
- * )    // end mammals
- *  mammals.canines.dogs.hound.says = 'owoooo'
- * 
+ * See ./demos.js for usage.
 */
 
 /**
@@ -81,9 +63,7 @@ export class Stem extends Dna {
      */
     constructor(key, ...children) {
         super(null, key, 'Stem')
-        console.log(`Stem '${key}' children`, children)
         for(let child of children) {
-            console.log(`    Stem '${key}' child`, child, child.key)
             this[child.key] = child
             this[child.key].parent = this
         }
@@ -94,12 +74,12 @@ export class Stem extends Dna {
  * The Leaf class is usually extended to accept leaf-specific properties
  */
 export class Leaf extends Dna {
-    constructor(key, value) {
+    constructor(key, object={}) {
         super(null, key, 'Leaf')
-        this.value = value
+        for (const [key, value] of Object.entries(object)) this[key] = value
     }
 }
 
 // Reduces some verbage
-export function leaf(key, ...props) { return new Leaf(key, props) }
-export function stem(key, ...children) { return new Stem(key, children) }
+export function leaf(key, ...props) { return new Leaf(key, ...props) }
+export function stem(key, ...children) { return new Stem(key, ...children) }

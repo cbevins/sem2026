@@ -1,20 +1,20 @@
 import {leaf, stem, Stem, Leaf} from './StemLeaf.js'
 
-const mammals = new Stem('mammals',
-    new Stem('canines',
-        new Leaf('wolf'),
-        new Leaf('hyenea'),
-        new Stem('dogs',
-            new Leaf('poodle', 'bark'),
-            new Leaf('hound', 'howl')
+const mammals = stem('mammals',
+    stem('canines',
+        leaf('wolf', {says: 'howl'}),
+        leaf('hyenea', {says: 'laugh'}),
+        stem('dogs',
+            leaf('poodle', {says:'bark'}),
+            leaf('hound', {says:'yelp'})
         ), // end dogs stem
     ), // end canines stem
-    new Stem('felines',
-        new Leaf('tiger', 'growl'),
-        new Leaf('lion', 'roar'),
-        new Stem('housecats',
-            new Leaf('tabby', 'meow'),
-            new Leaf('Cheshire', 'grin')) // end housecats stem
+    stem('felines',
+        leaf('tiger', {says:'growl'}),
+        leaf('lion', {says:'roar'}),
+        stem('housecats',
+            leaf('tabby', {says:'meow'}),
+            leaf('Cheshire', {says:'grin'})) // end housecats stem
     ), // end felines stem
 )    // end mammals
 console.log(mammals)

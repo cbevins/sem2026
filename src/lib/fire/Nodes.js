@@ -1,5 +1,5 @@
-import {DagNode} from '../dag/DagNode.js'
-import * as U from '../units/Units.js'
+import {DagNode} from '../index.js'
+import * as U from './Units.js'
 
 export class CoordE extends DagNode {
     constructor(value=0, units=U.geocoord) {

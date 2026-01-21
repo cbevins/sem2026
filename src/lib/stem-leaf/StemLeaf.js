@@ -38,6 +38,7 @@ export class Dna {
         })
         // this.parent = parent
     }
+    fullKey() { return this.lineage().join('.') }
     isLeaf() { return this.type === 'Leaf' }
     isStem() { return this.type === 'Stem' }
     lineage() {

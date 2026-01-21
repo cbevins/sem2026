@@ -1,45 +1,34 @@
 import {DagNode} from '../index.js'
 import * as U from './Units.js'
 
-export class CoordE extends DagNode {
-    constructor(value=0, units=U.geocoord) {
-        super('e', value, units)
-    }
-}
-
-export class CoordN extends DagNode {
-    constructor(value=0, units=U.geocoord) {
-        super('n', value, units)
-    }
-}
-
-export class CoordX extends DagNode {
-    constructor(value=0, units=U.geocoord) {
-        super('x', value, units)
-    }
-}
-
-export class CoordY extends DagNode {
-    constructor(value=0, units=U.geocoord) {
-        super('y', value, units)
-    }
-}
-
-export class DegreesHead extends DagNode {
+// GeoRefMod
+export class GeoAngle extends DagNode {
     constructor(value=0, units=U.compass) {
-        super('degHead', value, units)
+        super('north', value, units)
     }
 }
 
-export class DegreesNorth extends DagNode {
-    constructor(value=0, units=U.compass) {
-        super('degNorth', value, units)
+export class GeoEast extends DagNode {
+    constructor(value=0, units=U.geoCoord) {
+        super('east', value, units)
+    }
+}
+
+export class GeoNorth extends DagNode {
+    constructor(value=0, units=U.geoCoord) {
+        super('north', value, units)
     }
 }
 
 export class FireDist extends DagNode {
     constructor(value=0, units=U.fireDist) {
         super('dist', value, units)
+    }
+}
+
+export class FireEccent extends DagNode {
+    constructor(value=0, units=U.fireEccent) {
+        super('eccent', value, units)
     }
 }
 
@@ -64,5 +53,24 @@ export class FireTime extends DagNode {
 export class FireVhr extends DagNode {
     constructor(value=0, units=U.fireVhr) {
         super('vhr', value, units)
+    }
+}
+
+// HeadRefMod
+export class HeadAngle extends DagNode {
+    constructor(value=0, units=U.compass) {
+        super('head', value, units)
+    }
+}
+
+export class HeadX extends DagNode {
+    constructor(value=0, units=U.fireCoord) {
+        super('x', value, units)
+    }
+}
+
+export class HeadY extends DagNode {
+    constructor(value=0, units=U.fireCoord) {
+        super('y', value, units)
     }
 }

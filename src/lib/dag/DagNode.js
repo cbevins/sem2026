@@ -15,10 +15,10 @@ export class DagNode extends Leaf {
     static CLEAN = 'CLEAN'
     static DIRTY = 'DIRTY'
 
-    static IGNORED = 'IGNORED'      // not in the computation chain
-    static ACTIVE = 'ACTIVE'        // active but not selected or terminus
-    static SELECTED ='SELECTED'     // active and selected but not a terminus
-    static TERMINUS = 'TERMINUS'    // active, selected, and terminus of the chain
+    static IGNORED = 'IGNORED'              // not in the computation chain
+    static ACTIVE = 'ACTIVE'                // active but not selected or terminus
+    static SELECTED ='SELECTED'             // active and selected but not a terminus
+    static LASTSELECTED = 'LASTSELECTED'    // active, selected, and terminus of the chain
 
     //--------------------------------------------------------------------------
     // Functions called by Module.init() for initial (default) configuration
@@ -77,7 +77,7 @@ export class DagNode extends Leaf {
 
     isActive() { return this.status !== DagNode.IGNORED }
     isIgnored() { return this.status === DagNode.IGNORED }
-    isSelected() { return this.status === DagNode.SELECTED || this.status === DagNode.TERMINUS }
+    isSelected() { return this.status === DagNode.SELECTED || this.status === DagNode.LASTSELECTED }
 
     isClean() { return this.dirty === DagNode.CLEAN }
     isDirty() { return this.dirty === DagNode.DIRTY }

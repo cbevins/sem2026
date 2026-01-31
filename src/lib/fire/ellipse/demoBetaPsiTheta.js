@@ -41,15 +41,15 @@ const g = {vhr: Calc.subtract(f.vhr, back.vhr)}
 const h = {vhr: Calc.half(width.vhr)}
 
 const beta = {angle: {north: betaNorth}}
-beta.angle.head = Compass.counter(beta.angle.north, head.angle.north)
+beta.angle.head = Compass.rotateCcw(beta.angle.north, head.angle.north)
 beta.vhr = FE.betaVhr(beta.angle.head, eccent)
 
 const psi = {angle: {north: psiNorth}}
-psi.angle.head = Compass.counter(psi.angle.north, head.angle.north)
+psi.angle.head = Compass.rotateCcw(psi.angle.north, head.angle.north)
 psi.vhr = FE.psiVhr(psi.angle.head, f.vhr, g.vhr, h.vhr)
 
 const theta = {angle: {north: thetaNorth}}
-theta.angle.head = Compass.counter(theta.angle.north, head.angle.north)
+theta.angle.head = Compass.rotateCcw(theta.angle.north, head.angle.north)
 theta.vhr = FE.thetaVhr(theta.angle.head, f.vhr, h.vhr)
 
 for(let prop of [back, beta, f, g, h, length, psi, theta, width]) {
@@ -95,7 +95,7 @@ console.log('demo1.js run at', new Date)
 const betaTable = []
 const psiTable= []
 const thetaTable=[]
-for(let deg=0; deg<360; deg+=15) {
+for(let deg=0; deg<360; deg+=0.5) {
     beta.angle.head = deg
     beta.vhr = FE.betaVhr(beta.angle.head, eccent)
     beta.ros = Calc.multiply(beta.vhr, head.ros)
@@ -130,6 +130,10 @@ for(let deg=0; deg<360; deg+=15) {
     let betaFromTheta = FE.betaFromTheta(thetaFromBeta, f.vhr, g.vhr, h.vhr)
     betaTable.push([deg, beta.angle.head, psiFromBeta, betaFromPsi, thetaFromBeta, betaFromTheta])
 
+    if(deg>=265 && deg <=275) {
+        console.log('Beta', deg.toFixed(2), beta.angle.head.toFixed(2), psiFromBeta.toFixed(2),
+            '>', betaFromPsi.toFixed(2), '<', thetaFromBeta.toFixed(2), betaFromTheta.toFixed(2))
+    }
     betaFromPsi = FE.betaFromPsi(psi.angle.head, f.vhr, g.vhr, h.vhr)
     psiFromBeta = FE.psiFromBeta(betaFromPsi, f.vhr, g.vhr, h.vhr)
     let thetaFromPsi = FE.thetaFromPsi(psi.angle.head, f.vhr, h.vhr)
@@ -142,26 +146,35 @@ for(let deg=0; deg<360; deg+=15) {
     thetaFromPsi = FE.thetaFromPsi(psiFromTheta.head, f.vhr, h.vhr)
     thetaTable.push([deg, theta.angle.head, betaFromTheta, thetaFromBeta, psiFromTheta, thetaFromPsi])
 }
-console.log(`\nINPUTS: lwr=${lwr}, headRos=${headRos}, headNorth=${headNorth}, time=${time}, `
-    + `beta=${betaNorth}, psi=${psiNorth}, theta=${thetaNorth}`)
 
+let msg1 = ''
+let msg2 = ''
+
+console.log(`\nBeta Reciprocity Errors for INPUTS: lwr=${lwr}, headRos=${headRos}, headNorth=${headNorth}, time=${time}, `
+    + `beta=${betaNorth}, psi=${psiNorth}, theta=${thetaNorth}`)
 for(let [deg, beta, psiFromBeta, betaFromPsi, thetaFromBeta, betaFromTheta] of betaTable) {
-    console.log(`beta ${beta} => psi   ${psiFromBeta.toFixed(2)} => beta ${betaFromPsi.toFixed(2)}`)
-    console.log(`beta ${beta} => theta ${thetaFromBeta.toFixed(2)} => beta ${betaFromTheta.toFixed(2)}`)
+    msg1 = `beta ${beta} => psi   ${psiFromBeta.toFixed(2)} => beta ${betaFromPsi.toFixed(2)}`
+    if(Math.abs(beta-betaFromPsi)>0.1) console.log(msg1)
+    msg2 = `beta ${beta} => theta ${thetaFromBeta.toFixed(2)} => beta ${betaFromTheta.toFixed(2)}`
+    if(Math.abs(beta-betaFromTheta)>0.1) console.log(msg2)
 }
 
-console.log(`\nINPUTS: lwr=${lwr}, headRos=${headRos}, headNorth=${headNorth}, time=${time}, `
+console.log(`\nPsi Reciprocity Errors for INPUTS: lwr=${lwr}, headRos=${headRos}, headNorth=${headNorth}, time=${time}, `
     + `beta=${betaNorth}, psi=${psiNorth}, theta=${thetaNorth}`)
 for(let [deg, psi, betaFromPsi, psiFromBeta, thetaFromPsi, psiFromTheta] of psiTable) {
-    console.log(`psi ${psi} => beta  ${betaFromPsi.toFixed(2)} => psi ${psiFromBeta.toFixed(2)}`)
-    console.log(`psi ${psi} => theta ${thetaFromPsi.toFixed(2)} => psi ${psiFromTheta.toFixed(2)}`)
+    msg1 = `psi ${psi} => beta  ${betaFromPsi.toFixed(2)} => psi ${psiFromBeta.toFixed(2)}`
+    if(Math.abs(psi-psiFromBeta)>0.1) console.log(msg1)
+    msg2 = `psi ${psi} => theta ${thetaFromPsi.toFixed(2)} => psi ${psiFromTheta.toFixed(2)}`
+    if(Math.abs(psi-psiFromTheta)>0.1) console.log(msg2)
 }
 
-console.log(`\nINPUTS: lwr=${lwr}, headRos=${headRos}, headNorth=${headNorth}, time=${time}, `
+console.log(`\nTheta Reciprocity Errors for INPUTS: lwr=${lwr}, headRos=${headRos}, headNorth=${headNorth}, time=${time}, `
     + `beta=${betaNorth}, psi=${psiNorth}, theta=${thetaNorth}`)
 for(let [deg, theta, betaFromTheta, thetaFromBeta, psiFromTheta, thetaFromPsi] of psiTable) {
-    console.log(`theta ${theta} => beta ${betaFromTheta.toFixed(2)} => psi ${thetaFromBeta.toFixed(2)}`)
-    console.log(`theta ${theta} => psi  ${psiFromTheta.toFixed(2)} => psi ${thetaFromPsi.toFixed(2)}`)
+    msg1 = `theta ${theta} => beta ${betaFromTheta.toFixed(2)} => psi ${thetaFromBeta.toFixed(2)}`
+    if(Math.abs(theta-thetaFromBeta)>0.1) console.log(msg1)
+    msg2 = `theta ${theta} => psi  ${psiFromTheta.toFixed(2)} => psi ${thetaFromPsi.toFixed(2)}`
+    if(Math.abs(theta-thetaFromPsi)>0.1) console.log(msg2)
 }
 
 //------------------------------------------------------------------------------

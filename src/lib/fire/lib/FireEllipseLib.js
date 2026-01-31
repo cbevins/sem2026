@@ -12,7 +12,7 @@ export function angle(A, B, C) {
 }
 
 export function area(length, width) {return (Math.PI * length * width) / 4}
-    
+
 //------------------------------------------------------------------------------
 // back
 //------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ export function betaFromTheta(thetaHead, fVhr, gVhr, hVhr) {
     const y = hVhr * Math.sin(theta)        // y = R * t * h * sin(theta)
     const x = gVhr + fVhr * Math.cos(theta) // x = R * t * (g + f * cos(theta))
     // if (x === 0) { console.log(`*** FireEllipseEquations.betaFromTheta() - x is zero at theta ${thetaHead}`)}
-    let beta = (x === 0) ? theta : Math.atan(y/x)
+    let beta = (x === 0) ? Math.atan(y/0.00000001) : Math.atan(y/x)
     // Quandrant adjustment
     if (beta < 0) beta +=  Math.PI
     if (thetaHead > 180) beta += Math.PI

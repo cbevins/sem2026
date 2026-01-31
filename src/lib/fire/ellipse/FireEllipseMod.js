@@ -1,4 +1,4 @@
-import {Module} from '../Module.js'
+import {DagModule} from '../../index.js'
 import * as Node from '../Nodes.js'
 import * as FE from '../lib/FireEllipseLib.js'
 import * as Calc from '../lib/CalcLib.js'
@@ -9,35 +9,35 @@ import * as Compass from '../lib/CompassLib.js'
 //------------------------------------------------------------------------------
 
 // Sub-module for referencing angles relative to fire ellipse head and geographical north
-export class AngleMod extends Module {
+export class AngleMod extends DagModule {
     constructor(key='angle') {
         super(key, new Node.HeadAngle(), new Node.GeoAngle())
     }
 }
 
 // Sub-module for referencing x and y relative to the fire ellipse head
-export class HeadPointMod extends Module {
+export class HeadPointMod extends DagModule {
     constructor(key='head') {
         super(key, new Node.HeadX(), new Node.HeadY())
     }
 }
 
 // Sub-module for referencing position realtive to geographical north
-export class GeoPointMod extends Module {
+export class GeoPointMod extends DagModule {
     constructor(key='geo') {
         super(key, new Node.GeoEast(), new Node.GeoNorth())
     }
 }
 
 // Sub-module for referencing position relative to fire ellipse head and geographical north
-export class PositionMod extends Module {
+export class PositionMod extends DagModule {
     constructor(key='position') {
         super(key, new HeadPointMod(), new GeoPointMod())
     }
 }
 
 // Sub-module for referencing fire ellipse vectors and their associated fire behavior
-export class FireVectorMod extends Module {
+export class FireVectorMod extends DagModule {
     constructor(key) {
         super(key,
             new AngleMod('angle'),
@@ -51,13 +51,13 @@ export class FireVectorMod extends Module {
 }
 
 // Sub-module used by FireEllipseMod
-export class EllipseAxisMod extends Module {
+export class EllipseAxisMod extends DagModule {
     constructor(key) {
         super(key, new Node.FireVhr(), new Node.FireRos(), new Node.FireDist())
     }
 }
 
-export class FireEllipseMod extends Module {
+export class FireEllipseMod extends DagModule {
     constructor(key, input={lwr: null, headRos:null, headDegNorth:null, time:null}) {
         super(key,
             // Ellipse length-to-width ratio(lwr >= 1)
@@ -95,33 +95,30 @@ export class FireEllipseMod extends Module {
             // Vector from ellipse center point to ellipse perimeter at some angle from ellipse head
             new FireVectorMod('theta'),
         )
-        this.beta.psi = {}
-        this.beta.theta = {}
-        this.psi.beta = {}
-        this.psi.theta = {}
-        this.theta.beta = {}
-        this.theta.psi = {}
+        // this.beta.psi = {}
+        // this.beta.theta = {}
+        // this.psi.beta = {}
+        // this.psi.theta = {}
+        // this.theta.beta = {}
+        // this.theta.psi = {}
         this.init()
     }
     init() {
-        const {back, beta, eccent, f, g, h, head, ignition, length, lwr,
-            psi, theta, time, width} = this
+        const {back, beta, center, eccent, f, g, h, head, ignition,
+            left, length, lwr, psi, right, theta, time, width} = this
         lwr.input()
         eccent.method(FE.eccentricity, lwr)
 
         head.angle.head.fix(0)
         head.angle.north.input()
         head.dist.method(Calc.multiply, head.ros, time)
-        head.ros.input()
-        // head.origin.head.x.link(ignition.head.x)
-        // head.origin.head.y.link(ignition.head.y)
-        // head.origin.geo.east.link(ignition.geo.east)
-        // head.origin.geo.north.link(ignition.geo.north)
+        head.perim.geo.east.method(Compass.rotateCw, head.perim.head.x, head.angle.north)
+        head.perim.geo.north.method(Compass.rotateCw, head.perim.head.y, head.angle.north)
         head.perim.head.x.link(head.dist)
         head.perim.head.y.link(ignition.head.y)
+        head.ros.input()
         head.vhr.fix(1)     // head-to-head ratio is 1!
 
-    
         back.angle.head.fix(180)
         back.angle.north.method(Compass.opposite, head.angle.north)
         back.dist.method(Calc.multiply, back.ros, time)
@@ -132,14 +129,17 @@ export class FireEllipseMod extends Module {
         width.vhr.method(Calc.inverse, length.vhr)
         f.vhr.method(Calc.half, length.vhr)
         h.vhr.method(Calc.half, width.vhr)
-        g.vhr.method(Calc.sub, f.vhr, back.vhr)
+        g.vhr.method(Calc.subtract, f.vhr, back.vhr)
+
+        left.angle.head.fix(270)
+
+        right.angle.head.fix(90)
 
         beta.angle.north.input()
-        beta.angle.head.method(Compass.counter(beta.angle.north, head.angle.north))
+        beta.angle.head.method(Compass.rotateCw(beta.angle.north, head.angle.north))
         beta.dist.method(Calc.multiply, beta.ros, time)
         beta.ros.method(Calc.multiply, beta.vhr, head.ros)
         beta.vhr.method(FE.betaVhr, beta.angle.head, eccent)
-        beta.theta.method(FE.thetaFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
         beta.perim.head.x.method(FE.betaX, beta.angle.head, beta.dist)
         beta.perim.head.y.method(FE.betaY, beta.angle.head, beta.dist)
 
@@ -148,12 +148,12 @@ export class FireEllipseMod extends Module {
         ignition.head.x.fix(0)
         ignition.head.y.fix(0)
 
-        beta.psi.method(FE.psiFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
-        beta.theta.method(FE.thetaFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
-        psi.beta.method(FE.betaFromPsi, psi.angle.head, f.vhr, g.vhr, h.vhr)
-        psi.theta.method(FE.thetaFromPsi, psi.angle.head, f.vhr, h.vhr)
-        theta.beta.method(FE.betaFromTheta, theta.angle.head, f.vhr, g.vhr, h.vhr)
-        theta.psi.method(FE.psiFromTheta, theta.angle.head, f.vhr, h.vhr)
+        // beta.psi.method(FE.psiFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
+        // beta.theta.method(FE.thetaFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
+        // psi.beta.method(FE.betaFromPsi, psi.angle.head, f.vhr, g.vhr, h.vhr)
+        // psi.theta.method(FE.thetaFromPsi, psi.angle.head, f.vhr, h.vhr)
+        // theta.beta.method(FE.betaFromTheta, theta.angle.head, f.vhr, g.vhr, h.vhr)
+        // theta.psi.method(FE.psiFromTheta, theta.angle.head, f.vhr, h.vhr)
 
         time.input()
     }

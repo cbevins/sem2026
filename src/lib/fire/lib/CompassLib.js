@@ -5,9 +5,6 @@
  * @license MIT
  */
 
-// Returns 'base' angle (deg) rotated clockwise by 'degrees' 
-export function clockwise(base, degrees) { return constrain(base + degrees) }
-
 // Returns degrees where 0 <= degrees < 360
 export function constrain (degrees) {
     while (degrees >= 360) degrees -= 360
@@ -15,14 +12,17 @@ export function constrain (degrees) {
     return degrees
 }
 
-// Returns 'base' angle (deg) rotated counter-clockwise by 'degrees' 
-export function counter(x, y) { return constrain(x - y) }
-
 // Returns degrees from radians
 export function degrees(radians) { return (radians * 180) / Math.PI }
 
 // Returns opposite of degrees
 export function opposite(degrees) { return constrain(degrees - 180) }
+
+// Returns 'base' angle (deg) rotated counter-clockwise by 'degrees' 
+export function rotateCcw(base, degrees) { return constrain(base - degrees) }
+
+// Returns 'base' angle (deg) rotated clockwise by 'degrees' 
+export function rotateCw(base, degrees) { return constrain(base + degrees) }
 
 // Returns 'degrees' rotated by 90 degrees clockwise
 export function rotate90(degrees) { return constrain(degrees + 90) }

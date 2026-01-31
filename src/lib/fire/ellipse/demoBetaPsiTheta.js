@@ -2,6 +2,9 @@ import * as Compass from '../lib/CompassLib.js'
 import * as Calc from '../lib/CalcLib.js'
 import * as FE from '../lib/FireEllipseLib.js'
 import * as Util from './utils.js'
+import {getEllipseObject} from './ellipseObject.js'
+
+console.log('demo1.js run at', new Date)
 
 //------------------------------------------------------------------------------
 // Inputs
@@ -13,80 +16,8 @@ const headRos = 1
 const betaNorth = 0
 const psiNorth = 0
 const thetaNorth = 0
-
-//------------------------------------------------------------------------------
-// Ellipse
-//------------------------------------------------------------------------------
-const eccent = FE.eccentricity(lwr)
-const ignition = {head: {x: 0, y: 0}}
-const head = {
-    angle: {head: 0, north: headNorth},
-    dist: Calc.multiply(headRos, time),
-    ros: headRos,
-    vhr: 1
-}
-
-const back = {
-    angle: {
-        head: 180,
-        north: Compass.opposite(head.angle.north)
-    },
-    vhr: FE.backVhr(eccent)
-}
-
-const length = {vhr: Calc.sum(head.vhr, back.vhr)}
-const width = {vhr: Calc.divide(length.vhr, lwr)}
-const f = {vhr: Calc.half(length.vhr)}
-const g = {vhr: Calc.subtract(f.vhr, back.vhr)}
-const h = {vhr: Calc.half(width.vhr)}
-
-const beta = {angle: {north: betaNorth}}
-beta.angle.head = Compass.rotateCcw(beta.angle.north, head.angle.north)
-beta.vhr = FE.betaVhr(beta.angle.head, eccent)
-
-const psi = {angle: {north: psiNorth}}
-psi.angle.head = Compass.rotateCcw(psi.angle.north, head.angle.north)
-psi.vhr = FE.psiVhr(psi.angle.head, f.vhr, g.vhr, h.vhr)
-
-const theta = {angle: {north: thetaNorth}}
-theta.angle.head = Compass.rotateCcw(theta.angle.north, head.angle.north)
-theta.vhr = FE.thetaVhr(theta.angle.head, f.vhr, h.vhr)
-
-for(let prop of [back, beta, f, g, h, length, psi, theta, width]) {
-    prop.ros = Calc.multiply(prop.vhr, head.ros)
-    prop.dist = Calc.multiply(prop.vhr, head.dist)
-}
-
-beta.psi = FE.psiFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
-beta.theta = FE.thetaFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
-psi.beta = FE.betaFromPsi(psi.angle.head, f.vhr, g.vhr, h.vhr)
-psi.theta = FE.thetaFromPsi(psi.angle.head, f.vhr, h.vhr)
-theta.beta = FE.betaFromTheta(theta.angle.head, f.vhr, g.vhr, h.vhr)
-theta.psi = FE.psiFromTheta(theta.angle.head, f.vhr, h.vhr)
-
-beta.perim = {
-    head: {
-        x: FE.betaX(beta.angle.head, beta.dist),
-        y: FE.betaY(beta.angle.head, beta.dist)
-    }
-}
-
-psi.perim = {
-    head: {
-        x: FE.betaX(psi.beta, beta.dist),
-        y: FE.betaY(psi.beta, beta.dist)
-    }
-}
-
-theta.perim = {
-    head: {
-        x: FE.betaX(theta.angle.head, f.dist),
-        y: FE.betaY(theta.angle.head, h.dist)
-    }
-}
-
-const e = {back, beta, eccent, f, g, h, head, length, lwr, time, width}
-console.log('demo1.js run at', new Date)
+const e = getEllipseObject(lwr, headRos, headNorth, time, betaNorth, thetaNorth, psiNorth)
+const {back, beta, eccent, head, f, g, h, length, psi, theta, width} = e
 
 // -----------------------------------------------------------------------------
 // This section demonstrates the reciprocity of the beta-psi-theta functions.
@@ -130,10 +61,6 @@ for(let deg=0; deg<360; deg+=0.5) {
     let betaFromTheta = FE.betaFromTheta(thetaFromBeta, f.vhr, g.vhr, h.vhr)
     betaTable.push([deg, beta.angle.head, psiFromBeta, betaFromPsi, thetaFromBeta, betaFromTheta])
 
-    if(deg>=265 && deg <=275) {
-        console.log('Beta', deg.toFixed(2), beta.angle.head.toFixed(2), psiFromBeta.toFixed(2),
-            '>', betaFromPsi.toFixed(2), '<', thetaFromBeta.toFixed(2), betaFromTheta.toFixed(2))
-    }
     betaFromPsi = FE.betaFromPsi(psi.angle.head, f.vhr, g.vhr, h.vhr)
     psiFromBeta = FE.psiFromBeta(betaFromPsi, f.vhr, g.vhr, h.vhr)
     let thetaFromPsi = FE.thetaFromPsi(psi.angle.head, f.vhr, h.vhr)

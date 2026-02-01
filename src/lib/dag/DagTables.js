@@ -72,7 +72,11 @@ export function table(rows, headers=null, title=null) {
         }
         str += '\n'
     }
-    str += UR + ''.padStart(fullwidth-2,H) + UL +  '\n'
+
+    // Bottom  border
+    str += UR
+    for(let col=0; col<width.length-1; col++) str += ''.padStart(width[col]+2, H) + HU
+    str += ''.padStart(width[width.length-1]+2, H) + UL + '\n'
     return str
 }
 

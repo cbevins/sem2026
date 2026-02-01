@@ -58,7 +58,7 @@ export class EllipseAxisMod extends DagModule {
 }
 
 export class FireEllipseMod extends DagModule {
-    constructor(key, input={lwr: null, headRos:null, headDegNorth:null, time:null}) {
+    constructor(key, inputs={lwr: null, headRos:null, headDegNorth:null, time:null}) {
         super(key,
             // Ellipse length-to-width ratio(lwr >= 1)
             new Node.FireLwr(),
@@ -66,6 +66,8 @@ export class FireEllipseMod extends DagModule {
             new Node.FireEccent(),
             // Total elapsed time sing ignition
             new Node.FireTime(),
+            new Node.FirePerimeter(),
+            new Node.FireSize(),
             // Major axis
             new EllipseAxisMod('length'),
             // Minor axis
@@ -101,13 +103,15 @@ export class FireEllipseMod extends DagModule {
         // this.psi.theta = {}
         // this.theta.beta = {}
         // this.theta.psi = {}
-        this.init()
+        this.assignUpdaters()
     }
-    init() {
+    assignUpdaters() {
         const {back, beta, center, eccent, f, g, h, head, ignition,
-            left, length, lwr, psi, right, theta, time, width} = this
+            left, length, lwr, perimeter, psi, right, size, theta, time, width} = this
         lwr.input()
         eccent.method(FE.eccentricity, lwr)
+        size.method(FE.area, length.dist, width.dist)
+        perimeter.method(FE.perimeterRamanujan, f.dist, h.dist)
 
         head.angle.head.fix(0)
         head.angle.north.input()

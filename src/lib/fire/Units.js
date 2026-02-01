@@ -25,6 +25,9 @@ export const fireLwr = new Units('ellipse length-to-width ratio', 'real',
 export const fireRos = new Units('fire spread rate', 'real',
     {ge:0, le:10000}, ['ft/min', 'm/s', 'm/min', 'mi/h', 'km/h', 'ch/h'])
 
+export const fireSize = new Units('fire size', 'real',
+    {ge:0, le:Infinity}, ['ac', 'ha', 'ft2', 'm2', 'mi2', 'km2'])
+
 export const fireTime = new Units('elapsed time since ignition', 'real',
     {ge:0, le:60*24*360}, ['min', 'h'])
     

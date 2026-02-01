@@ -38,9 +38,21 @@ export class FireLwr extends DagNode {
     }
 }
 
+export class FirePerimeter extends DagNode {
+    constructor(value=0, units=U.fireDist) {
+        super('perimeter', value, units)
+    }
+}
+
 export class FireRos extends DagNode {
     constructor(value=0, units=U.fireRos) {
         super('ros', value, units)
+    }
+}
+
+export class FireSize extends DagNode {
+    constructor(value=0, units=U.fireSize) {
+        super('size', value, units)
     }
 }
 

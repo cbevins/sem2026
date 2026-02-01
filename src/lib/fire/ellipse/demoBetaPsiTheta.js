@@ -2,7 +2,7 @@ import * as Compass from '../lib/CompassLib.js'
 import * as Calc from '../lib/CalcLib.js'
 import * as FE from '../lib/FireEllipseLib.js'
 import * as Util from './utils.js'
-import {getEllipseObject} from './ellipseObject.js'
+import {FireEllipse} from './FireEllipse.js'
 
 console.log('demo1.js run at', new Date)
 
@@ -16,7 +16,7 @@ const headRos = 1
 const betaNorth = 0
 const psiNorth = 0
 const thetaNorth = 0
-const e = getEllipseObject(lwr, headRos, headNorth, time, betaNorth, thetaNorth, psiNorth)
+const e = new FireEllipse(lwr, headRos, headNorth, time, betaNorth, thetaNorth, psiNorth)
 const {back, beta, eccent, head, f, g, h, length, psi, theta, width} = e
 
 // -----------------------------------------------------------------------------
@@ -27,51 +27,51 @@ const betaTable = []
 const psiTable= []
 const thetaTable=[]
 for(let deg=0; deg<360; deg+=0.5) {
-    beta.angle.head = deg
-    beta.vhr = FE.betaVhr(beta.angle.head, eccent)
-    beta.ros = Calc.multiply(beta.vhr, head.ros)
-    beta.dist = Calc.multiply(beta.vhr, head.dist)
-    beta.psi = FE.psiFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
-    beta.theta = FE.thetaFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
-    beta.perim.head.x = FE.betaX(beta.angle.head, beta.dist)
-    beta.perim.head.y = FE.betaY(beta.angle.head, beta.dist)
+    // beta.angle.head = deg
+    // beta.vhr = FE.betaVhr(beta.angle.head, eccent)
+    // beta.ros = Calc.multiply(beta.vhr, head.ros)
+    // beta.dist = Calc.multiply(beta.vhr, head.dist)
+    // beta.psi = FE.psiFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
+    // beta.theta = FE.thetaFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
+    // beta.perim.head.x = FE.betaX(beta.angle.head, beta.dist)
+    // beta.perim.head.y = FE.betaY(beta.angle.head, beta.dist)
 
-    psi.angle.head = deg
-    psi.vhr = FE.psiVhr(psi.angle.head, f.vhr, g.vhr, h.vhr)
-    psi.ros = Calc.multiply(psi.vhr, head.ros)
-    psi.dist = Calc.multiply(psi.vhr, head.dist)
-    psi.beta = FE.betaFromPsi(psi.angle.head, f.vhr, g.vhr, h.vhr)
-    psi.theta = FE.thetaFromPsi(psi.angle.head, f.vhr, h.vhr)
-    psi.perim.head.x = FE.betaX(psi.beta, beta.dist)
-    psi.perim.head.y = FE.betaY(psi.beta, beta.dist)
+    // psi.angle.head = deg
+    // psi.vhr = FE.psiVhr(psi.angle.head, f.vhr, g.vhr, h.vhr)
+    // psi.ros = Calc.multiply(psi.vhr, head.ros)
+    // psi.dist = Calc.multiply(psi.vhr, head.dist)
+    // psi.beta = FE.betaFromPsi(psi.angle.head, f.vhr, g.vhr, h.vhr)
+    // psi.theta = FE.thetaFromPsi(psi.angle.head, f.vhr, h.vhr)
+    // psi.perim.head.x = FE.betaX(psi.beta, beta.dist)
+    // psi.perim.head.y = FE.betaY(psi.beta, beta.dist)
 
-    theta.angle.head = deg
-    theta.vhr = FE.thetaVhr(theta.angle.head, f.vhr, h.vhr)
-    theta.ros = Calc.multiply(theta.vhr, head.ros)
-    theta.dist = Calc.multiply(theta.vhr, head.dist)
-    theta.beta = FE.betaFromTheta(theta.angle.head, f.vhr, g.vhr, h.vhr)
-    theta.psi = FE.psiFromTheta(theta.angle.head, f.vhr, h.vhr)
-    theta.perim.head.x = FE.betaX(theta.angle.head, f.dist)
-    theta.perim.head.y = FE.betaY(theta.angle.head, h.dist)
+    // theta.angle.head = deg
+    // theta.vhr = FE.thetaVhr(theta.angle.head, f.vhr, h.vhr)
+    // theta.ros = Calc.multiply(theta.vhr, head.ros)
+    // theta.dist = Calc.multiply(theta.vhr, head.dist)
+    // theta.beta = FE.betaFromTheta(theta.angle.head, f.vhr, g.vhr, h.vhr)
+    // theta.psi = FE.psiFromTheta(theta.angle.head, f.vhr, h.vhr)
+    // theta.perim.head.x = FE.betaX(theta.angle.head, f.dist)
+    // theta.perim.head.y = FE.betaY(theta.angle.head, h.dist)
 
-    // Ensure beta-psi-theta derivations are recipricol
-    let psiFromBeta = FE.psiFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
-    let betaFromPsi = FE.betaFromPsi(psiFromBeta, f.vhr, g.vhr, h.vhr)
-    let thetaFromBeta = FE.thetaFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
-    let betaFromTheta = FE.betaFromTheta(thetaFromBeta, f.vhr, g.vhr, h.vhr)
-    betaTable.push([deg, beta.angle.head, psiFromBeta, betaFromPsi, thetaFromBeta, betaFromTheta])
+    // // Ensure beta-psi-theta derivations are recipricol
+    // let psiFromBeta = FE.psiFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
+    // let betaFromPsi = FE.betaFromPsi(psiFromBeta, f.vhr, g.vhr, h.vhr)
+    // let thetaFromBeta = FE.thetaFromBeta(beta.angle.head, f.vhr, g.vhr, h.vhr)
+    // let betaFromTheta = FE.betaFromTheta(thetaFromBeta, f.vhr, g.vhr, h.vhr)
+    // betaTable.push([deg, beta.angle.head, psiFromBeta, betaFromPsi, thetaFromBeta, betaFromTheta])
 
-    betaFromPsi = FE.betaFromPsi(psi.angle.head, f.vhr, g.vhr, h.vhr)
-    psiFromBeta = FE.psiFromBeta(betaFromPsi, f.vhr, g.vhr, h.vhr)
-    let thetaFromPsi = FE.thetaFromPsi(psi.angle.head, f.vhr, h.vhr)
-    let psiFromTheta = FE.psiFromTheta(thetaFromPsi, f.vhr, h.vhr)
-    psiTable.push([deg, psi.angle.head, betaFromPsi, psiFromBeta, thetaFromPsi, psiFromTheta])
+    // betaFromPsi = FE.betaFromPsi(psi.angle.head, f.vhr, g.vhr, h.vhr)
+    // psiFromBeta = FE.psiFromBeta(betaFromPsi, f.vhr, g.vhr, h.vhr)
+    // let thetaFromPsi = FE.thetaFromPsi(psi.angle.head, f.vhr, h.vhr)
+    // let psiFromTheta = FE.psiFromTheta(thetaFromPsi, f.vhr, h.vhr)
+    // psiTable.push([deg, psi.angle.head, betaFromPsi, psiFromBeta, thetaFromPsi, psiFromTheta])
 
-    betaFromTheta = FE.betaFromTheta(theta.angle.head, f.vhr, g.vhr, h.vhr)
-    thetaFromBeta = FE.thetaFromBeta(betaFromTheta, f.vhr, g.vhr, h.vhr)
-    psiFromTheta = FE.psiFromTheta(theta.angle.head, f.vhr, h.vhr)
-    thetaFromPsi = FE.thetaFromPsi(psiFromTheta.head, f.vhr, h.vhr)
-    thetaTable.push([deg, theta.angle.head, betaFromTheta, thetaFromBeta, psiFromTheta, thetaFromPsi])
+    // betaFromTheta = FE.betaFromTheta(theta.angle.head, f.vhr, g.vhr, h.vhr)
+    // thetaFromBeta = FE.thetaFromBeta(betaFromTheta, f.vhr, g.vhr, h.vhr)
+    // psiFromTheta = FE.psiFromTheta(theta.angle.head, f.vhr, h.vhr)
+    // thetaFromPsi = FE.thetaFromPsi(psiFromTheta.head, f.vhr, h.vhr)
+    // thetaTable.push([deg, theta.angle.head, betaFromTheta, thetaFromBeta, psiFromTheta, thetaFromPsi])
 }
 
 let msg1 = ''

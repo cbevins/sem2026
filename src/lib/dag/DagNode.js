@@ -88,8 +88,10 @@ export class DagNode extends Leaf {
      * Notifies all *this* DagNode's suppliers that it is one of their consumers
      */
     _notifySuppliers() {
-        for(let supplier of this.suppliers)
+        console.log(this.key, 'notifySuppliers...')
+        for(let supplier of this.suppliers) {
             supplier.consumers.push(this)
+        }
     }
 
     /**

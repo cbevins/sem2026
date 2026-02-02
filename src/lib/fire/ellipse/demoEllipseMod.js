@@ -1,6 +1,6 @@
 import {FireEllipseMod} from './FireEllipseMod.js'
 import * as Table from '../../dag/DagTables.js'
-import {startBanner} from '../../utils/startBanner.js'
+import {startBanner} from '../../utils/terminal.js'
 
 startBanner()
 
@@ -20,10 +20,10 @@ back.ros.select()
 right.ros.select()
 left.ros.select()
 Table.selectedNodesTable(ellipse)
+// process.exit()
 
 // Step 5 - discover required inputs and set their values
 Table.activeInputNodesTable(ellipse, 'Active Input Nodes BEFORE Setting Values')
-// process.exit()
 
 // Step 6 - set required inputs and get updated selected node values
 head.ros.set(1)

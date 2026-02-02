@@ -22,8 +22,20 @@ export const hd = "\u2566" // ╦
 export const hu = "\u2569" // ╩
 export const vh = "\u256c" // ╬
 
+export function startBanner() {console.log(startBannerStr())}
+export function startBannerStr() {
+    const progname = process.argv[1].split('\\').pop()
+    const started = new Date().toLocaleString()
+    const len = progname.length + started.length + 14
+    let str = v + ' ' + magenta + progname + reset + ' started at ' + magenta + started + reset + ' ' + v + '\n'
+    const top = dr + ''.padStart(len, h) + dl + '\n'
+    const bot = ur + ''.padStart(len, h) + ul + '\n'
+    return top+str+bot
+}
+
 // Generic terminal ascii table
-export function table(rows, headers=null, title=null) {
+export function table(rows, headers=null, title=null) { console.log(tableStr(rows, headers,title)) }
+export function tableStr(rows, headers=null, title=null) {
     // Determine column widths
     const width = []
     for(let col=0; col<rows[0].length; col++) width[col] = 0

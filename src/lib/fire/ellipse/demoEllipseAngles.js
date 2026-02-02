@@ -1,6 +1,6 @@
 import {FireEllipseMod} from './FireEllipseMod.js'
 import * as Table from '../../dag/DagTables.js'
-import {startBanner} from '../../utils/startBanner.js'
+import {startBanner, table} from '../../utils/terminal.js'
 
 startBanner()
 
@@ -21,10 +21,12 @@ Table.selectedNodesTable(ellipse)
 Table.activeInputNodesTable(ellipse, 'Active Input Nodes BEFORE Setting Values')
 
 // Step 6 - set required inputs and get updated selected node values
+const data = []
 for(let i=0; i<360; i+=15) {
     head.angle.north.set(i)
     const b = back.angle.north.get()
     const r = right.angle.north.get()
     const l = left.angle.north.get()
-    console.log(`head=${i}, right=${r}, back=${b}, left=${l}`)
+    data.push([i, r, b, l])
 }
+

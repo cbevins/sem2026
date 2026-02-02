@@ -146,12 +146,18 @@ export class FireEllipseMod extends DagModule {
         g.vhr.method(Calc.subtract, f.vhr, back.vhr)
 
         left.angle.head.fix(270)
+        left.angle.north.method(Compass.rotateCw, left.angle.head, head.angle.north)
         left.vhr.link(h.vhr)
         left.theta.fix(270)
+        left.beta.method(FE.betaFromTheta, left.theta, f.vhr, g.vhr, h.vhr)
+        left.psi.method(FE.psiFromTheta, left.theta, f.vhr, h.vhr)
 
         right.angle.head.fix(90)
+        right.angle.north.method(Compass.rotateCw, right.angle.head, head.angle.north)
         right.theta.fix(90)
         right.vhr.link(h.vhr)
+        right.beta.method(FE.betaFromTheta, right.theta, f.vhr, g.vhr, h.vhr)
+        right.psi.method(FE.psiFromTheta, right.theta, f.vhr, h.vhr)
 
         beta.angle.north.input()
         beta.angle.head.method(Compass.rotateCw, beta.angle.north, head.angle.north)

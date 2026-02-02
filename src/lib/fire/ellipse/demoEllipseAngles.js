@@ -1,34 +1,28 @@
 import {FireEllipseMod} from './FireEllipseMod.js'
 import * as Table from '../../dag/DagTables.js'
+import {start} from './utils.js'
 
-console.log(`${process.argv[1].split('\\').pop()} started at`, new Date)
+start() // console.log(`\n-------------------\n${process.argv[1].split('\\').pop()} started at`, new Date)
+process.exit()
 
 // Step 1 - compose a Dag of required Modules
 const ellipse = new FireEllipseMod('e')
-
 // Step 2 - configure Module options and inter-module linkages
-
 // Step 3 - determine DagNode consumers (and get destructured items for convenience)
 ellipse.setConsumers()
 const {back, beta, eccent, f, g, h, head, ignition, left, length, lwr,
     perimeter, psi, right, size, theta, time, width} = ellipse
 
 // Step 4 - select desired outputs
-perimeter.select()
-size.select()
-back.ros.select()
-right.ros.select()
-left.ros.select()
+right.angle.north.select()
 Table.selectedNodesTable(ellipse)
 
 // Step 5 - discover required inputs and set their values
 Table.activeInputNodesTable(ellipse, 'Active Input Nodes BEFORE Setting Values')
-// process.exit()
 
 // Step 6 - set required inputs and get updated selected node values
-head.ros.set(1)
-lwr.set(2)
-time.set(1)
-Table.activeInputNodesTable(ellipse, 'Active Input Nodes AFTER Setting Values')
-ellipse.updateAll()
-Table.selectedNodesTable(ellipse)
+for(let i=0; i<360; i+=15) {
+    head.angle.north.set(i)
+    const r = right.angle.north.get()
+    console.log(i,r)
+}

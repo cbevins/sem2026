@@ -1,7 +1,8 @@
 import {FireEllipseMod} from './FireEllipseMod.js'
 import * as Table from '../../dag/DagTables.js'
+import {startBanner} from '../../utils/startBanner.js'
 
-console.log(`${process.argv[1].split('\\').pop()} started at`, new Date)
+startBanner()
 
 // Step 1 - compose a Dag of required Modules
 const ellipse = new FireEllipseMod('e')
@@ -10,8 +11,7 @@ const ellipse = new FireEllipseMod('e')
 
 // Step 3 - determine DagNode consumers (and get destructured items for convenience)
 ellipse.setConsumers()
-const {back, beta, eccent, f, g, h, head, ignition, left, length, lwr,
-    perimeter, psi, right, size, theta, time, width} = ellipse
+const {back, head, left, lwr, perimeter, right, size, time} = ellipse
 
 // Step 4 - select desired outputs
 perimeter.select()

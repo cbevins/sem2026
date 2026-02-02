@@ -21,3 +21,51 @@ export const vl = "\u2563" // ╣
 export const hd = "\u2566" // ╦
 export const hu = "\u2569" // ╩
 export const vh = "\u256c" // ╬
+
+// Generic terminal ascii table
+export function table(rows, headers=null, title=null) {
+    // Determine column widths
+    const width = []
+    for(let col=0; col<rows[0].length; col++) width[col] = 0
+    for(let row of rows) {
+        for(let col=0; col<row.length; col++)
+            width[col] = Math.max(width[col], row[col].length)
+    }
+    if (headers) {
+        for(let col=0; col<headers.length; col++)
+            width[col] = Math.max(width[col], headers[col].length)
+    }
+
+    // Title
+    let str = green + title + reset + '\n'
+    // Top bar
+    str += dr
+    for(let col=0; col<width.length-1; col++) str += ''.padStart(width[col]+2, h) + hd
+    str += ''.padStart(width[width.length-1]+2, h) + dl + '\n'
+
+    if (headers) {
+        // Headers row
+        str += v +' '
+        for(let col=0; col<headers.length; col++) {
+            str += green + headers[col].padEnd(width[col]+1) + reset + v + ' '
+        }
+        // Middle bar
+        str += '\n' + vr
+        for(let col=0; col<width.length-1; col++) str += ''.padStart(width[col]+2, h) + vh
+        str += ''.padStart(width[width.length-1]+2, h) + vl + '\n'
+    }
+
+    for(let row of rows) {
+        str += v +' '
+        for(let col=0; col<row.length; col++) {
+            str += yellow + row[col].padEnd(width[col]+1) + reset + v + ' '
+        }
+        str += '\n'
+    }
+
+    // Bottom  border
+    str += ur
+    for(let col=0; col<width.length-1; col++) str += ''.padStart(width[col]+2, h) + hu
+    str += ''.padStart(width[width.length-1]+2, h) + ul + '\n'
+    return str
+}

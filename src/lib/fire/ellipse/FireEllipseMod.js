@@ -137,6 +137,9 @@ export class FireEllipseMod extends DagModule {
         back.psi.fix(180)
         back.theta.fix(180)
 
+        center.head.x.link(g.dist)
+        center.head.y.fix(0)
+
         length.vhr.method(Calc.sum, head.vhr, back.vhr)
 
         width.vhr.method(Calc.divide, length.vhr, lwr)
@@ -186,7 +189,7 @@ export class FireEllipseMod extends DagModule {
         theta.angle.north.input()
         theta.angle.head.method(Compass.rotateCw, theta.angle.north, head.angle.north)
         theta.vhr.method(FE.thetaVhr, theta.angle.head, f.vhr, h.vhr)
-        theta.perim.head.x.method(FE.betaX, theta.angle.head, f.dist)
+        theta.perim.head.x.method(Calc.sum, theta.dist, center.head.x)
         theta.perim.head.y.method(FE.betaY, theta.angle.head, h.dist)
         // beta angle from head vector at the perimeter point at theta angle from head
         theta.beta.method(FE.betaFromTheta, theta.angle.head, f.vhr, g.vhr, h.vhr)

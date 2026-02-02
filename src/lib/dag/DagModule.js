@@ -19,7 +19,7 @@ export class DagModule extends Stem {
 
     activeNodes() { return this.nodes().filter(node => node.status === DagNode.ACTIVE) }
 
-    activeInputNodes() { return this.nodes().filter(node => node.isInput() && node.status === DagNode.ACTIVE) }
+    activeInputNodes() { return this.nodes().filter(node => node.isInput() && node.status !== DagNode.IGNORED) }
 
     inputNodes() { return this.nodes().filter(node => node.isInput()) }
 

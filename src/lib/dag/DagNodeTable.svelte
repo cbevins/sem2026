@@ -1,5 +1,4 @@
 <script module>
-    import {FireEllipseMod} from './FireEllipseMod.js'
     export {DagNodeTable}
 </script>
 
@@ -12,7 +11,7 @@
 {/snippet}
 
 {#snippet DagNodeTable(title, nodeArray)}
-    <h2 class='mt-4 text-base font-bold'>{title} ({nodeArray.length})</h2>
+    <h2 class='mt-4 text-base font-bold text-center'>{title} ({nodeArray.length})</h2>
     <table class='table-auto text-sm'>
         <thead>
             <tr>

@@ -66,24 +66,24 @@ export class DagNode extends Leaf {
         return this._get()
     }
     _get() {
+        // If this DagNode's value is clean, just return the value
+        if (this.dirty === DagNode.CLEAN) return this.value
         // If this DagNode is input or fixed, just return its value
         if (this.isInput() || this.isFixed()) {
             this.dirty = DagNode.CLEAN
             return this.value
         }
-        // If this DagNode's value is clean, just return the value
-        if (this.dirty === DagNode.CLEAN) return this.value
         // If this DagNode is linked to another, get() the linked node's value and return it
         if (this.isLinked()) {
+            this.value = this.suppliers[0]._get()
             this.dirty = DagNode.CLEAN
-            return this.suppliers[0].value
+            return this.value
         }
         // Otherwise DagNode is DIRTY, so get its arguments and call its updater method
         const args = []
         for(let supplier of this.suppliers)
             args.push(supplier._get())      // this may recurse upstream
         this.value = this.updater.apply(this, args)
-        // This DagNode is now CLEAN
         this.dirty = DagNode.CLEAN
         return this.value
     }

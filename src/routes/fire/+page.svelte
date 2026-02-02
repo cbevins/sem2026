@@ -4,7 +4,7 @@
     const items = [{
         route: '/fire/ellipse/perimeter',
         title: 'Fire Ellipse Perimeter',
-        brief: 'Demo using FireBehaviorMod to draw fire ellipse',
+        brief: 'FireBehaviorMod perimeter points',
     },{
         route: '/fire/ellipse/module',
         title: 'Fire Ellipse Module Table',

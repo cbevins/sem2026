@@ -27,6 +27,7 @@ for(let i=0; i<360; i+=15) {
     const b = back.angle.north.get()
     const r = right.angle.north.get()
     const l = left.angle.north.get()
-    data.push([i, r, b, l])
+    data.push([i.toFixed(0), r.toFixed(0), b.toFixed(0), l.toFixed(0)])
 }
-
+table(data, ['Head', 'Right', 'Back', 'Left'], 'Principal Axis Angles from North')
+Table.allNodesTable(ellipse)

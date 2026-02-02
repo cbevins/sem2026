@@ -52,7 +52,10 @@ export class DagNode extends Leaf {
         }
         this.suppliers = args
     }
-
+    // Returns an array of this node's supplier fullKeys
+    supplierFullKeys() { return this.suppliers.map(node => node.fullKey()) }
+    // Returns string representation of updater invocation
+    updaterString() { return this.updater.name+'('+this.supplierFullKeys().join(', ')+')'}
     //--------------------------------------------------------------------------
     // Functions called by client to set() and get() node values
     //--------------------------------------------------------------------------
@@ -64,11 +67,17 @@ export class DagNode extends Leaf {
     }
     _get() {
         // If this DagNode is input or fixed, just return its value
-        if (this.isInput() || this.isFixed()) return this.value
+        if (this.isInput() || this.isFixed()) {
+            this.dirty = DagNode.CLEAN
+            return this.value
+        }
         // If this DagNode's value is clean, just return the value
         if (this.dirty === DagNode.CLEAN) return this.value
         // If this DagNode is linked to another, get() the linked node's value and return it
-        if (this.isLinked()) return this.suppliers[0].value
+        if (this.isLinked()) {
+            this.dirty = DagNode.CLEAN
+            return this.suppliers[0].value
+        }
         // Otherwise DagNode is DIRTY, so get its arguments and call its updater method
         const args = []
         for(let supplier of this.suppliers)

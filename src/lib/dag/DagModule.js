@@ -47,6 +47,8 @@ export class DagModule extends Stem {
         }
     }
 
+    sortNodes(nodes) { return nodes.sort((a, b) => a.fullKey().localeCompare(b.fullKey())) }
+
     updateAll() {
         for (let node of this.selectedNodes()) node.get()
     }

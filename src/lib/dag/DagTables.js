@@ -43,11 +43,9 @@ export function table(rows, headers=null, title=null) {
         for(let col=0; col<headers.length; col++)
             width[col] = Math.max(width[col], headers[col].length)
     }
-    let fullwidth = 1
-    for(let col=0; col<width.length; col++) fullwidth += (width[col]+3)
 
     // Title
-    let str = title ? title+'\n' : ''
+    let str = Green + title + Reset + '\n'
     // Top bar
     str += DR
     for(let col=0; col<width.length-1; col++) str += ''.padStart(width[col]+2, H) + HD

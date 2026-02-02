@@ -43,7 +43,6 @@ export class DagModule extends Stem {
         const nodes = this.nodes()
         for(let node of nodes) node.consumers = []
         for(let node of nodes) {
-            console.log(node.key)
             node._notifySuppliers()
         }
     }

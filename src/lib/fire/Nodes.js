@@ -69,6 +69,11 @@ export class FireVhr extends DagNode {
 }
 
 // HeadRefMod
+export class BetaAngle extends DagNode {
+    constructor(value=0, units=U.compass) {
+        super('beta', value, units)
+    }
+}
 export class HeadAngle extends DagNode {
     constructor(value=0, units=U.compass) {
         super('head', value, units)
@@ -84,5 +89,15 @@ export class HeadX extends DagNode {
 export class HeadY extends DagNode {
     constructor(value=0, units=U.fireCoord) {
         super('y', value, units)
+    }
+}
+export class PsiAngle extends DagNode {
+    constructor(value=0, units=U.compass) {
+        super('psi', value, units)
+    }
+}
+export class ThetaAngle extends DagNode {
+    constructor(value=0, units=U.compass) {
+        super('theta', value, units)
     }
 }

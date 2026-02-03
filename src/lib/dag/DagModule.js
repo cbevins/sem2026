@@ -45,6 +45,21 @@ export class DagModule extends Stem {
         for(let node of nodes) {
             node._notifySuppliers()
         }
+        const stack = []
+        for(let node of nodes) {
+            this._checkCyclical(node, node, stack)
+        }
+    }
+    _checkCyclical(node, startNode, stack) {
+        for(let supplier of node.suppliers) {
+            if(supplier === startNode) {
+                console.log(stack)
+                throw new Error(`Cyclical dep found for node ${startNode.fullKey()}`)
+            }
+            stack.push(node.fullKey())
+            this._checkCyclical(supplier, startNode, stack)
+        }
+        stack.pop()
     }
 
     sortNodes(nodes) { return nodes.sort((a, b) => a.fullKey().localeCompare(b.fullKey())) }

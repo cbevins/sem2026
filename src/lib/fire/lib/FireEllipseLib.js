@@ -39,9 +39,9 @@ export function backVhr(eccent) { return (1 - eccent) / (1 + eccent) }
 // (i.e., the direction of elliptical expansion) at the point, and (2) the ellipse head orientation.
 // 'Beta' is the angle between (1) the fire ignition point and  (2) the ellipse head orientation.
 // Unimplemented by BehavePlus
-export function betaFromPsi(psiHead, f, g, h) {
-    const thetaHead = thetaFromPsi(psiHead, f, h)
-    return betaFromTheta(thetaHead, f, g, h)
+export function betaFromPsi(psiHead, fVhr, gVhr, hVhr) {
+    const thetaHead = thetaFromPsi(psiHead, fVhr, hVhr)
+    return betaFromTheta(thetaHead, fVhr, gVhr, hVhr)
 }
 
 // Used only by betaFromPsi(), Unused by BehavePlus
@@ -59,13 +59,20 @@ export function betaFromTheta(thetaHead, fVhr, gVhr, hVhr) {
     if (thetaHead > 180) beta += Math.PI
     return degrees(beta)
 }
-
-export function betaX(betaHead, betaDist) {
-    return betaDist * Math.cos(radians(betaHead))
-}
     
-export function betaY(betaHead, betaDist) {
-    return betaDist * Math.sin(radians(betaHead))
+export function betaPerimeterPoint(betaHead, betaDist, headDeg=0, ignx=0, igny=0) {
+    const rad = radians(betaHead + headDeg)
+    const dx = ignx + betaDist * Math.cos(rad)
+    const dy = igny + betaDist * Math.sin(rad)
+    return [dx, dy]
+}
+
+export function betaX(betaHead, betaDist, headDeg=0, ignX=0) {
+    return ignX + betaDist * Math.cos(radians(betaHead + headDeg))
+}
+
+export function betaY(betaHead, betaDist, headDeg=0, ignY=0) {
+    return ignY + betaDist * Math.sin(radians(betaHead + headDeg))
 }
 
 /**
@@ -76,6 +83,14 @@ export function betaY(betaHead, betaDist) {
  */
 export function betaVhr(betaHead, eccent) {
     return (1 - eccent) / (1 - eccent * Math.cos(radians(betaHead)))
+}
+
+export function centerX(headDeg, gDist, ignX=0) {
+    return ignX + gDist * Math.cos(radians(headDeg))
+}
+
+export function centerY(headDeg, gDist, ignY=0) {
+    return ignY + gDist * Math.sin(radians(headDeg))
 }
 
 /**
@@ -93,6 +108,16 @@ export function betaVhr(betaHead, eccent) {
  * @returns The fire ellipse eccentricity (ratio).
  */
 export function eccentricity(lwr) {return Math.sqrt(lwr * lwr - 1) / lwr}
+
+// This is just betaX with betaHead=0
+export function headX(headDist, headDeg=0, ignX=0) {
+    return ignX + headDist * Math.cos(radians(headDeg))
+}
+
+// This is just betaY with betaHead=0
+export function headY(headDist, headDeg=0, ignY=0) {
+    return ignY + headDist * Math.sin(radians(headDeg))
+}
 
 export function lwrFromWind(mph) { return 1 + 0.25 * mph }
 
@@ -161,7 +186,7 @@ export function psiFromTheta(thetaHead, f, h) {
     // psi += ( theta > pi) ? pi : 0
     // Quadrant adjustment
     // 1st quadrant needs no adjustment
-    if (theta <= 0.5 * Math.PI) {}
+    if (theta <= 0.5 * Math.PI) { /* no adjustment needed */ }
     // 2nd and 3rd quadrants
     else if (theta > 0.5 * Math.PI && theta <= 1.5 * Math.PI) { psi += Math.PI }
     // 4th quadrant
@@ -177,7 +202,26 @@ export function psiVhr(psiHead, fVhr, gVhr, hVhr) {
     const sin2Psi = 1 - cos2Psi
     return gVhr * cosPsi + Math.sqrt((fVhr * fVhr * cos2Psi) + (hVhr * hVhr * sin2Psi))
 }
-    
+
+export function psiX(psiHead, fVhr, gVhr, hVhr, eccent, headDist, headDeg=0, ignX=0) {
+    // Get the betaHead for this psi
+    const betaHead = betaFromPsi(psiHead, fVhr, gVhr, hVhr)
+    const bVhr = betaVhr(betaHead, eccent)
+    const betaDist = bVhr * headDist
+    const x = betaX(betaHead, betaDist, headDeg, ignX)
+    // console.log(`When psi=${psiHead}, beta=${betaHead}, betaDist=${betaDist}, x=${x}`)
+    return x
+}
+
+export function psiY(psiHead, fVhr, gVhr, hVhr, eccent, headDist, headDeg=0, ignY=0) {
+    const betaHead = betaFromPsi(psiHead, fVhr, gVhr, hVhr)
+    const bVhr = betaVhr(betaHead, eccent)
+    const betaDist = bVhr * headDist
+    const y = betaY(betaHead, betaDist, headDeg, ignY)
+    // console.log(`When psi=${psiHead}, beta=${betaHead}, betaDist=${betaDist}, y=${y}`)
+    return y
+}
+
 //------------------------------------------------------------------------------
 // theta
 //------------------------------------------------------------------------------
@@ -218,12 +262,19 @@ export function thetaFromPsi(psiHead, fVhr, hVhr) {
     return degrees(theta)
 }
 
-export function thetaX(thetaHead, fDist) {
-    return fDist * Math.cos(radians(thetaHead))
+export function thetaPerimeterPoint(thetaDeg, fDist, hDist, ignx=0, igny=0, headDeg=0) {
+    let rad = radians(thetaDeg+headDeg)
+    const dx = ignx + fDist * Math.cos(rad)
+    const dy = igny + hDist * Math.sin(rad)
+    return [dx, dy]
 }
 
-export function thetaY(thetaHead, hDist) {
-    return hDist * Math.sin(radians(thetaHead))
+export function thetaX(thetaHead, fDist, headDeg=0, centerX=0) {
+    return centerX + fDist * Math.cos(radians(thetaHead+headDeg))
+}
+
+export function thetaY(thetaHead, hDist, headDeg=0, centerY=0) {
+    return centerY + hDist * Math.sin(radians(thetaHead+headDeg))
 }
 
 export function thetaVhr(thetaHead, fVhr, hVhr) {
@@ -235,9 +286,53 @@ export function thetaVhr(thetaHead, fVhr, hVhr) {
     return (sumsq>0) ? Math.sqrt(sumsq) : 0
 }
 
-export function subtendX(thetaHead, centerX, fDist) {
-    return centerX + fDist * Math.cos(radians(thetaHead))
+export function subtendX(thetaHead, centerX, fDist, headDeg) {
+    return centerX + fDist * Math.cos(radians(thetaHead + headDeg))
 }
-export function subtendY(thetaHead, centerX, fDist) {
-    return centerY + fDist * Math.sin(radians(thetaHead))
+export function subtendY(thetaHead, centerY, fDist, headDeg) {
+    return centerY + fDist * Math.sin(radians(thetaHead + headDeg))
+}
+/**
+ * Calculates the coordinates of a point on the perimeter of an ellipse at a given angle.
+ * 
+ * @param {number} xc - The x-coordinate of the ellipse's center.
+ * @param {number} yc - The y-coordinate of the ellipse's center.
+ * @param {number} a - The semi-major axis (x-radius).
+ * @param {number} b - The semi-minor axis (y-radius).
+ * @param {number} theta - The angle in radians from the center (measured from the positive x-axis).
+ * @returns {{x: number, y: number}} An object containing the x and y coordinates.
+ */
+function getPointOnEllipse(xc, yc, a, b, theta, rot=0) {
+  // Formula derived from the intersection of a line y = tan(theta)*x and the ellipse equation
+  const a2 = a * a;
+  const b2 = b * b;
+  const rad = radians(theta + rot)
+  const tanTheta2 = Math.tan(rad) * Math.tan(rad);
+  const sqrtDenominator = Math.sqrt(b2 + a2 * tanTheta2);
+
+  let x = (a * b) / sqrtDenominator;
+  let y = (a * b * Math.tan(rad)) / sqrtDenominator;
+
+  // Adjust signs based on the quadrant of the angle
+  // The sign of x and y should match the sign of cos(theta) and sin(theta) respectively
+  if (Math.cos(rad) < 0) {
+    x = -x;
+  }
+  if (Math.sin(rad) < 0) {
+    y = -y;
+  }
+  
+  // Translate the point to the ellipse's center
+  x += xc;
+  y += yc;
+
+  return { x: x, y: y };
+}
+export function pointX(theta, a, b, north, xc, yc) {
+    const p = getPointOnEllipse(xc, yc, a, b, theta, north)
+    return p.x
+}
+export function pointY(theta, a, b, north, xc, yc) {
+    const p = getPointOnEllipse(xc, yc, a, b, theta, north)
+    return p.y
 }

@@ -62,7 +62,8 @@ export class EllipseAxisMod extends DagModule {
 }
 
 export class FireEllipseMod extends DagModule {
-    constructor(key, inputs={lwr: null, headRos:null, headDegNorth:null, time:null}) {
+    // configVector is 'head' or 'north'
+    constructor(key, configVector) {
         super(key,
             // Ellipse length-to-width ratio(lwr >= 1)
             new Node.FireLwr(),
@@ -101,22 +102,19 @@ export class FireEllipseMod extends DagModule {
             // Vector from ellipse center point to ellipse perimeter at some angle from ellipse head
             new FireVectorMod('theta'),
         )
-        // this.beta.psi = {}
-        // this.beta.theta = {}
-        // this.psi.beta = new Node.HeadAngle('beta')
-        // this.psi.theta = {}
-        // this.theta.beta = {}
-        // this.theta.psi = {}
-        this.assignUpdaters()
+        this.assignUpdaters(configVector)
     }
-    assignUpdaters() {
+
+    assignUpdaters(configVector) {
         const {back, beta, center, eccent, f, g, h, head, ignition,
             left, length, lwr, perimeter, psi, right, size, theta, time, width} = this
+
         lwr.input()
         eccent.method(FE.eccentricity, lwr)
         size.method(FE.area, length.dist, width.dist)
         perimeter.method(FE.perimeterRamanujan, f.dist, h.dist)
 
+        // Head vector is be definition ALWAYS at 0 degrees from head
         head.angle.head.fix(0)
         head.angle.north.input()
         head.dist.method(Calc.multiply, head.ros, time)
@@ -130,15 +128,21 @@ export class FireEllipseMod extends DagModule {
         head.psi.fix(0)
         head.theta.fix(0)
 
+        // Back  vector is always 180 degrees from head
         back.angle.head.fix(180)
         back.angle.north.method(Compass.opposite, head.angle.north)
-        back.vhr.method(FE.backVhr, eccent)
         back.beta.fix(180)
         back.psi.fix(180)
         back.theta.fix(180)
+        back.vhr.method(FE.backVhr, eccent)
 
-        center.head.x.link(g.dist)
-        center.head.y.fix(0)
+        center.head.x.method(FE.centerX, head.angle.north, g.dist, ignition.head.x)
+        center.head.y.method(FE.centerY, head.angle.north, g.dist, ignition.head.y)
+
+        ignition.geo.east.input()
+        ignition.geo.north.input()
+        ignition.head.x.input()
+        ignition.head.y.input()
 
         length.vhr.method(Calc.sum, head.vhr, back.vhr)
 
@@ -148,25 +152,25 @@ export class FireEllipseMod extends DagModule {
         h.vhr.method(Calc.half, width.vhr)
         g.vhr.method(Calc.subtract, f.vhr, back.vhr)
 
+        // Left flank vector is by definition ALWAYS 270 degrees clockwise from head
         left.angle.head.fix(270)
         left.angle.north.method(Compass.rotateCw, left.angle.head, head.angle.north)
-        left.vhr.link(h.vhr)
-        left.theta.fix(270)
         left.beta.method(FE.betaFromTheta, left.theta, f.vhr, g.vhr, h.vhr)
         left.psi.method(FE.psiFromTheta, left.theta, f.vhr, h.vhr)
+        left.theta.fix(270)
+        left.vhr.link(h.vhr)
 
+        // Right flank vector is by definition ALWAYS 90 degrees clockwise from head
         right.angle.head.fix(90)
         right.angle.north.method(Compass.rotateCw, right.angle.head, head.angle.north)
-        right.theta.fix(90)
-        right.vhr.link(h.vhr)
         right.beta.method(FE.betaFromTheta, right.theta, f.vhr, g.vhr, h.vhr)
         right.psi.method(FE.psiFromTheta, right.theta, f.vhr, h.vhr)
+        right.theta.fix(90)
+        right.vhr.link(h.vhr)
 
-        beta.angle.north.input()
-        beta.angle.head.method(Compass.rotateCw, beta.angle.north, head.angle.north)
         beta.vhr.method(FE.betaVhr, beta.angle.head, eccent)
-        beta.perim.head.x.method(FE.betaX, beta.angle.head, beta.dist)
-        beta.perim.head.y.method(FE.betaY, beta.angle.head, beta.dist)
+        beta.perim.head.x.method(FE.betaX, beta.angle.head, beta.dist, head.angle.north, ignition.head.x)
+        beta.perim.head.y.method(FE.betaY, beta.angle.head, beta.dist, head.angle.north, ignition.head.y)
         // psi angle from head at perimeter point at beta angle from head
         beta.psi.method(FE.psiFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
         // theta angle from head to perimeter point at beta angle from head
@@ -174,11 +178,9 @@ export class FireEllipseMod extends DagModule {
         // recipricol beta angle from head from psi angle from beta angle at head
         beta.beta.method(FE.betaFromPsi, beta.psi, f.vhr, g.vhr, h.vhr)
 
-        psi.angle.north.input()
-        psi.angle.head.method(Compass.rotateCw, psi.angle.north, head.angle.north)
         psi.vhr.method(FE.psiVhr, psi.angle.head, f.vhr, g.vhr, h.vhr)
-        psi.perim.head.x.method(FE.betaX, psi.beta, beta.dist)
-        psi.perim.head.y.method(FE.betaY, psi.beta, beta.dist)
+        psi.perim.head.x.method(FE.psiX, psi.angle.head, f.vhr, g.vhr, h.vhr, eccent, head.dist, head.angle.north, ignition.head.x)
+        psi.perim.head.y.method(FE.psiY, psi.angle.head, f.vhr, g.vhr, h.vhr, eccent, head.dist, head.angle.north, ignition.head.y)
         // beta angle from head at perimeter point at psi angle from head
         psi.beta.method(FE.betaFromPsi, psi.angle.head, f.vhr, g.vhr, h.vhr)
         // recipricol psi angle from head from beta angle from psi angle at head
@@ -186,11 +188,11 @@ export class FireEllipseMod extends DagModule {
         // theta angle from head to perimeter point at psi angle from head
         psi.theta.method(FE.thetaFromPsi, psi.angle.head, f.vhr, h.vhr)
         
-        theta.angle.north.input()
-        theta.angle.head.method(Compass.rotateCw, theta.angle.north, head.angle.north)
         theta.vhr.method(FE.thetaVhr, theta.angle.head, f.vhr, h.vhr)
-        theta.perim.head.x.method(Calc.sum, theta.dist, center.head.x)
-        theta.perim.head.y.method(FE.betaY, theta.angle.head, h.dist)
+        theta.perim.head.x.method(FE.thetaX, theta.angle.head, f.dist, head.angle.north, center.head.x)
+        theta.perim.head.y.method(FE.thetaY, theta.angle.head, h.dist, head.angle.north, center.head.y)
+        // theta.perim.head.x.method(FE.pointX, theta.angle.head, f.dist, h.dist, head.angle.north, center.head.x, center.head.y)
+        // theta.perim.head.y.method(FE.pointY, theta.angle.head, f.dist, h.dist, head.angle.north, center.head.x, center.head.y)
         // beta angle from head vector at the perimeter point at theta angle from head
         theta.beta.method(FE.betaFromTheta, theta.angle.head, f.vhr, g.vhr, h.vhr)
         // psi angle from head vector at the perimeter point at theta angle from head
@@ -198,16 +200,43 @@ export class FireEllipseMod extends DagModule {
         // recipricol theta angle from head from psi angle from theta angle at head
         theta.theta.method(FE.thetaFromPsi, theta.psi, f.vhr, h.vhr)
 
-        ignition.geo.east.input()
-        ignition.geo.north.input()
-        ignition.head.x.fix(0)
-        ignition.head.y.fix(0)
-
         for(let prop of [back, beta, f, g, h, left, length, psi, right, theta, width]) {
             prop.ros.method(Calc.multiply, prop.vhr, head.ros)
-            prop.dist.method(Calc.multiply, prop.vhr, head.dist)
+            prop.dist.method(Calc.multiply, prop.ros, time)
         }
-
         time.input()
+
+        if (configVector==='head') this.configVectorInputFromHead()
+        else this.configVectorInputFromNorth()
+    }
+
+    configVectorInputFromHead() {
+        const {beta, head, psi, theta} = this
+
+        // Input beta, psi, and theta from HEAD
+        beta.angle.head.input()
+        psi.angle.head.input()
+        theta.angle.head.input()
+
+        // Start at head from north and go clockwise to beta-psi-theta from head
+        beta.angle.north.method(Compass.rotateCw, head.angle.north, beta.angle.head)
+        psi.angle.north.method(Compass.rotateCw, head.angle.north, psi.angle.head)
+        theta.angle.north.method(Compass.rotateCw, head.angle.north, theta.angle.head)
+        return this
+    }
+
+    configVectorInputFromNorth() {
+        const {beta, head, psi, theta} = this
+
+        // Input beta, psi, and theta from NORTH
+        beta.angle.north.input()
+        psi.angle.north.input()
+        theta.angle.north.input()
+
+        // Start at beta-psi-theta from north and go counter clockwise to head from north
+        beta.angle.head.method(Compass.rotateCcw, beta.angle.north, head.angle.north)
+        psi.angle.head.method(Compass.rotateCcw, psi.angle.north, head.angle.north)
+        theta.angle.head.method(Compass.rotateCcw, theta.angle.north, head.angle.north)
+        return this
     }
 }

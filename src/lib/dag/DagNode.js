@@ -38,9 +38,11 @@ export class DagNode extends Leaf {
     fix(value) {
         this.updater = DagNode._fixed
         this.value = value
+        this.suppliers = []
     }
     input() {
         this.updater = DagNode._input
+        this.suppliers = []
     }
     method(funcRef, ...args) {
         if (funcRef === undefined)

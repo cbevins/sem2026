@@ -12,6 +12,10 @@ export function nodeTableStr(nodes, title='') {
     return tableStr(data.sort(), headers, title)
 }
 
+export function nodesTable(nodes, title='Custom Nodes') {
+    console.log(nodeTableStr(nodes, title))
+}
+
 export function activeInputNodesTable(root, title='Active Input Nodes') {
     console.log(nodeTableStr(root.activeInputNodes(), title))
 }

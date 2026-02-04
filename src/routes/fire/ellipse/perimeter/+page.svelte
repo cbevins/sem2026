@@ -2,16 +2,18 @@
     import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
     import {GenericTable} from '$lib/svelte/GenericTable.svelte'
     import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
-    
+    import {nodesTable} from '$lib/dag/DagTables.js'
     let lwr = $state(2)
     let headDeg = $state(45)
     let headRos = $state(1)
     let time = $state(100)
     let deg = $state(15)
 
+    // NOTE 1 - For theta or psi perimeter pts, call betaPerimeterPt with theta.beta or psi.beta
     // Create FireEllipseMod and select nodes
-    let src='head'
+    let src='north'  // 'head' or 'north'
     const e = new FireEllipseMod('e', src)
+    if (src==='head') e.configVectorInputFromHead(); else e.configVectorInputFromNorth();
     e.setConsumers()
 
     const {beta, psi, theta, center, ignition} = e

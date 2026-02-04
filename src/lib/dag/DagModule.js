@@ -42,22 +42,20 @@ export class DagModule extends Stem {
     setConsumers() {
         const nodes = this.nodes()
         for(let node of nodes) node.consumers = []
+        for(let node of nodes) node._notifySuppliers()
         for(let node of nodes) {
-            node._notifySuppliers()
-        }
-        const stack = []
-        for(let node of nodes) {
-            this._checkCyclical(node, node, stack)
+            const stack = []
+            this._checkCyclicalSelfRef(node, node, stack)
         }
     }
-    _checkCyclical(node, startNode, stack) {
+    _checkCyclicalSelfRef(node, startNode, stack) {
         for(let supplier of node.suppliers) {
             if(supplier === startNode) {
                 console.log(stack)
-                throw new Error(`Cyclical dep found for node ${startNode.fullKey()}`)
+                throw new Error(`Cyclical dep found for node ${startNode.fullKey()}: check stack list above`)
             }
             stack.push(node.fullKey())
-            this._checkCyclical(supplier, startNode, stack)
+            this._checkCyclicalSelfRef(supplier, startNode, stack)
         }
         stack.pop()
     }

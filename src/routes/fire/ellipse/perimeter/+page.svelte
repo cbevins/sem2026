@@ -3,17 +3,16 @@
     import {GenericTable} from '$lib/svelte/GenericTable.svelte'
     import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
     import {nodesTable} from '$lib/dag/DagTables.js'
+    
     let lwr = $state(2)
-    let headDeg = $state(45)
+    let headDeg = $state(360)
     let headRos = $state(1)
     let time = $state(100)
     let deg = $state(15)
 
-    // NOTE 1 - For theta or psi perimeter pts, call betaPerimeterPt with theta.beta or psi.beta
     // Create FireEllipseMod and select nodes
-    let src='north'  // 'head' or 'north'
+    let src='head'  // 'head' or 'north'
     const e = new FireEllipseMod('e', src)
-    if (src==='head') e.configVectorInputFromHead(); else e.configVectorInputFromNorth();
     e.setConsumers()
 
     const {beta, psi, theta, center, ignition} = e
@@ -70,12 +69,12 @@
         x: function(east) { return (east - this.west()) * this.scale()},
         y: function(north) { return (this.north() - north) * this.scale()},
     }
-    console.log('scale',scope.scale(), 'zoom=', scope.zoom)
-    console.log('west=',scope.west(), 'east=',scope.east())
-    console.log('north=',scope.north(), 'south=',scope.south())
-    console.log('geo [0,0] is [x,y]', scope.x(0), scope.y(0))
-    console.log('geo [50,50] is [x,y]', scope.x(50), scope.y(50))
-    console.log('ellipse center is', center.head.x.value, center.head.y.value)
+    // console.log('scale',scope.scale(), 'zoom=', scope.zoom)
+    // console.log('west=',scope.west(), 'east=',scope.east())
+    // console.log('north=',scope.north(), 'south=',scope.south())
+    // console.log('geo [0,0] is [x,y]', scope.x(0), scope.y(0))
+    // console.log('geo [50,50] is [x,y]', scope.x(50), scope.y(50))
+    // console.log('ellipse center is', center.head.x.value, center.head.y.value)
 </script>
 
 <div class='ml-4 mt-4 mb-4'>

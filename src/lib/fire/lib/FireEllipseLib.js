@@ -67,14 +67,6 @@ export function betaPerimeterPoint(betaHead, betaDist, headDeg=0, ignx=0, igny=0
     return [dx, dy]
 }
 
-export function betaX(betaHead, betaDist, headDeg=0, ignX=0) {
-    return ignX + betaDist * Math.cos(radians(betaHead + headDeg))
-}
-
-export function betaY(betaHead, betaDist, headDeg=0, ignY=0) {
-    return ignY + betaDist * Math.sin(radians(betaHead + headDeg))
-}
-
 /**
  * Calculate the ratio of beta-to-head velocity or distance
  *
@@ -83,6 +75,14 @@ export function betaY(betaHead, betaDist, headDeg=0, ignY=0) {
  */
 export function betaVhr(betaHead, eccent) {
     return (1 - eccent) / (1 - eccent * Math.cos(radians(betaHead)))
+}
+
+export function betaX(betaHead, betaDist, headDeg=0, ignX=0) {
+    return ignX + betaDist * Math.cos(radians(betaHead + headDeg))
+}
+
+export function betaY(betaHead, betaDist, headDeg=0, ignY=0) {
+    return ignY + betaDist * Math.sin(radians(betaHead + headDeg))
 }
 
 export function centerX(headDeg, gDist, ignX=0) {
@@ -100,7 +100,7 @@ export function centerY(headDeg, gDist, ignY=0) {
  * calculated as the ratio of the distance from the center to a focus 'c'
  * to the length of the semi-major axis 'a' (i.e., e=c/a).
  * Its value ranges from 0 (a circle) to just under 1 (a very elongated ellipse),
- * with higher values indicating more "squashed" or oval shapes. 
+ * with higher values indicating more "squashed" or oval shapes.
  *    e = c/a
  * Use the relationship c^2 =a^2 - b^2, so c = sqrt(a^2 - b^2)
  *
@@ -203,23 +203,14 @@ export function psiVhr(psiHead, fVhr, gVhr, hVhr) {
     return gVhr * cosPsi + Math.sqrt((fVhr * fVhr * cos2Psi) + (hVhr * hVhr * sin2Psi))
 }
 
-export function psiX(psiHead, fVhr, gVhr, hVhr, eccent, headDist, headDeg=0, ignX=0) {
-    // Get the betaHead for this psi
-    const betaHead = betaFromPsi(psiHead, fVhr, gVhr, hVhr)
-    const bVhr = betaVhr(betaHead, eccent)
-    const betaDist = bVhr * headDist
-    const x = betaX(betaHead, betaDist, headDeg, ignX)
-    // console.log(`When psi=${psiHead}, beta=${betaHead}, betaDist=${betaDist}, x=${x}`)
-    return x
+export function psiX(psiBeta, eccent, headDist, headDeg=0, ignX=0) {
+    const bVhr = betaVhr(psiBeta, eccent)
+    return betaX(psiBeta, bVhr * headDist, headDeg, ignX)
 }
 
-export function psiY(psiHead, fVhr, gVhr, hVhr, eccent, headDist, headDeg=0, ignY=0) {
-    const betaHead = betaFromPsi(psiHead, fVhr, gVhr, hVhr)
-    const bVhr = betaVhr(betaHead, eccent)
-    const betaDist = bVhr * headDist
-    const y = betaY(betaHead, betaDist, headDeg, ignY)
-    // console.log(`When psi=${psiHead}, beta=${betaHead}, betaDist=${betaDist}, y=${y}`)
-    return y
+export function psiY(psiBeta, eccent, headDist, headDeg=0, ignY=0) {
+    const bVhr = betaVhr(psiBeta, eccent)
+    return betaY(psiBeta, bVhr * headDist, headDeg, ignY)
 }
 
 //------------------------------------------------------------------------------
@@ -240,9 +231,8 @@ export function thetaFromBeta(betaHead, f, g, h) {
     const num = h * cosB * term - f * g * sin2B
     const denom = h2 * cos2B + f2 * sin2B
     const cosTheta = num / denom
-    let theta = Math.acos(cosTheta)               // theta in radians when beta radians < PI
-    if (beta >= Math.PI) theta = 2 * Math.PI - theta // theta in radians when beta >= PI
-    // Convert theta radians to degrees
+    let theta = Math.acos(cosTheta)                     // theta in radians when beta radians < PI
+    if (beta >= Math.PI) theta = 2 * Math.PI - theta    // theta in radians when beta >= PI
     let thetaHead = degrees(theta)
     // if (betaHead > 180) thetaHead = 360 - thetaHead
     return thetaHead
@@ -255,10 +245,10 @@ export function thetaFromPsi(psiHead, fVhr, hVhr) {
     const tanTheta = Math.tan(psi) * hVhr / fVhr
     let theta = Math.atan(tanTheta)
     // Quadrant adjustment
-    if (psi <= 0.5 * Math.PI) {}
+    if (psi <= 0.5 * Math.PI) { /* do nothing */ }
     else if (psi > 0.5 * Math.PI && psi <= 1.5 * Math.PI ) { theta += Math.PI }
     else if (psi > 1.5 * Math.PI ) { theta += 2 * Math.PI }
-    //theta += (theta < 0. || psi > pi ) ? pi : 0.
+    // theta += (theta < 0. || psi > pi ) ? pi : 0.
     return degrees(theta)
 }
 
@@ -269,12 +259,14 @@ export function thetaPerimeterPoint(thetaDeg, fDist, hDist, ignx=0, igny=0, head
     return [dx, dy]
 }
 
-export function thetaX(thetaHead, fDist, headDeg=0, centerX=0) {
-    return centerX + fDist * Math.cos(radians(thetaHead+headDeg))
+export function thetaX(thetaBeta, eccent, headDist, headDeg=0, ignX=0) {
+    const bVhr = betaVhr(thetaBeta, eccent)
+    return betaX(thetaBeta, bVhr*headDist, headDeg, ignX)
 }
 
-export function thetaY(thetaHead, hDist, headDeg=0, centerY=0) {
-    return centerY + hDist * Math.sin(radians(thetaHead+headDeg))
+export function thetaY(thetaBeta, eccent, headDist, headDeg=0, ignY=0) {
+    const bVhr = betaVhr(thetaBeta, eccent)
+    return betaY(thetaBeta, bVhr*headDist, headDeg, ignY)
 }
 
 export function thetaVhr(thetaHead, fVhr, hVhr) {
@@ -291,48 +283,4 @@ export function subtendX(thetaHead, centerX, fDist, headDeg) {
 }
 export function subtendY(thetaHead, centerY, fDist, headDeg) {
     return centerY + fDist * Math.sin(radians(thetaHead + headDeg))
-}
-/**
- * Calculates the coordinates of a point on the perimeter of an ellipse at a given angle.
- * 
- * @param {number} xc - The x-coordinate of the ellipse's center.
- * @param {number} yc - The y-coordinate of the ellipse's center.
- * @param {number} a - The semi-major axis (x-radius).
- * @param {number} b - The semi-minor axis (y-radius).
- * @param {number} theta - The angle in radians from the center (measured from the positive x-axis).
- * @returns {{x: number, y: number}} An object containing the x and y coordinates.
- */
-function getPointOnEllipse(xc, yc, a, b, theta, rot=0) {
-  // Formula derived from the intersection of a line y = tan(theta)*x and the ellipse equation
-  const a2 = a * a;
-  const b2 = b * b;
-  const rad = radians(theta + rot)
-  const tanTheta2 = Math.tan(rad) * Math.tan(rad);
-  const sqrtDenominator = Math.sqrt(b2 + a2 * tanTheta2);
-
-  let x = (a * b) / sqrtDenominator;
-  let y = (a * b * Math.tan(rad)) / sqrtDenominator;
-
-  // Adjust signs based on the quadrant of the angle
-  // The sign of x and y should match the sign of cos(theta) and sin(theta) respectively
-  if (Math.cos(rad) < 0) {
-    x = -x;
-  }
-  if (Math.sin(rad) < 0) {
-    y = -y;
-  }
-  
-  // Translate the point to the ellipse's center
-  x += xc;
-  y += yc;
-
-  return { x: x, y: y };
-}
-export function pointX(theta, a, b, north, xc, yc) {
-    const p = getPointOnEllipse(xc, yc, a, b, theta, north)
-    return p.x
-}
-export function pointY(theta, a, b, north, xc, yc) {
-    const p = getPointOnEllipse(xc, yc, a, b, theta, north)
-    return p.y
 }

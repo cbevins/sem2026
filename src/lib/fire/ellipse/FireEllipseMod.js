@@ -171,33 +171,32 @@ export class FireEllipseMod extends DagModule {
         beta.vhr.method(FE.betaVhr, beta.angle.head, eccent)
         beta.perim.head.x.method(FE.betaX, beta.angle.head, beta.dist, head.angle.north, ignition.head.x)
         beta.perim.head.y.method(FE.betaY, beta.angle.head, beta.dist, head.angle.north, ignition.head.y)
-        // psi angle from head at perimeter point at beta angle from head
+        // psi.angle.head at perim pt intersected by beta.angle.head
         beta.psi.method(FE.psiFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
-        // theta angle from head to perimeter point at beta angle from head
+        // theta.angle.head at perim pt intersected by beta.angle.head
         beta.theta.method(FE.thetaFromBeta, beta.angle.head, f.vhr, g.vhr, h.vhr)
-        // recipricol beta angle from head from psi angle from beta angle at head
+        // recipricol of beta.angle.head -> beta.psi -> beta.beta (first and last should be equal)
         beta.beta.method(FE.betaFromPsi, beta.psi, f.vhr, g.vhr, h.vhr)
 
         psi.vhr.method(FE.psiVhr, psi.angle.head, f.vhr, g.vhr, h.vhr)
-        psi.perim.head.x.method(FE.psiX, psi.angle.head, f.vhr, g.vhr, h.vhr, eccent, head.dist, head.angle.north, ignition.head.x)
-        psi.perim.head.y.method(FE.psiY, psi.angle.head, f.vhr, g.vhr, h.vhr, eccent, head.dist, head.angle.north, ignition.head.y)
-        // beta angle from head at perimeter point at psi angle from head
+        psi.perim.head.x.method(FE.psiX, psi.beta, eccent, head.dist, head.angle.north, ignition.head.x)
+        psi.perim.head.y.method(FE.psiY, psi.beta, eccent, head.dist, head.angle.north, ignition.head.y)
+
+        // beta.angle.head at perim pt with psi.angle.head
         psi.beta.method(FE.betaFromPsi, psi.angle.head, f.vhr, g.vhr, h.vhr)
-        // recipricol psi angle from head from beta angle from psi angle at head
+        // recipricol of psi.angle.head -> psi.beta -> psi.psi (first and last should be equal)
         psi.psi.method(FE.psiFromBeta, psi.beta, f.vhr, g.vhr, h.vhr)
-        // theta angle from head to perimeter point at psi angle from head
+        // theta.angle.head at perim pt with psi.angle.head
         psi.theta.method(FE.thetaFromPsi, psi.angle.head, f.vhr, h.vhr)
         
         theta.vhr.method(FE.thetaVhr, theta.angle.head, f.vhr, h.vhr)
-        theta.perim.head.x.method(FE.thetaX, theta.angle.head, f.dist, head.angle.north, center.head.x)
-        theta.perim.head.y.method(FE.thetaY, theta.angle.head, h.dist, head.angle.north, center.head.y)
-        // theta.perim.head.x.method(FE.pointX, theta.angle.head, f.dist, h.dist, head.angle.north, center.head.x, center.head.y)
-        // theta.perim.head.y.method(FE.pointY, theta.angle.head, f.dist, h.dist, head.angle.north, center.head.x, center.head.y)
-        // beta angle from head vector at the perimeter point at theta angle from head
+        theta.perim.head.x.method(FE.thetaX, theta.beta, eccent, head.dist, head.angle.north, ignition.head.x)
+        theta.perim.head.y.method(FE.thetaY, theta.beta, eccent, head.dist, head.angle.north, ignition.head.y)
+        // beta.angle.head at perim pt intersected by theta.angle.head
         theta.beta.method(FE.betaFromTheta, theta.angle.head, f.vhr, g.vhr, h.vhr)
-        // psi angle from head vector at the perimeter point at theta angle from head
+        // psi.angle.head at perim pt intersected by theta.angle.head
         theta.psi.method(FE.psiFromTheta, theta.angle.head, f.vhr, h.vhr)
-        // recipricol theta angle from head from psi angle from theta angle at head
+        // recipricol theta.angle.head -> theta.psi.head -> theta.theta (first should equal last)
         theta.theta.method(FE.thetaFromPsi, theta.psi, f.vhr, h.vhr)
 
         for(let prop of [back, beta, f, g, h, left, length, psi, right, theta, width]) {

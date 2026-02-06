@@ -3,23 +3,29 @@
     import {GenericTable} from '$lib/svelte/GenericTable.svelte'
     import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
     import {nodesTable} from '$lib/dag/DagTables.js'
-    
+    import * as FE from '$lib/fire/lib/FireEllipseLib'
+
     let lwrInput = 2
     let headDegInput = 45
     let headRosInput = 1
     let timeInput = 100
-    let deg = 15
+    let deg = 5
+    let showBetaPerim = true
+    let showPsiPerim = true
+    let showThetaPerim = true
 
     // Create a FireEllipseMod with beta-psi-theta vector angle from 'head' and ready()
     let src='head'  // 'head' or 'north'
     const e = new FireEllipseMod('e', src).ready()
-    const {beta, center, head, ignition, lwr, psi, theta, time} = e
+    const {beta, center, f, h, head, ignition, lwr, psi, theta, time} = e
     for(let v of [beta, psi, theta]) {
         for(let node of [v.perim.head.x, v.perim.head.y, v.beta, v.psi, v.theta, v.vhr])
             node.select()
     }
     center.head.x.select()
     center.head.y.select()
+    f.dist.select()
+    h.dist.select()
 
     // Get and set required inputs
     const inputNodes = e.sortNodes(e.activeInputNodes())
@@ -41,11 +47,24 @@
     function  perimeterPoints(e, vector, src, deg) {
         function fmt(node) { return node.value.toFixed(8) }
         const pts = []
+        let len = 0
+        let lastX = 0
+        let lastY = 0
         for(let i=0; i<=360; i+=deg) {
             vector.angle[src].set(i)
             e.updateAll()
+            // Determine segment length and cumulative perimeter length
+            if (i) {
+                const dx = vector.perim.head.x.value - lastX
+                const dy = vector.perim.head.y.value - lastY
+                const dl = Math.sqrt(dx*dx + dy*dy)
+                len += dl
+            }
             pts.push([i, fmt(vector.perim.head.x), fmt(vector.perim.head.y),
-                fmt(vector.beta), fmt(vector.psi), fmt(vector.theta), fmt(vector.vhr)])
+                fmt(vector.beta), fmt(vector.psi), fmt(vector.theta), fmt(vector.vhr),
+                len.toFixed(8)])
+            lastX = vector.perim.head.x.value
+            lastY = vector.perim.head.y.value
         }
         return pts
     }
@@ -70,6 +89,16 @@
         x: function(east) { return (east - this.west()) * this.scale()},
         y: function(north) { return (this.north() - north) * this.scale()},
     }
+
+    // Perimeter table
+    const perimTable = [
+        [`${deg}-deg beta intervals`, betaPts[betaPts.length-1][7]],
+        [`${deg}-deg theta intervals`, thetaPts[thetaPts.length-1][7]],
+        [`${deg}-deg psi intervals`, psiPts[psiPts.length-1][7]],
+        ['10k numerical integration', FE.perimeterNumericalIntegration(e.f.dist.value, e.h.dist.value).toFixed(8)],
+        ['Ramanujan method', FE.perimeterRamanujan(e.f.dist.value, e.h.dist.value).toFixed(8)],
+        ['Simple Approximation', FE.perimeterSimpleApprox(e.f.dist.value, e.h.dist.value).toFixed(8)],
+    ]
 </script>
 
 <div class='ml-4 mt-4 mb-4'>
@@ -85,33 +114,42 @@
         <!-- Grid axis -->
         <line x1=0 y1={scope.view.height/2} x2={scope.view.width} y2={scope.view.height/2} stroke='black'/>
         <line x1={scope.view.width/2} y1=0 x2={scope.view.width/2} y2={scope.view.height} stroke='black'/>
-        <!-- geo[50,0] -->
-        {#each betaPts as [deg, e, n, b, p, t]}
-            <circle cx={scope.x(e)} cy={scope.y(n)} r=3 fill='red'/>
-        {/each}
-        {#each thetaPts as [deg, e, n, b, p, t]}
-            <circle cx={scope.x(e)} cy={scope.y(n)} r=2 fill='yellow'/>
-        {/each}
-        {#each psiPts as [deg, e, n, b, p, t]}
-            <circle cx={scope.x(e)} cy={scope.y(n)} r=1 fill='blue'/>
-        {/each}
+        <!-- perimeter points at beta intervals -->
+        {#if showBetaPerim}
+            {#each betaPts as [deg, e, n]}
+                <circle cx={scope.x(e)} cy={scope.y(n)} r=3 fill='red'/>
+            {/each}
+            <!-- Line from ignition point to beta at 0 degrees from head -->
+            <line x1={scope.x(ignition.head.x.value)} y1={scope.y(ignition.head.y.value)}
+                x2={scope.x(beta0[1])} y2={scope.y(beta0[2])} stroke='red'/>
+            <!-- Perimeter point for beta=0 (should be ellipse head) -->
+            <circle cx={scope.x(beta0[1])} cy={scope.y(beta0[2])} r=3 fill='red'/>
+        {/if}
+        <!-- perimeter points at theta inetrvals -->
+        {#if showThetaPerim}
+            {#each thetaPts as [deg, e, n]}
+                <circle cx={scope.x(e)} cy={scope.y(n)} r=2 fill='yellow'/>
+            {/each}
+            <!-- Line from ellipse center to theta at 0 degrees from head -->
+            <line x1={scope.x(center.head.x.value)} y1={scope.y(center.head.y.value)}
+                x2={scope.x(theta0[1])} y2={scope.y(theta0[2])} stroke='yellow' stroke-width=3/>
+            <!-- Perimeter point for theta=0 (should be ellipse head) -->
+            <circle cx={scope.x(theta0[1])} cy={scope.y(theta0[2])} r=4 fill='yellow'/>
+        {/if}
+        <!-- perimeter points at psi inetrvals -->
+        {#if showPsiPerim}
+            {#each psiPts as [deg, e, n]}
+                <circle cx={scope.x(e)} cy={scope.y(n)} r=1 fill='blue'/>
+            {/each}
+        {/if}
         <!-- Ignition point is the Cartesian origin -->
         <circle cx={scope.x(ignition.head.x.value)} cy={scope.y(ignition.head.y.value)} r=4 fill='red'/>
         <!-- Ellipse center pt in Cartesian coords -->
         <circle cx={scope.x(center.head.x.value)} cy={scope.y(center.head.y.value)} r=3 fill='yellow'/>
-        <!-- Line from ellipse center to theta at 0 degrees from head -->
-        <line x1={scope.x(center.head.x.value)} y1={scope.y(center.head.y.value)}
-            x2={scope.x(theta0[1])} y2={scope.y(theta0[2])} stroke='yellow' stroke-width=3/>
-        <!-- Perimeter point for theta=0 (should be ellipse head) -->
-        <circle cx={scope.x(theta0[1])} cy={scope.y(theta0[2])} r=4 fill='yellow'/>
-        <!-- Line from ignition point to beta at 0 degrees from head -->
-        <line x1={scope.x(ignition.head.x.value)} y1={scope.y(ignition.head.y.value)}
-            x2={scope.x(beta0[1])} y2={scope.y(beta0[2])} stroke='red'/>
-        <!-- Perimeter point for beta=0 (should be ellipse head) -->
-        <circle cx={scope.x(beta0[1])} cy={scope.y(beta0[2])} r=3 fill='red'/>
     </svg>
 </div>
 <div class='ml-4'>
+    {@render GenericTable(perimTable, ['Method', 'Perim'], `Perimeter Estimates`)}
     {@render DagNodeTable('Selected Nodes', selectedNodes)}
     {@render DagNodeTable('Active Input Nodes', activeInputNodes)}
     {@render DagNodeTable('Active Nodes', activeNodes)}

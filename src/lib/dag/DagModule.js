@@ -36,6 +36,13 @@ export class DagModule extends Stem {
         return a
     }
 
+    // MUST BE CALLED AFTER ALL CONFIGURATION IS COMPLETED
+    // AND BEFORE ANY Node.select(), set(), get(), etc
+    ready() {
+        this.setConsumers()
+        return this
+    }
+
     selectedNodes() { return this.nodes().filter(node => node.status === DagNode.SELECTED) }
 
     // Usually only called on the topmost Dag
@@ -47,6 +54,7 @@ export class DagModule extends Stem {
             const stack = []
             this._checkCyclicalSelfRef(node, node, stack)
         }
+        return this
     }
     _checkCyclicalSelfRef(node, startNode, stack) {
         for(let supplier of node.suppliers) {

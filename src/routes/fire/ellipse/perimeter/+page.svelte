@@ -6,7 +6,7 @@
     import * as FE from '$lib/fire/lib/FireEllipseLib'
 
     let lwrInput = 2
-    let headDegInput = 45
+    let headDegInput = 0
     let headRosInput = 1
     let timeInput = 100
     let deg = 5
@@ -68,9 +68,9 @@
         }
         return pts
     }
-
-    const beta0 = betaPts[0]
-    const theta0 = thetaPts[0]
+    const i15 = 15/deg      // index of 15-deg
+    const beta15 = betaPts[i15]
+    const theta15 = thetaPts[i15]
     const headers = ['Deg', 'Head X', 'Head Y', 'Beta', 'Psi', 'Theta', 'Vhr']
 
     const scope = {
@@ -119,22 +119,22 @@
             {#each betaPts as [deg, e, n]}
                 <circle cx={scope.x(e)} cy={scope.y(n)} r=3 fill='red'/>
             {/each}
-            <!-- Line from ignition point to beta at 0 degrees from head -->
+            <!-- Line from ignition point to beta at 15 degrees from head -->
             <line x1={scope.x(ignition.head.x.value)} y1={scope.y(ignition.head.y.value)}
-                x2={scope.x(beta0[1])} y2={scope.y(beta0[2])} stroke='red'/>
-            <!-- Perimeter point for beta=0 (should be ellipse head) -->
-            <circle cx={scope.x(beta0[1])} cy={scope.y(beta0[2])} r=3 fill='red'/>
+                x2={scope.x(beta15[1])} y2={scope.y(beta15[2])} stroke='red'/>
+            <!-- Perimeter point for beta=15 (should be ellipse head) -->
+            <circle cx={scope.x(beta15[1])} cy={scope.y(beta15[2])} r=3 fill='red'/>
         {/if}
         <!-- perimeter points at theta inetrvals -->
         {#if showThetaPerim}
             {#each thetaPts as [deg, e, n]}
                 <circle cx={scope.x(e)} cy={scope.y(n)} r=2 fill='yellow'/>
             {/each}
-            <!-- Line from ellipse center to theta at 0 degrees from head -->
+            <!-- Line from ellipse center to theta at 15 degrees from head -->
             <line x1={scope.x(center.head.x.value)} y1={scope.y(center.head.y.value)}
-                x2={scope.x(theta0[1])} y2={scope.y(theta0[2])} stroke='yellow' stroke-width=3/>
-            <!-- Perimeter point for theta=0 (should be ellipse head) -->
-            <circle cx={scope.x(theta0[1])} cy={scope.y(theta0[2])} r=4 fill='yellow'/>
+                x2={scope.x(theta15[1])} y2={scope.y(theta15[2])} stroke='yellow' stroke-width=3/>
+            <!-- Perimeter point for theta=15 (should be ellipse head) -->
+            <circle cx={scope.x(theta15[1])} cy={scope.y(theta15[2])} r=4 fill='yellow'/>
         {/if}
         <!-- perimeter points at psi inetrvals -->
         {#if showPsiPerim}

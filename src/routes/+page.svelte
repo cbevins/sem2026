@@ -1,18 +1,18 @@
 <script>
-    import MenuPage from "./MenuPage.svelte"
+    import MenuPage from "$lib/svelte/MenuPage.svelte"
     let title = 'SEM2006 Projects'
     let items = [{
         route: '/fire',
         title: 'Fire Behavior Projects',
-        brief: 'Fire behavior models',
+        brief: 'Demos of various wildland fire behavior models',
     },{
-        route: '/svgscope',
-        title: 'SVG Scope',
-        brief: 'SVG Scope is a Svelte component that enables zooming and panning of SVG images'
+        route: '/svg',
+        title: 'SVG Classes & Utilities',
+        brief: 'Demos of various SVG utility classes'
     },{
-        route: '#',
-        title: 'Project 3 Title',
-        brief: 'Project 3 Brief',
+        route: '/svelte',
+        title: 'Svelte Components',
+        brief: 'Demos of various SVelte components',
     }]
 </script>
 <MenuPage {items} {title}/>

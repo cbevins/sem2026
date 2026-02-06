@@ -141,8 +141,9 @@ export class FireEllipseMod extends DagModule {
 
         ignition.geo.east.input()
         ignition.geo.north.input()
-        ignition.head.x.input()
-        ignition.head.y.input()
+        // by definition the ignition pt is the origin of the ellipse's Cartesian coordinates
+        ignition.head.x.fix(0)
+        ignition.head.y.fix(0)
 
         length.vhr.method(Calc.sum, head.vhr, back.vhr)
 

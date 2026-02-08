@@ -6,4 +6,5 @@
     const circles = new CirclesSvgScope()     // should be passed in as a prop!
     const terrain = new TerrainSvgScope()     // should be passed in as a prop!
 </script>
+<SvgScope scope={circles} table={true}/>
 <SvgScope scope={terrain} table={true}/>

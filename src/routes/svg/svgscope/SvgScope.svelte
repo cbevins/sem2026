@@ -48,7 +48,7 @@
     //  enters/leaves the bound element itself, but NOT its descendants
     //  so use this to reduce bubbling
     function handler(e) {
-        m = {x:e.clientX, y:e.clientY}
+        m = {x:e.offsetX, y:e.offsetY}
         console.log(event)
         message = `button ${e.button} ${e.type} at [${m.x}, ${m.y}]`
     }

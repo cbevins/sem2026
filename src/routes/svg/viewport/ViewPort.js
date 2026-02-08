@@ -11,15 +11,19 @@ export class ViewPort {
         this.device = {
             width: deviceWidth,
             height: deviceHeight,
-            units:'px'},
+            units:'px'}
+        // current center point in world view units
         this.cx = centerX
         this.cy = centerY
+        // initial center point in world viel units
+        this.cx0 = centerX
+        this.cy0 = centerY
         // Scale is ratio of pixels / world units (i.e., 1 px = 20 ft -> 1/20)
         this.scale = scale
+        // zoom factor is world view units / pixel (i.e., 20 ft per pixel)
+        this.zoom = 1 / this.scale
         this.units = 'dl'
         this.dec = 0    // World coordinate display decimal places
-        this.mouse = {dx: 0, dy: 0, wx: 0, wy: 0, drag: false}
-        this.message = 'Click on ViewPort...'
     }
     // ViewPort dimensions and edges in world units
     height() { return this.device.height / this.scale}
@@ -31,9 +35,11 @@ export class ViewPort {
     // Returns device (pixel) coordinates given the view (world) coordinates
     dx(vx) { return this.scale * (vx - this.left()) }
     dy(vy) { return this.scale * (this.top() - vy) }
+    dd(vd) { return vd * this.scale }   // device distance given world distance
     // Returns view (world) coordinates given the device coordinates
     vx(dx) { return this.left() + dx /this.scale }
     vy(dy) { return this.top() - dy / this.scale }
+    vd(dd) { return dd / this.scale }   // world distance given pixels
 }
 //--------------------------------------------------------------------------
 // mouse events in Svelte SVG
@@ -50,7 +56,19 @@ export class ViewPort {
 // mouseover: similar to mouseenter, but fires when the pointer enters an element or any of its child elements.
 // mouseout: similar to mouseleave, but fires when the pointer leaves an element or any of its child elements
 //--------------------------------------------------------------------------
-export function viewportHandler(vp, e=null) {
+export function viewportMouseHandler(vp, e=null) {
+    if (e===null) return {type:'', dx:0, dy:0, vx:0, vy:0, drag:false}
+    return {
+        type: e.type,
+        dx: e.offsetX,
+        dy: e.offsetY,
+        vx: vp.vx(e.offsetX),
+        vy: vp.vy(e.offsetY),
+        drag: false,
+    }
+}
+export function viewportKeyHandler(vp, e=null) {
+    console.log('KEY', e)
     if (e===null) return {type:'', dx:0, dy:0, vx:0, vy:0, drag:false}
     return {
         type: e.type,

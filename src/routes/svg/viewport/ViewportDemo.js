@@ -1,4 +1,4 @@
-export class SvgEventDemo {
+export class ViewportDemo {
     constructor(width, height) {
         this.width = width
         this.height= height

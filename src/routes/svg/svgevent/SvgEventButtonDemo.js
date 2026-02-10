@@ -17,16 +17,17 @@ export class SvgEventButtonDemo {
             else { /* ignore */}
         }
 
-        const ring = ['black', 'magenta', 'blue'][this.state]
+        const w = this.width
+        const h = this.height
         const fill = ['gray', 'lightblue', 'magenta'][this.state]
+        const stroke = ['black', 'magenta', 'blue'][this.state]
         const textAttr = "stroke='black' font-size=10 text-anchor='middle'"
             + " 'font-family'='sans-serif' font-weight='light'"
 
-        let str = `<rect x='0' y='0' width=${this.width} height=${this.height} rx="10" ry="10
-            fill='${ring}'/>`
-        str += `<rect x='5' y='5' width=${this.width-10} height=${this.height-10} rx="10" ry="10"
-            fill='${fill}'/>`
-        str += `<text x=${this.width/2} y=${this.height/2} ${textAttr}>${this.count}</text>`
-        return str
+        const btn = `<rect x=0 y=0 width=${w} height=${h} fill='${fill}'/>`
+        const ring = `<path d="M0,0 L${w},0 L${w},${h}, L0,${h} Z"
+            stroke=${stroke} stroke-width="10" fill="transparent" style="stroke-linejoin: round;"/>`
+        const text = `<text x=${w/2} y=${h/2} ${textAttr}>${this.count}</text>`
+        return btn+ring+text
     }
 }

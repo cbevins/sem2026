@@ -3,17 +3,17 @@ export class SvgEventDemo {
         this.width = width
         this.height= height
 
-        this.xy    = 'none'
-        this.move  = 'Mouse move to: none'
+        this.xy    = '(outside of image)'
+        this.move  = 'Mouse move to: (move mouse over the image)'
         this.over  = 'Mouse over at: none'
         this.out   = 'Mouse out at: none'
-        this.enter = 'Mouse enter at: none'
-        this.leave = 'Mouse leave at: none'
-        this.down  = 'Mouse down at: none'
-        this.up    = 'Mouse up at: none'
-        this.click = 'Mouse click at: none'
+        this.enter = 'Mouse enter at: (move mouse pointer inside the image)'
+        this.leave = 'Mouse leave at: (move mouse pointer outside the image)'
+        this.down  = 'Mouse down at: (release a mouse button)'
+        this.up    = 'Mouse up at: (press down a mouse button)'
+        this.click = 'Mouse click at: (press and release a mouse button)'
         this.dbl   = 'Double click at: none'
-        this.key   = 'Last key: none'   // handles both key down and up
+        this.key   = 'Last key: (press a key while inside the image)'   // handles both key down and up
 
         this.panning = ''
         this.panBeg = []
@@ -36,6 +36,10 @@ export class SvgEventDemo {
                 this.enter = `Mouse enter at: ${this.xy}`
             } else if (e.type === 'mouseleave') {
                 this.leave = `Mouse leave at: ${this.xy}`
+                if (this.panning === 'PANNING...') {
+                    this.panEnd = [e.offsetX, e.offsetY, Date.now()]
+                    this.panning = `Panning stopped from [${this.panBeg[0]}, ${this.panBeg[1]}] to [${this.panEnd[0]}, ${this.panEnd[1]}]`
+                }
             }
             // mousedown/mouseup occurs when a mouse button is pressed down ir released over an element
             else if (e.type === 'mousedown') {

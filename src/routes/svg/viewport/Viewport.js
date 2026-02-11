@@ -1,3 +1,10 @@
+/**
+ * Viewport is a base class for implementing interactive SVG images using SvgEvent.
+ * It is responsible for handling mouse and key events over the SVG image,
+ * and storing the svg dimensions, client (world) coordinates, and other state variables.
+ * Derived classes must re-implement the Viewport.draw() method and are responsible
+ * for returning SVG content based on current state.
+ */
 export class Viewport {
     constructor(svgWidth, svgHeight, centerX=0, centerY=0, unitsPerPixel=1,
             units='', scales=[1], level=0) {
@@ -87,9 +94,7 @@ export class Viewport {
         }
     }
 
-    pan(xy) {
-
-    }
+    pan(xy) { /* not yet implemented*/ }
 
     zoomin(xy) {
         this.zoomxy = xy
@@ -112,19 +117,9 @@ export class Viewport {
         else if (e.type === 'keyup') this.key(xy)
     }
     
+    // This function must be reimplemented by derived classes
+    // Must return proper SVG content to embed within the SvgEvent wrapper
     drawSvg() {
-        const cx = this.width/2
-        const cy = this.height/2
-        const fill = ['red', 'green', 'blue']
-        const textAttr = "stroke='black' font-size=10 text-anchor='middle'"
-            + " 'font-family'='sans-serif' font-weight='light'"
-        let str = `<rect x=0 y=0 width=${this.width} height=${this.height} fill='green'/>`
-        str += `<ellipse cx=${cx} cy=${cy} rx=200 ry=200 fill='blue'/>`
-        str += `<ellipse cx=${cx} cy=${cy} rx=180 ry=160 fill='yellow'/>`
-        str += `<ellipse cx=${cx} cy=${cy} rx=160 ry=120 fill='magenta'/>`
-        str += `<ellipse cx=${cx} cy=${cy} rx=120 ry=80 fill='cyan'/>`
-        str += `<ellipse cx=${cx} cy=${cy} rx=80 ry=80 fill='red'/>`
-        this.svgContent = str
-        return str
+        throw new Error('Classes derived from Viewport must re-implement their own draw() method.')
     }
 }

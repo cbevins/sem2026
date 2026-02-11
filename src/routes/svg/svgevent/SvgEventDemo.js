@@ -75,7 +75,7 @@ export class SvgEventDemo {
                 if (e.altKey) k.push('Alt')
                 if (e.metaKey) k.push('Meta')
                 k.push(e.key, e.code)
-                this.key = `${e.type} is ${k.join('-')}`
+                this.key = `${e.type} (key=${e.key}) is ${k.join('-')}`
             }
         }
     }

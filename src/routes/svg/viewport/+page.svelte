@@ -1,8 +1,7 @@
 <script>
     import SvgEvent from "../svgevent/SvgEvent.svelte"
     import {ViewportDemo} from './ViewportDemo.js'
-
-    // Create a class that draws the image and maintains its state
+    // ViewportDemo is a class that draws the image and maintains its state
     let demo = new ViewportDemo(400, 400)
 </script>
 

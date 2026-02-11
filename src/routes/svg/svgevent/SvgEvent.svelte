@@ -13,7 +13,7 @@
     
     function focusAction(node) { node.focus() }
 
-    // Handle mouseenter/mouseleave separately svg element focus can be set
+    // Handle mouseenter/mouseleave separately so svg element focus can be set
     function focusHandler(e) {
         if (e.type === 'mouseenter') svgRef.focus()
         mouseHandler(e)

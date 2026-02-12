@@ -6,49 +6,75 @@
  * for returning SVG content based on current state.
  */
 export class Viewport {
-    constructor(svgWidth, svgHeight, centerX=0, centerY=0, unitsPerPixel=1,
-            units='', scales=[1], level=0) {
-        this.cx     = centerX       // viewport center x in client units
-        this.cy     = centerY       // viewport center y in client units
-        this.width  = svgWidth      // Svg image width in pixels
-        this.height = svgHeight     // Svg image height in pixels
-        this.level  = level         // current scale is this.scales[this.level]
+    constructor(svgWidth, svgHeight, centerX=0, centerY=0, scales=[1], level=0, units='') {
+        // Viewport state properties
+        this.level  = level         // current scale index into this.scales[this.level]
+        this.pw     = svgWidth      // Svg image width in pixels
+        this.ph     = svgHeight     // Svg image height in pixels
         this.scales = scales        // array of unitsPerPixel at various scale (zoom) levels
-        this.upp    = unitsPerPixel // i.e., 20 ft per pixel is 20
-        this.units  = units         // informative, such as 'ft'
+        this.units  = units         // world units label, such as 'ft'
+        this.upp    = scales[level] // units per pixel, i.e., 20 ft per pixel is 20
+        this.wcx    = centerX       // viewport center x in world units
+        this.wcy    = centerY       // viewport center y in world units
         
         // Store initial view so it can be restored
-        this.cx0    = centerX       // initial viewport center x in client units
-        this.cy0    = centerY       // initial viewport center y in client units
-        this.level0 = level         // current scale is scales[level]
-        
-        // Not sure these are really needed ...
-        this.clickxy = {x: 0, y: 0}
-        this.dblxy   = {x: 0, y: 0}
-        this.downxy  = {x: 0, y: 0}
-        this.enterxy = {x: 0, y: 0}
-        this.keyxy   = {x: 0, y: 0}
-        this.leavexy = {x: 0, y: 0}
-        this.movexy  = {x: 0, y: 0}
-        this.upxy    = {x: 0, y: 0}
-        this.zoomxy  = {x: 0, y: 0}
+        this.wcx0    = centerX       // initial viewport center x in world units
+        this.wcy0    = centerY       // initial viewport center y in world units
+        this.level0  = level         // initial scale index into this.scales[this.level0]
 
-        this.panning = false
-        this.begPan = {x: 0, y: 0, t: 0}
-        this.endPan = {x: 0, y: 0, t: 0}
+        this.begPan = {x: 0, y: 0, t: 0}    // most recent mousedown location (pixels) and time
+        this.endPan = {x: 0, y: 0, t: 0}    // most recent mouseup location (pixels) and time
+        this.keyxy = {x: 0, y: 0}           // most recent keyup location (pixels)
+        this.movexy = {x:0, y:0}    // current mouse location (pixels)
+        this.panning = false        // TRUE while no mouseup occurs after a mousedown
         this.svgContent = ''
+        this.zoomxy = {x:0, y:0}    // most recent zoom location (pixels)
+
+        this.clickDelay = 200       // maximum milliseconds between mousedown and mouse up to qualify as a 'click'
     }
 
+    // Called from SvgEvent.keyHandler() and SvgEvent.mouseHandler()
+    // to interperet the event as needed, and return a (possibly) new SVG image
     create(e=null) {
+        // the event handler potentially updates the Viewport state
         if(e) this.handleEvent(e)
         return this.drawSvg()
     }
-
-    // Currently unused
-    click(xy) { this.clickxy = xy }
     
-    // Currently unused
-    dblclick(xy) { this.dblxy = xy }
+    // This function must be reimplemented by derived classes
+    // Must return proper SVG content to embed within the SvgEvent wrapper
+    drawSvg() {
+        throw new Error('Classes derived from Viewport must re-implement their own draw() method.')
+    }
+
+    //--------------------------------------------------------------------------
+    // State handlers
+    //--------------------------------------------------------------------------
+
+    // The following return viewport edge x or y in world units
+    // from the current viewport center and scale
+    wleft() { return this.wcx - this.upp * this.pw/2 }
+    wright() { return this.wcx + this.upp * this.pw/2 }
+    wtop() { return this.wcy + this.upp * this.ph/2 }
+    wbottom() { return this.wcy - this.upp * this.ph/2 }
+    
+    // The following return svg pixel offset gicen world x or y
+    px(wx) { return this.pcx + (wx - this.wcx) / this.upp }
+    py(wy) { return this.pcy - (wy - this.wcy) / this.upp }
+
+    // The following returns world position given SVG pixel offset
+    wx(px) { return this.wleft() + this.upp * px }
+    wy(py) { return this.wtop() - this.upp * py }
+    
+    //--------------------------------------------------------------------------
+    // Event handlers
+    //--------------------------------------------------------------------------
+
+    // eslint-disable-next-line no-unused-vars
+    click(xy) { /* not currently used */ }
+    
+    // eslint-disable-next-line no-unused-vars
+    dblclick(xy) { /* not currently used */ }
 
     // Catch '+' and '-' keys for zoom control
     key(xy) {
@@ -60,17 +86,15 @@ export class Viewport {
 
     // mousedown starts the panning action or possibly a click action
     mousedown(xy) {
-        this.downxy = xy
         this.begPan =  {...xy, t: Date.now()}
         this.isPanning = true
     }
 
-    // Currently unused
-    mouseenter(xy) { this.enterxy = xy }
+    // eslint-disable-next-line no-unused-vars
+    mouseenter(xy) { /* not currently used */ }
 
     // mouseleave cancels any on-going panning action
     mouseleave(xy) {
-        this.leavexy = xy
         if (this.isPanning) {
             this.endPan = {...xy, t: Date.now()}
             this.isPanning = false
@@ -82,14 +106,13 @@ export class Viewport {
 
     // mouseup ends a 'panning' OR 'click' action
     mouseup(xy) {
-        this.upxy = xy
         // only consider a mouseup that follows a mousedown on this element
         if (this.isPanning) {
             this.endPan = {...xy, t: Date.now()}
             this.isPanning = false
             // if this mouseup was fast (an far?) enough to be a click ...
             let delay = this.endPan.t - this.begPan.t
-            if (delay < 200) this.click(xy)
+            if (delay < this.clickDelay) this.click(xy)
             else this.pan(xy)
         }
     }
@@ -98,10 +121,14 @@ export class Viewport {
 
     zoomin(xy) {
         this.zoomxy = xy
+        if (this.level < this.scales.length-2) this.level++
+        this.upp = this.scales[this.level]
     }
 
     zoomout(xy) {
         this.zoomxy = xy
+        if (this.level > 0) this.level--
+        this.upp = this.scales[this.level]
     }
 
     handleEvent(e) {
@@ -115,11 +142,5 @@ export class Viewport {
         else if (e.type === 'mousedown') this.mousedown(xy)
         else if (e.type === 'mouseup') this.mouseup(xy)
         else if (e.type === 'keyup') this.key(xy)
-    }
-    
-    // This function must be reimplemented by derived classes
-    // Must return proper SVG content to embed within the SvgEvent wrapper
-    drawSvg() {
-        throw new Error('Classes derived from Viewport must re-implement their own draw() method.')
     }
 }

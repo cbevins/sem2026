@@ -10,6 +10,7 @@ export class Viewport {
         // Viewport state properties
         this.width  = svgWidth      // Svg image width in pixels
         this.height = svgHeight     // Svg image height in pixels
+        if (level >= scales.length) level = scales.length-1
         this.level  = level         // current scale index into this.scales[this.level]
         this.scales = scales        // array of unitsPerPixel at various scale (zoom) levels
         this.units  = units         // world units label, such as 'ft'
@@ -59,10 +60,12 @@ export class Viewport {
     wbottom() { return this.wcy - (this.upp * this.height/2) }
     
     // The following return svg pixel offset given world x or y
+    pd(wd) { return wd / this.upp }
     px(wx) { return (this.width/2) + ((wx - this.wcx) / this.upp) }
     py(wy) { return (this.height/2) - ((wy - this.wcy) / this.upp) }
 
     // The following returns world position given SVG pixel offset
+    wd(pd) { return pd * this.upp }
     wx(px) { return this.wleft() + (this.upp * px) }
     wy(py) { return this.wtop() - (this.upp * py) }
 
@@ -119,13 +122,13 @@ export class Viewport {
 
     pan(xy) { /* not yet implemented*/ }
 
-    zoomin(xy) {
+    zoomout(xy) {
         this.zoomxy = xy
         if (this.level < this.scales.length-2) this.level++
         this.upp = this.scales[this.level]
     }
 
-    zoomout(xy) {
+    zoomin(xy) {
         this.zoomxy = xy
         if (this.level > 0) this.level--
         this.upp = this.scales[this.level]

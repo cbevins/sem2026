@@ -8,9 +8,9 @@
 export class Viewport {
     constructor(svgWidth, svgHeight, centerX=0, centerY=0, scales=[1], level=0, units='') {
         // Viewport state properties
+        this.width  = svgWidth      // Svg image width in pixels
+        this.height = svgHeight     // Svg image height in pixels
         this.level  = level         // current scale index into this.scales[this.level]
-        this.pw     = svgWidth      // Svg image width in pixels
-        this.ph     = svgHeight     // Svg image height in pixels
         this.scales = scales        // array of unitsPerPixel at various scale (zoom) levels
         this.units  = units         // world units label, such as 'ft'
         this.upp    = scales[level] // units per pixel, i.e., 20 ft per pixel is 20
@@ -53,19 +53,19 @@ export class Viewport {
 
     // The following return viewport edge x or y in world units
     // from the current viewport center and scale
-    wleft() { return this.wcx - this.upp * this.pw/2 }
-    wright() { return this.wcx + this.upp * this.pw/2 }
-    wtop() { return this.wcy + this.upp * this.ph/2 }
-    wbottom() { return this.wcy - this.upp * this.ph/2 }
+    wleft() { return this.wcx - (this.upp * this.width/2) }
+    wright() { return this.wcx + (this.upp * this.width/2) }
+    wtop() { return this.wcy + (this.upp * this.height/2) }
+    wbottom() { return this.wcy - (this.upp * this.height/2) }
     
-    // The following return svg pixel offset gicen world x or y
-    px(wx) { return this.pcx + (wx - this.wcx) / this.upp }
-    py(wy) { return this.pcy - (wy - this.wcy) / this.upp }
+    // The following return svg pixel offset given world x or y
+    px(wx) { return (this.width/2) + ((wx - this.wcx) / this.upp) }
+    py(wy) { return (this.height/2) - ((wy - this.wcy) / this.upp) }
 
     // The following returns world position given SVG pixel offset
-    wx(px) { return this.wleft() + this.upp * px }
-    wy(py) { return this.wtop() - this.upp * py }
-    
+    wx(px) { return this.wleft() + (this.upp * px) }
+    wy(py) { return this.wtop() - (this.upp * py) }
+
     //--------------------------------------------------------------------------
     // Event handlers
     //--------------------------------------------------------------------------

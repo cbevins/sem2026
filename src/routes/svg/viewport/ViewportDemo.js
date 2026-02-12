@@ -2,14 +2,14 @@ import { Viewport } from "./Viewport.js"
 
 export class ViewportDemo extends Viewport {
     constructor(svgWidth, svgHeight, centerX=0, centerY=0, unitsPerPixel=1,
-            units='', scales=[1], level=0) {
-        super(svgWidth, svgHeight, centerX, centerY, unitsPerPixel, units,
-            scales, level)
+            scales=[1], level=0, units='') {
+        super(svgWidth, svgHeight, centerX, centerY, unitsPerPixel,
+            scales, level, units)
     }
-        
+
     drawSvg() {
-        const cx = this.width/2
-        const cy = this.height/2
+        const cx = this.pcx
+        const cy = this.pcy
         const fill = ['red', 'green', 'blue']
         const textAttr = "stroke='black' font-size=10 text-anchor='middle'"
             + " 'font-family'='sans-serif' font-weight='light'"

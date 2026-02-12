@@ -2,7 +2,8 @@
     import SvgEvent from "../svgevent/SvgEvent.svelte"
     import {ViewportDemo} from './ViewportDemo.js'
     // ViewportDemo is a class that draws the image and maintains its state
-    let demo = new ViewportDemo(400, 400)
+    let demo = new ViewportDemo(500, 500, 200, 200, [0.5, 1, 2], 1, 'ft')
+    console.log(demo)
 </script>
 
 <div class='ml-4 text-2xl'>ViewPort Demo</div>

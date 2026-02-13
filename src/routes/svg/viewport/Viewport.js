@@ -54,7 +54,7 @@ export class Viewport {
 
     // The following return viewport edge x or y in world units
     // from the current viewport center and scale
-    wleft() { return this.wcx - (this.upp * this.width/2) }
+    wleft() { return this.wcx - (this.upp * this.width)/2 }
     wright() { return this.wcx + (this.upp * this.width/2) }
     wtop() { return this.wcy + (this.upp * this.height/2) }
     wbottom() { return this.wcy - (this.upp * this.height/2) }

@@ -6,7 +6,9 @@
  * for returning SVG content based on current state.
  */
 export class Viewport {
-    constructor(svgWidth, svgHeight, centerX=0, centerY=0, scales=[1], level=0, units='') {
+    constructor(svgWidth, svgHeight, centerX=0, centerY=0,
+            scales=[1], level=0, units='',
+            wxMin=-Infinity, wxMax=Infinity, wyMin=-Infinity, wyMax=Infinity) {
         // Viewport state properties
         this.width  = svgWidth      // Svg image width in pixels
         this.height = svgHeight     // Svg image height in pixels
@@ -17,7 +19,13 @@ export class Viewport {
         this.upp    = scales[level] // units per pixel, i.e., 20 ft per pixel is 20
         this.wcx    = centerX       // viewport center x in world units
         this.wcy    = centerY       // viewport center y in world units
-        
+    
+        // The following are only used to define panning limits
+        this.wxMax = wxMax          // eastern-most world coordinate
+        this.wxMin = wxMin          // western-most world coordinate
+        this.wyMax = wyMax          // northern-most world coordinate
+        this.wxMin = wyMin          // southern-most world coordinate
+
         // Store initial view so it can be restored
         this.wcx0    = centerX       // initial viewport center x in world units
         this.wcy0    = centerY       // initial viewport center y in world units
@@ -74,8 +82,11 @@ export class Viewport {
     // Event handlers
     //--------------------------------------------------------------------------
 
-    // eslint-disable-next-line no-unused-vars
-    click(xy) { /* not currently used */ }
+    // Moves the clicked location to the image center
+    click(xy) {
+        this.wcx = this.wx(xy.x)
+        this.wcy = this.wy(xy.y)
+    }
     
     // eslint-disable-next-line no-unused-vars
     dblclick(xy) { /* not currently used */ }
@@ -87,12 +98,18 @@ export class Viewport {
     key(xy) {
         this.keyxy = xy
         const e = this.event
-        if (e.key === 'v' || e.key === '+') this.zoomin(xy)
-        else if (e.key === '^' || e.key === '-') this.zoomout(xy)
+        if (['v', '+'].includes(e.key)) this.zoomout(xy)
+        else if (['^','-'].includes(e.key)) this.zoomin(xy)
         else if (e.key === 'ArrowDown') this.shift('d')
         else if (e.key === 'ArrowLeft') this.shift('l')
         else if (e.key === 'ArrowRight') this.shift('r')
         else if (e.key === 'ArrowUp') this.shift('u')
+        else if (e.key === 'Home') this.shift('ul') // NumPad7
+        else if (e.key === 'End') this.shift('dl')  // NumPad1
+        else if (e.key === 'PageUp') this.shift('ur')  // NumPad9
+        else if (e.key === 'PageDown') this.shift('dr')  // NumPad3
+        else if (['c','r','0'].includes(e.key)) this.reset()
+        else (console.log(e))
     }
 
     // mousedown starts the panning action or possibly a click action
@@ -113,7 +130,8 @@ export class Viewport {
     }
     
     // Currently unused, but could use mousemove update display of current pointer position
-    mousemove(xy) { this.movexy = xy }
+    mousemove(xy) {
+        this.movexy = xy }
 
     // mouseup ends a 'panning' OR 'click' action
     mouseup(xy) {
@@ -124,24 +142,37 @@ export class Viewport {
             // if this mouseup was fast (an far?) enough to be a click ...
             let delay = this.endPan.t - this.begPan.t
             if (delay < this.clickDelay) this.click(xy)
-            else this.pan(xy)
+            else this.pan()
         }
     }
 
-    pan(xy) {
-        this.panxy = xy
+    pan() {
+        const dx = this.begPan.x - this.endPan.x
+        const dy = this.endPan.y - this.begPan.y
+        this.wcx += this.upp * dx
+        this.wcy += this.upp * dy
+    }
+
+    reset() {
+        this.wcx = this.wcx0
+        this.wcy = this.wcy0
+        this.level = this.level0
+        this.upp = this.scales[this.level]
     }
 
     shift(dir) {
         let dx = 0
         let dy = 0
-        if (dir === 'l') dx = (this.shiftRatio * this.width)
-        else if (dir === 'r') dx = -(this.shiftRatio * this.width)
-        else if (dir === 'd') dy = (this.shiftRatio * this.height)
-        else if (dir === 'u') dy = -(this.shiftRatio * this.height)
+        // x-shifts
+        if (['l', 'ul', 'dl'].includes(dir)) dx = (this.shiftRatio * this.width)
+        if (['r', 'ur', 'dr'].includes(dir)) dx = -(this.shiftRatio * this.width)
+        // y shifts
+        if (['d', 'dl', 'dr'].includes(dir)) dy = (this.shiftRatio * this.height)
+        if (['u', 'ur', 'ul'].includes(dir)) dy = -(this.shiftRatio * this.height)
         this.wcx += dx * this.upp
         this.wcy += dy * this.upp
     }
+
     zoomout(xy) {
         this.zoomxy = xy
         if (this.level < this.scales.length-2) this.level++
@@ -160,8 +191,8 @@ export class Viewport {
         if (e.type === 'mousemove') this.mousemove(xy)
         else if (e.type === 'click') this.click(xy)
         else if (e.type === 'dblclick') this.dblclick(xy)
-        else if (e.type === 'mouseenter' || e.type === 'mouseover') this.mouseenter(xy)
-        else if (e.type === 'mouseleave' || e.type === 'mouseout') this.mouseleave(xy)
+        else if (['mouseenter', 'mouseover'].includes(e.type)) this.mouseenter(xy)
+        else if (['mouseleave', 'mouseout'].includes(e.type)) this.mouseleave(xy)
         else if (e.type === 'mousedown') this.mousedown(xy)
         else if (e.type === 'mouseup') this.mouseup(xy)
         else if (e.type === 'keyup') this.key(xy)

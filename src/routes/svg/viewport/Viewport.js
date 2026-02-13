@@ -32,6 +32,7 @@ export class Viewport {
         this.zoomxy = {x:0, y:0}    // most recent zoom location (pixels)
 
         this.clickDelay = 200       // maximum milliseconds between mousedown and mouse up to qualify as a 'click'
+        this.shiftRatio = 0.25
     }
 
     // Called from SvgEvent.keyHandler() and SvgEvent.mouseHandler()
@@ -80,11 +81,18 @@ export class Viewport {
     dblclick(xy) { /* not currently used */ }
 
     // Catch '+' and '-' keys for zoom control
+    // Props: ctrlKey (bool), isComposing (bool), key (string),
+    // location (int), metaKey (bool), repeat (bool), shiftKey (bool)
+    // Obsolete props are charCode (int), keyCode (int), keyIdentifier
     key(xy) {
         this.keyxy = xy
         const e = this.event
-        if (e.key === '+') this.zoomin(xy)
-        else if (e.key === '-') this.zoomout(xy)
+        if (e.key === 'v' || e.key === '+') this.zoomin(xy)
+        else if (e.key === '^' || e.key === '-') this.zoomout(xy)
+        else if (e.key === 'ArrowDown') this.shift('d')
+        else if (e.key === 'ArrowLeft') this.shift('l')
+        else if (e.key === 'ArrowRight') this.shift('r')
+        else if (e.key === 'ArrowUp') this.shift('u')
     }
 
     // mousedown starts the panning action or possibly a click action
@@ -120,8 +128,20 @@ export class Viewport {
         }
     }
 
-    pan(xy) { /* not yet implemented*/ }
+    pan(xy) {
+        this.panxy = xy
+    }
 
+    shift(dir) {
+        let dx = 0
+        let dy = 0
+        if (dir === 'l') dx = (this.shiftRatio * this.width)
+        else if (dir === 'r') dx = -(this.shiftRatio * this.width)
+        else if (dir === 'd') dy = (this.shiftRatio * this.height)
+        else if (dir === 'u') dy = -(this.shiftRatio * this.height)
+        this.wcx += dx * this.upp
+        this.wcy += dy * this.upp
+    }
     zoomout(xy) {
         this.zoomxy = xy
         if (this.level < this.scales.length-2) this.level++

@@ -10,15 +10,16 @@
     import * as FE from '$lib/fire/lib/FireEllipseLib'
     import { perimeterPoints } from './perimeterPoints.js'
     import {PerimeterViewport} from './PerimeterViewport.js'
-    
+    import {activeInputNodesTable} from '$lib/dag/DagTables.js'
+
     let lwRatio = 2
-    let bearing = 0
+    let bearing = 135
     let headRos = 1
     let elapsed = 100
     let deg = 5
 
     // Create a FireEllipseMod with beta-psi-theta vector angle from 'head' and ready()
-    let src='bearing'  // 'angle' or 'bearing'
+    let src = 'angle'  // 'angle' or 'bearing'
     const e = new FireEllipseMod('e', src).ready()
     const {beta, center, f, h, head, ignition, length, lwr, psi, theta, time} = e
     for(let v of [beta, psi, theta]) {
@@ -33,6 +34,7 @@
 
     // Get and set required inputs
     const inputNodes = e.sortNodes(e.activeInputNodes())
+    // activeInputNodesTable(e)
     head.bearing.set(bearing)
     head.ros.set(headRos)
     lwr.set(lwRatio)

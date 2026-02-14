@@ -186,7 +186,7 @@ export class FireEllipseMod extends DagModule {
         }
         time.input()
 
-        if (configVector==='head') this.configVectorInputFromHead()
+        if (configVector==='angle') this.configVectorInputFromHead()
         else this.configVectorInputFromNorth()
     }
 

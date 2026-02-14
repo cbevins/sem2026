@@ -24,7 +24,7 @@ export class Viewport {
         this.wxMax = wxMax          // eastern-most world coordinate
         this.wxMin = wxMin          // western-most world coordinate
         this.wyMax = wyMax          // northern-most world coordinate
-        this.wxMin = wyMin          // southern-most world coordinate
+        this.wyMin = wyMin          // southern-most world coordinate
 
         // Store initial view so it can be restored
         this.wcx0    = centerX       // initial viewport center x in world units
@@ -109,7 +109,7 @@ export class Viewport {
         else if (e.key === 'PageUp') this.shift('ur')  // NumPad9
         else if (e.key === 'PageDown') this.shift('dr')  // NumPad3
         else if (['c','r','0'].includes(e.key)) this.reset()
-        else (console.log(e))
+        // else (console.log(e))
     }
 
     // mousedown starts the panning action or possibly a click action
@@ -161,21 +161,23 @@ export class Viewport {
     }
 
     shift(dir) {
+        const xshift = this.shiftRatio * this.width
+        const yshift = this.shiftRatio * this.height
         let dx = 0
         let dy = 0
         // x-shifts
-        if (['l', 'ul', 'dl'].includes(dir)) dx = (this.shiftRatio * this.width)
-        if (['r', 'ur', 'dr'].includes(dir)) dx = -(this.shiftRatio * this.width)
+        if (['l','ul','dl'].includes(dir) && ((this.wxMax-this.wleft()) > xshift)) dx = xshift
+        if (['r','ur','dr'].includes(dir) && ((this.wright()-this.wxMin) > xshift)) dx = -xshift
         // y shifts
-        if (['d', 'dl', 'dr'].includes(dir)) dy = (this.shiftRatio * this.height)
-        if (['u', 'ur', 'ul'].includes(dir)) dy = -(this.shiftRatio * this.height)
+        if (['d','dl','dr'].includes(dir) && ((this.wyMax-this.wbottom()) > yshift)) dy = yshift
+        if (['u','ur','ul'].includes(dir) && ((this.wtop()-this.wyMin) > yshift)) dy = -yshift
         this.wcx += dx * this.upp
         this.wcy += dy * this.upp
     }
 
     zoomout(xy) {
         this.zoomxy = xy
-        if (this.level < this.scales.length-2) this.level++
+        if (this.level < this.scales.length-1) this.level++
         this.upp = this.scales[this.level]
     }
 

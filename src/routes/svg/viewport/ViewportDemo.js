@@ -2,7 +2,10 @@ import { Viewport } from "./Viewport.js"
 
 export class ViewportDemo extends Viewport {
     constructor(svgWidth, svgHeight) {
-        super(svgWidth, svgHeight, 200, 200, [4, 2, 1, 0.5, 0.1], 2, 'ft')
+        super(svgWidth, svgHeight, 200, 200,
+            [16, 8, 4, 2, 1, 0.5, 0.1, 0.05], 4, 'ft',
+            0, 400, 0, 400)
+            console.log(this)
     }
 
     drawSvg() {
@@ -13,7 +16,7 @@ export class ViewportDemo extends Viewport {
         const y1 = this.height / 3
         const y2 = 2 * this.height / 3
 
-        let str = `<rect x=0 y=0 width=${this.width} height=${this.height} fill='gray'/>`
+        let str = `<rect x=${this.px(this.wxMin)} y=${this.py(this.wyMax)} width=${this.pd(this.width)} height=${this.pd(this.height)} fill='gray'/>`
         str += `<circle cx=${this.px(c1)} cy=${this.py(y1)} r=${this.pd(rx)} fill='red' opacity="0.6"/>`
         str += `<circle cx=${this.px(c2)} cy=${this.py(y1)} r=${this.pd(rx)} fill='yellow' opacity="0.6"/>`
         str += `<circle cx=${this.px(c3)} cy=${this.py(y2)} r=${this.pd(rx)} fill='blue' opacity="0.6"/>`
@@ -32,6 +35,8 @@ export class ViewportDemo extends Viewport {
         str += `<text x=${3*this.width/4} y=10 text-anchor='middle' ${textAttr}>${center}</text>`
         return str
     }
+
+    // Places world coordinates around viewport frame
     drawEdgeLables(textAttr) {
         let str = ''
         str += `<text x=20 y=10 text-anchor='start' ${textAttr}>${this.wtop()}</text>`
@@ -51,6 +56,7 @@ export class ViewportDemo extends Viewport {
 
         return str
     }
+    // Draws axis and places world coordinates at terminus of each semi-axis
     drawAxis(textAttr) {
         const w = this.width
         const mx = w/2

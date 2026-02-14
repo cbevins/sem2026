@@ -1,6 +1,4 @@
 <script>
-    import { onMount } from 'svelte'
-
     let svgRef  // reference to the SVG to programatically control focus
 
     // 'creator' is a class or object with svg 'width' and 'height' props and

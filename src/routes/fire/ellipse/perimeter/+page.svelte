@@ -4,6 +4,7 @@
     import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
     import {nodesTable} from '$lib/dag/DagTables.js'
     import * as FE from '$lib/fire/lib/FireEllipseLib'
+    import { perimeterPoints } from './perimeterPoints.js'
 
     let lwrInput = 2
     let headDegInput = 0
@@ -40,38 +41,13 @@
     const activeNodes = e.sortNodes(e.activeNodes())
 
     // Determine perimeter points at 'deg' degree intervals of beta, theta, and psi
-    const betaPts = perimeterPoints(e, beta, src, deg)
-    const psiPts = perimeterPoints(e, psi, src, deg)
-    const thetaPts = perimeterPoints(e, theta, src, deg)
-    
-    function  perimeterPoints(e, vector, src, deg) {
-        function fmt(node) { return node.value.toFixed(8) }
-        const pts = []
-        let len = 0
-        let lastX = 0
-        let lastY = 0
-        for(let i=0; i<=360; i+=deg) {
-            vector.angle[src].set(i)
-            e.updateAll()
-            // Determine segment length and cumulative perimeter length
-            if (i) {
-                const dx = vector.perim.head.x.value - lastX
-                const dy = vector.perim.head.y.value - lastY
-                const dl = Math.sqrt(dx*dx + dy*dy)
-                len += dl
-            }
-            pts.push([i, fmt(vector.perim.head.x), fmt(vector.perim.head.y),
-                fmt(vector.beta), fmt(vector.psi), fmt(vector.theta), fmt(vector.vhr),
-                len.toFixed(8)])
-            lastX = vector.perim.head.x.value
-            lastY = vector.perim.head.y.value
-        }
-        return pts
-    }
+    const betaPts = perimeterPoints(e, beta, deg, src)
+    const psiPts = perimeterPoints(e, psi, deg, src)
+    const thetaPts = perimeterPoints(e, theta, deg, src)
     const i15 = 15/deg      // index of 15-deg
     const beta15 = betaPts[i15]
     const theta15 = thetaPts[i15]
-    const headers = ['Deg', 'Head X', 'Head Y', 'Beta', 'Psi', 'Theta', 'Vhr']
+    const headers = ['Deg', 'Head X', 'Head Y', 'Beta', 'Psi', 'Theta', 'Vhr', 'Length']
 
     const scope = {
         view: {width: 400, height: 400},
@@ -102,7 +78,7 @@
 </script>
 
 <div class='ml-4 mt-4 mb-4'>
-    <div class='text-xl'>Fire Ellipse Perimeter</div>
+    <div class='text-xl'>Fire Ellipse Perimeter Example 1</div>
     <div class='text-normal'>
         Example using FireEllipseMod to determine the ellipse perimeter points
         plotted at uniform intervals of {deg} degrees of beta (red), theta (yellow),

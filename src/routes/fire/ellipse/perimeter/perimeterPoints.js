@@ -1,6 +1,6 @@
 /**
  * Returns an array of fire ellipse perimeter points and other info
- * @param {*} e FireEllipseMod instance
+ * @param {*} ellipseMod FireEllipseMod instance
  * @param {*} vector Reference to e.beta, e.psi, or e.theta
  * @param {*} deg Degrees increment 
  * @param {*} src Angle configuration parameter, either 'head' or 'north'
@@ -14,14 +14,16 @@
  *  6: cumulative perimeter distance from head
  */
 function fmt(node) { return node.value.toFixed(8) }
-export function perimeterPoints(e, vector, deg=5, src='head') {
+
+export function perimeterPoints(ellipseMod, vector, deg=5, src='head') {
+    const state = ellipseMod.getState()
     const pts = []
     let len = 0
     let lastX = 0
     let lastY = 0
     for(let i=0; i<=360; i+=deg) {
         vector.angle[src].set(i)
-        e.updateAll()
+        ellipseMod.updateAll()
         // Determine segment length and cumulative perimeter length
         if (i) {
             const dx = vector.perim.head.x.value - lastX
@@ -35,5 +37,6 @@ export function perimeterPoints(e, vector, deg=5, src='head') {
         lastX = vector.perim.head.x.value
         lastY = vector.perim.head.y.value
     }
+    ellipseMod.setState(state)
     return pts
 }

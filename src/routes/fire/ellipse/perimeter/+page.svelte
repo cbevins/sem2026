@@ -1,24 +1,25 @@
 <script>
     import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
-    import {GenericTable} from '$lib/svelte/GenericTable.svelte'
-    import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
-    import {nodesTable} from '$lib/dag/DagTables.js'
     import * as FE from '$lib/fire/lib/FireEllipseLib'
     import { perimeterPoints } from './perimeterPoints.js'
+    
+    import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
+    import {GenericTable} from '$lib/svelte/GenericTable.svelte'
+    // import AccordionItem from "./AccordionItem.svelte";
+    
+    import {SvgEvent} from '$lib/index.js'
+    import {PerimeterViewport} from './PerimeterViewport.js'
 
     let lwrInput = 2
     let headDegInput = 0
     let headRosInput = 1
     let timeInput = 100
     let deg = 5
-    let showBetaPerim = true
-    let showPsiPerim = true
-    let showThetaPerim = true
 
     // Create a FireEllipseMod with beta-psi-theta vector angle from 'head' and ready()
     let src='head'  // 'head' or 'north'
     const e = new FireEllipseMod('e', src).ready()
-    const {beta, center, f, h, head, ignition, lwr, psi, theta, time} = e
+    const {beta, center, f, h, head, ignition, length, lwr, psi, theta, time} = e
     for(let v of [beta, psi, theta]) {
         for(let node of [v.perim.head.x, v.perim.head.y, v.beta, v.psi, v.theta, v.vhr])
             node.select()
@@ -27,6 +28,7 @@
     center.head.y.select()
     f.dist.select()
     h.dist.select()
+    length.dist.select()
 
     // Get and set required inputs
     const inputNodes = e.sortNodes(e.activeInputNodes())
@@ -44,27 +46,16 @@
     const betaPts = perimeterPoints(e, beta, deg, src)
     const psiPts = perimeterPoints(e, psi, deg, src)
     const thetaPts = perimeterPoints(e, theta, deg, src)
-    const i15 = 15/deg      // index of 15-deg
-    const beta15 = betaPts[i15]
-    const theta15 = thetaPts[i15]
     const headers = ['Deg', 'Head X', 'Head Y', 'Beta', 'Psi', 'Theta', 'Vhr', 'Length']
-
-    const scope = {
-        view: {width: 400, height: 400},
-        // view center point in user units (ft)
-        center: {east: 0, north: 0},
-        // scale at each level where 1 pixel = n user units (ft)
-        zooms: [0.25, 0.50, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096],
-        // Given the above scale, set initial zoom to level 3, where 1 pixel = 2 ft
-        zoom: 2,
-        scale: function() { return this.zooms[this.zoom] },
-        east: function() { return this.center.east + this.scale() * this.view.width/2},
-        west: function() { return this.center.east - this.scale() * this.view.width/2},
-        north: function() { return this.center.north + this.scale() * this.view.height/2},
-        south: function() { return this.center.north - this.scale() * this.view.height/2},
-        x: function(east) { return (east - this.west()) * this.scale()},
-        y: function(north) { return (this.north() - north) * this.scale()},
-    }
+    
+    // PerimeterViewport is a class that draws the image and maintains its state
+    // We only need to specify the SVG width, height here,
+    // and let the Viewport-derived class define all the other properties
+    let demo = new PerimeterViewport(400, 400, length.dist.get(),
+        thetaPts, psiPts, betaPts,  // perimeter pt arrays
+        ignition.head.x.value, ignition.head.y.value,   // ignition pt
+        center.head.x.value, center.head.y.value,   // center pt
+        true, true, true)   // show theta, psi, beta
 
     // Perimeter table
     const perimTable = [
@@ -85,45 +76,12 @@
         or psi (blue) from '{src}'.  SvgScope is used to display the ellipse
         in either a Cartesian or geographic coordinate system.
     </div>
-    <svg width={scope.view.width} height={scope.view.height}>
-        <rect width={scope.view.width} height={scope.view.height} fill='green'/>
-        <!-- Grid axis -->
-        <line x1=0 y1={scope.view.height/2} x2={scope.view.width} y2={scope.view.height/2} stroke='black'/>
-        <line x1={scope.view.width/2} y1=0 x2={scope.view.width/2} y2={scope.view.height} stroke='black'/>
-        <!-- perimeter points at beta intervals -->
-        {#if showBetaPerim}
-            {#each betaPts as [deg, e, n]}
-                <circle cx={scope.x(e)} cy={scope.y(n)} r=3 fill='red'/>
-            {/each}
-            <!-- Line from ignition point to beta at 15 degrees from head -->
-            <line x1={scope.x(ignition.head.x.value)} y1={scope.y(ignition.head.y.value)}
-                x2={scope.x(beta15[1])} y2={scope.y(beta15[2])} stroke='red'/>
-            <!-- Perimeter point for beta=15 (should be ellipse head) -->
-            <circle cx={scope.x(beta15[1])} cy={scope.y(beta15[2])} r=3 fill='red'/>
-        {/if}
-        <!-- perimeter points at theta inetrvals -->
-        {#if showThetaPerim}
-            {#each thetaPts as [deg, e, n]}
-                <circle cx={scope.x(e)} cy={scope.y(n)} r=2 fill='yellow'/>
-            {/each}
-            <!-- Line from ellipse center to theta at 15 degrees from head -->
-            <line x1={scope.x(center.head.x.value)} y1={scope.y(center.head.y.value)}
-                x2={scope.x(theta15[1])} y2={scope.y(theta15[2])} stroke='yellow' stroke-width=3/>
-            <!-- Perimeter point for theta=15 (should be ellipse head) -->
-            <circle cx={scope.x(theta15[1])} cy={scope.y(theta15[2])} r=4 fill='yellow'/>
-        {/if}
-        <!-- perimeter points at psi inetrvals -->
-        {#if showPsiPerim}
-            {#each psiPts as [deg, e, n]}
-                <circle cx={scope.x(e)} cy={scope.y(n)} r=1 fill='blue'/>
-            {/each}
-        {/if}
-        <!-- Ignition point is the Cartesian origin -->
-        <circle cx={scope.x(ignition.head.x.value)} cy={scope.y(ignition.head.y.value)} r=4 fill='red'/>
-        <!-- Ellipse center pt in Cartesian coords -->
-        <circle cx={scope.x(center.head.x.value)} cy={scope.y(center.head.y.value)} r=3 fill='yellow'/>
-    </svg>
+
+    <div class='ml-4 mt-4'>
+        <SvgEvent creator={demo} keyable={true} mousable={true}/>
+    </div>
 </div>
+
 <div class='ml-4'>
     {@render GenericTable(perimTable, ['Method', 'Perim'], `Perimeter Estimates`)}
     {@render DagNodeTable('Selected Nodes', selectedNodes)}

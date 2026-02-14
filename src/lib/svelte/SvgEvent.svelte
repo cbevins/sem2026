@@ -1,4 +1,6 @@
 <script>
+	import { stopPropagation } from "svelte/legacy";
+
     let svgRef  // reference to the SVG to programatically control focus
 
     // 'creator' is a class or object with svg 'width' and 'height' props and
@@ -30,10 +32,11 @@
 -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- Could add onmousedown/onmouseup, but they interfer with click -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <svg width={width} height={height} tabindex="-1" bind:this={svgRef}
     use:focusAction
-    onkeydown={keyHandler}
-    onkeyup={keyHandler} 
+    onkeydowncapture={keyHandler}
+    onkeyupcapture={keyHandler} 
     onclick={mouseHandler}
     onmousedown={mouseHandler}
     onmouseup={mouseHandler}

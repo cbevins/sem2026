@@ -145,7 +145,7 @@ export class Viewport {
         if (this.isPanning) {
             this.endPan = {...xy, t: Date.now()}
             this.isPanning = false
-            // if this mouseup was fast (an far?) enough to be a click ...
+            // if this mouseup was fast (and far?) enough to be a click ...
             let delay = this.endPan.t - this.begPan.t
             if (delay < this.clickDelay) this.click(xy)
             else this.pan()
@@ -176,8 +176,8 @@ export class Viewport {
         if (['l','ul','dl'].includes(dir) && ((this.wxMax-this.wleft()) > xshift)) dx = xshift
         if (['r','ur','dr'].includes(dir) && ((this.wright()-this.wxMin) > xshift)) dx = -xshift
         // y shifts
-        if (['d','dl','dr'].includes(dir) && ((this.wyMax-this.wbottom()) > yshift)) dy = yshift
-        if (['u','ur','ul'].includes(dir) && ((this.wtop()-this.wyMin) > yshift)) dy = -yshift
+        if (['d','dl','dr'].includes(dir) && (this.pd(this.wyMax-this.wbottom()) > yshift)) dy = yshift
+        if (['u','ur','ul'].includes(dir) && (this.pd(this.wtop()-this.wyMin) > yshift)) dy = -yshift
         this.wcx += dx * this.upp
         this.wcy += dy * this.upp
     }

@@ -1,13 +1,8 @@
 <script>
+    import {DagNodeTable, Expand, GenericTable, SvgEvent} from '$lib/index.js'
     import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
     import * as FE from '$lib/fire/lib/FireEllipseLib'
     import { perimeterPoints } from './perimeterPoints.js'
-    
-    import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
-    import {GenericTable} from '$lib/svelte/GenericTable.svelte'
-    // import AccordionItem from "./AccordionItem.svelte";
-    
-    import {SvgEvent} from '$lib/index.js'
     import {PerimeterViewport} from './PerimeterViewport.js'
 
     let lwrInput = 2
@@ -82,14 +77,43 @@
     </div>
 </div>
 
-<div class='ml-4'>
-    {@render GenericTable(perimTable, ['Method', 'Perim'], `Perimeter Estimates`)}
-    {@render DagNodeTable('Selected Nodes', selectedNodes)}
-    {@render DagNodeTable('Active Input Nodes', activeInputNodes)}
-    {@render DagNodeTable('Active Nodes', activeNodes)}
+<div class='ml-4 mt-2'>
+    <Expand title='Perimeter Estimates'>
+        {@render GenericTable(perimTable, ['Method', 'Perim'])}
+    </Expand>
+</div>
 
-    <div class='text-xl text-center'>FireEllipseMod</div>
-    {@render GenericTable(betaPts, headers, `Beta Perimeter at ${deg}-deg Intervals`)}
-    {@render GenericTable(thetaPts, headers, `Theta Perimeter at ${deg}-deg Intervals`)}
-    {@render GenericTable(psiPts, headers, `Psi Perimeter at ${deg}-deg Intervals`)}
+<div class='ml-4 mt-2'>
+    <Expand title='Selected Nodes'>
+        {@render DagNodeTable('Selected Nodes', selectedNodes)}
+    </Expand>
+</div>
+
+<div class='ml-4'>
+    <Expand title='Active Input  Nodes'>
+        {@render DagNodeTable('Active Input Nodes', activeInputNodes)}
+    </Expand>
+</div>
+
+<div class='ml-4'>
+    <Expand title='All Active Nodes'>
+        {@render DagNodeTable('Active Nodes', activeNodes)}
+    </Expand>
+</div>
+
+<div class='text-xl text-center'>FireEllipseMod</div>
+<div class='ml-4'>
+    <Expand title='Perimeter at {deg}-deg Beta Intervals'>
+        {@render GenericTable(betaPts, headers, `Perimeter at ${deg}-deg Beta Intervals`)}
+    </Expand>
+</div>
+<div class='ml-4'>
+    <Expand title='Perimeter at {deg}-deg Theta Intervals'>
+        {@render GenericTable(thetaPts, headers, `Perimeter at ${deg}-deg Theta Intervals`)}
+    </Expand>
+</div>
+<div class='ml-4'>
+    <Expand title='Perimeter at ${deg}-deg Psi Intervals'>
+        {@render GenericTable(psiPts, headers, `Perimeter at ${deg}-deg Psi Intervals`)}
+    </Expand>
 </div>

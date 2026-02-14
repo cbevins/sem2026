@@ -15,12 +15,12 @@ theta.beta.select()
 theta.theta.select()
 theta.psi.select()
 
-head.angle.north.set(0)
+head.bearing.set(0)
 lwr.set(2)
 
 test('Beta-Theta-Psi Recipricol Conversions', () => {
 	for(let i=0; i<360; i++) {
-		beta.angle.north.set(i)
+		beta.bearing.set(i)
 		const a = beta.angle.head.get()
 		const b = beta.beta.get()
 		const t = beta.theta.get()
@@ -30,7 +30,7 @@ test('Beta-Theta-Psi Recipricol Conversions', () => {
 })
 test('Theta-Beta-Psi Recipricol Conversions', () => {
 	for(let i=0; i<360; i++) {
-		theta.angle.north.set(i)
+		theta.bearing.set(i)
 		const a = theta.angle.head.get()
 		const b = theta.beta.get()
 		const t = theta.theta.get()
@@ -40,7 +40,7 @@ test('Theta-Beta-Psi Recipricol Conversions', () => {
 })
 test('Psi-Theta-Beta Recipricol Conversions', () => {
 	for(let i=0; i<360; i++) {
-		psi.angle.north.set(i)
+		psi.bearing.set(i)
 		const a = psi.angle.head.get()
 		const b = psi.beta.get()
 		const t = psi.theta.get()

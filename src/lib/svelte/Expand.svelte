@@ -7,7 +7,7 @@
 </script>
 
 <div class='border rounded-4xl mb-2 bg-gray-300'>
-  <button class="flex" onclick={toggle} aria-expanded={isOpen}>
+  <button class="flex px-1 py-1" onclick={toggle} aria-expanded={isOpen}>
     <svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none"
       stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="black">
       <path d="M9 5l7 7-7 7" />
@@ -25,16 +25,6 @@
 </div>
 
 <style>
-  button {
-    border: none;
-    background: none;
-    color: inherit;
-    cursor: pointer;
-    margin: 0;
-    padding-bottom: 0.5rem;
-    padding-top: 0.5rem;
-  }
-
   svg {
 		flex-shrink: 0;
     transition: transform 0.2s ease-in;
@@ -47,7 +37,8 @@
 	.flex {
 		display: flex;
 	}
-		.hidden {
+
+	.hidden {
 		display: none;
 	}
 </style>

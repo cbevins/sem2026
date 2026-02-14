@@ -12,9 +12,9 @@ ellipse.setConsumers()
 const {back, head, left, right} = ellipse
 
 // Step 4 - select desired outputs
-back.angle.north.select()
-right.angle.north.select()
-left.angle.north.select()
+back.bearing.select()
+right.bearing.select()
+left.bearing.select()
 Table.selectedNodesTable(ellipse)
 
 // Step 5 - discover required inputs and set their values
@@ -23,10 +23,10 @@ Table.activeInputNodesTable(ellipse, 'Active Input Nodes BEFORE Setting Values')
 // Step 6 - set required inputs and get updated selected node values
 const data = []
 for(let i=0; i<360; i+=15) {
-    head.angle.north.set(i)
-    const b = back.angle.north.get()
-    const r = right.angle.north.get()
-    const l = left.angle.north.get()
+    head.bearing.set(i)
+    const b = back.bearing.get()
+    const r = right.bearing.get()
+    const l = left.bearing.get()
     data.push([i.toFixed(0), r.toFixed(0), b.toFixed(0), l.toFixed(0)])
 }
 table(data, ['Head', 'Right', 'Back', 'Left'], 'Principal Axis Angles from North')

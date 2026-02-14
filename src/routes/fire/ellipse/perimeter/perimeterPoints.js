@@ -3,7 +3,7 @@
  * @param {*} ellipseMod FireEllipseMod instance
  * @param {*} vector Reference to e.beta, e.psi, or e.theta
  * @param {*} deg Degrees increment 
- * @param {*} src Angle configuration parameter, either 'head' or 'north'
+ * @param {*} src Angle configuration parameter, either 'angle' or 'bearing'
  * @returns Array of arrays of following properties at each degStep:
  *  0: x coordinate wrt head
  *  1: y coordinate wrt head
@@ -15,27 +15,27 @@
  */
 function fmt(node) { return node.value.toFixed(8) }
 
-export function perimeterPoints(ellipseMod, vector, deg=5, src='head') {
+export function perimeterPoints(ellipseMod, vector, deg=5, src='angle') {
     const state = ellipseMod.getState()
     const pts = []
     let len = 0
     let lastX = 0
     let lastY = 0
     for(let i=0; i<=360; i+=deg) {
-        vector.angle[src].set(i)
+        vector[src].set(i)
         ellipseMod.updateAll()
         // Determine segment length and cumulative perimeter length
         if (i) {
-            const dx = vector.perim.head.x.value - lastX
-            const dy = vector.perim.head.y.value - lastY
+            const dx = vector.perim.x.value - lastX
+            const dy = vector.perim.y.value - lastY
             const dl = Math.sqrt(dx*dx + dy*dy)
             len += dl
         }
-        pts.push([i, fmt(vector.perim.head.x), fmt(vector.perim.head.y),
+        pts.push([i, fmt(vector.perim.x), fmt(vector.perim.y),
             fmt(vector.beta), fmt(vector.psi), fmt(vector.theta), fmt(vector.vhr),
             len.toFixed(8)])
-        lastX = vector.perim.head.x.value
-        lastY = vector.perim.head.y.value
+        lastX = vector.perim.x.value
+        lastY = vector.perim.y.value
     }
     ellipseMod.setState(state)
     return pts

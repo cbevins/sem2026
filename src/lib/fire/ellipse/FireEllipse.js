@@ -3,23 +3,22 @@ import * as Calc from '../lib/CalcLib.js'
 import * as FE from '../lib/FireEllipseLib.js'
 
 export class FireEllipse {
-    constructor(lwr=3, headRos=1, headNorth=0, time=1, betaNorth=0, thetaNorth=0, psiNorth=0, ignX=0, ignY=0) {
+    constructor(lwr=3, headRos=1, bearing=0, time=1, betaBearing=0, thetaBearing=0, psiBearing=0, ignX=0, ignY=0) {
         
         const eccent = FE.eccentricity(lwr)
         const ignition = {head: {x: ignX, y: ignY}}
         
         const head = {
-            angle: {head: 0, north: headNorth},
+            angle: 0,
+            bearing: bearing,
             dist: Calc.multiply(headRos, time),
             ros: headRos,
             vhr: 1
         }
 
         const back = {
-            angle: {
-                head: 180,
-                north: Compass.opposite(head.angle.north)
-            },
+            angle: 180,
+            bearing: Compass.opposite(head.bearing),
             vhr: FE.backVhr(eccent)
         }
 
@@ -29,16 +28,16 @@ export class FireEllipse {
         const g = {vhr: Calc.subtract(f.vhr, back.vhr)}
         const h = {vhr: Calc.half(width.vhr)}
 
-        const beta = {angle: {north: betaNorth}}
-        beta.angle.head = Compass.rotateCcw(beta.angle.north, head.angle.north)
-        beta.vhr = FE.betaVhr(beta.angle.head, eccent)
+        const beta = {bearing: betaBearing}
+        beta.angle = Compass.rotateCcw(beta.bearing, head.bearing)
+        beta.vhr = FE.betaVhr(beta.angle, eccent)
 
-        const psi = {angle: {north: psiNorth}}
-        psi.angle.head = Compass.rotateCcw(psi.angle.north, head.angle.north)
+        const psi = {bearing: psiBearing}
+        psi.angle = Compass.rotateCcw(psi.bearing, head.bearing)
         psi.vhr = FE.psiVhr(psi.angle.head, f.vhr, g.vhr, h.vhr)
 
-        const theta = {angle: {north: thetaNorth}}
-        theta.angle.head = Compass.rotateCcw(theta.angle.north, head.angle.north)
+        const theta = {bearing: thetaBearing}
+        theta.angle = Compass.rotateCcw(theta.bearing, head.bearing)
         theta.vhr = FE.thetaVhr(theta.angle.head, f.vhr, h.vhr)
 
         for(let prop of [back, beta, f, g, h, length, psi, theta, width]) {
@@ -88,9 +87,9 @@ export class FireEllipse {
         this.time = time
         this.width = width
     }
-    setBeta(betaNorth) {
-        const beta = {angle: {north: betaNorth}}
-        beta.angle.head = Compass.rotateCcw(beta.angle.north, this.head.angle.north)
+    setBeta(betaBearing) {
+        const beta = {bearing: betaBearing}
+        beta.angle = Compass.rotateCcw(beta.bearing, this.head.bearing)
         beta.vhr = FE.betaVhr(beta.angle.head, this.eccent)
         beta.ros = Calc.multiply(beta.vhr, this.head.ros)
         beta.dist = Calc.multiply(beta.vhr, this.head.dist)
@@ -104,9 +103,9 @@ export class FireEllipse {
         }
         this.beta = beta
     }
-    setPsi(psiNorth) {
-        const psi = {angle: {north: psiNorth}}
-        psi.angle.head = Compass.rotateCcw(psi.angle.north, this.head.angle.north)
+    setPsi(psiBearing) {
+        const psi = {bearing: psiBearing}
+        psi.angle = Compass.rotateCcw(psi.bearing, this.head.bearing)
         psi.vhr = FE.psiVhr(psi.angle.head, this.f.vhr, this.g.vhr, this.h.vhr)
         psi.ros = Calc.multiply(psi.vhr, this.head.ros)
         psi.dist = Calc.multiply(psi.vhr, this.head.dist)
@@ -120,9 +119,9 @@ export class FireEllipse {
         }
         this.psi = psi
     }
-    setTheta(thetaNorth) {
-        const theta = {angle: {north: thetaNorth}}
-        theta.angle.head = Compass.rotateCcw(theta.angle.north, this.head.angle.north)
+    setTheta(thetaBearing) {
+        const theta = {bearing: thetaBearing}
+        theta.angle = Compass.rotateCcw(theta.bearing, this.head.bearing)
         theta.vhr = FE.thetaVhr(theta.angle.head, this.f.vhr, this.h.vhr)
         theta.ros = Calc.multiply(theta.vhr, this.head.ros)
         theta.dist = Calc.multiply(theta.vhr, this.head.dist)

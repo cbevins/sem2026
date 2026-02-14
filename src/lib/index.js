@@ -5,6 +5,8 @@ export {DagNode} from './dag/DagNode.js'
 export{Stem, Leaf} from './stem-leaf/StemLeaf.js'
 export { Viewport } from './viewport/Viewport.js'
 
+export {table} from './utils/terminal.js'
+
 export {default as DagNodeTable} from './dag/DagNodeTable.svelte'
 
 export { default as Expand } from './svelte/Expand.svelte'

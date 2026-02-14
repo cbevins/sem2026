@@ -1,6 +1,12 @@
 import {DagNode} from '../index.js'
 import * as U from './Units.js'
 
+export class Bearing extends DagNode {
+    constructor(value=0, units=U.compass) {
+        super('bearing', value, units)
+    }
+}
+
 // GeoRefMod
 export class GeoAngle extends DagNode {
     constructor(value=0, units=U.compass) {
@@ -74,9 +80,10 @@ export class BetaAngle extends DagNode {
         super('beta', value, units)
     }
 }
+
 export class HeadAngle extends DagNode {
     constructor(value=0, units=U.compass) {
-        super('head', value, units)
+        super('angle', value, units)
     }
 }
 

@@ -16,7 +16,7 @@
     const e = new FireEllipseMod('e')
     e.setConsumers()
     for(let v of [e.head, e.back, e.left, e.right, e.beta, e.theta, e.psi]) {
-        for(let node of [v.angle.head, v.angle.north, v.vhr, v.ros, v.dist,
+        for(let node of [v.angle.head, v.bearing, v.vhr, v.ros, v.dist,
             v.perim.head.x, v.perim.head.y, v.perim.geo.east, v.perim.geo.north,
             v.beta, v.psi, v.theta]) {
             node.select()
@@ -33,12 +33,12 @@
     e.size.select()
     e.perimeter.select()
 
-    e.beta.angle.north.set(beta)
-    e.head.angle.north.set(headDeg)
+    e.beta.bearing.set(beta)
+    e.head.bearing.set(headDeg)
     e.head.ros.set(headRos)
     e.lwr.set(lwr)
-    e.psi.angle.north.set(psi)
-    e.theta.angle.north.set(theta)
+    e.psi.bearing.set(psi)
+    e.theta.bearing.set(theta)
     e.time.set(time)
     e.updateAll()
     const allNodes = e.sortNodes(e.nodes())

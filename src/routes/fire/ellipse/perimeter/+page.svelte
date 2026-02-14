@@ -1,36 +1,42 @@
 <script>
-    import {DagNodeTable, Expand, GenericTable, SvgEvent} from '$lib/index.js'
+    // It seems we can import Svelte components from an index.js ...
+    import {SvgEvent} from '$lib/index.js'
+    import {Expand} from '$lib/index.js'
+    // But snippets must be imported from their source file
+    import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
+    import {GenericTable} from '$lib/svelte/GenericTable.svelte'
+
     import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
     import * as FE from '$lib/fire/lib/FireEllipseLib'
     import { perimeterPoints } from './perimeterPoints.js'
     import {PerimeterViewport} from './PerimeterViewport.js'
-
-    let lwrInput = 2
-    let headDegInput = 0
-    let headRosInput = 1
-    let timeInput = 100
+    
+    let lwRatio = 2
+    let bearing = 0
+    let headRos = 1
+    let elapsed = 100
     let deg = 5
 
     // Create a FireEllipseMod with beta-psi-theta vector angle from 'head' and ready()
-    let src='head'  // 'head' or 'north'
+    let src='bearing'  // 'angle' or 'bearing'
     const e = new FireEllipseMod('e', src).ready()
     const {beta, center, f, h, head, ignition, length, lwr, psi, theta, time} = e
     for(let v of [beta, psi, theta]) {
-        for(let node of [v.perim.head.x, v.perim.head.y, v.beta, v.psi, v.theta, v.vhr])
+        for(let node of [v.perim.x, v.perim.y, v.beta, v.psi, v.theta, v.vhr])
             node.select()
     }
-    center.head.x.select()
-    center.head.y.select()
+    center.x.select()
+    center.y.select()
     f.dist.select()
     h.dist.select()
     length.dist.select()
 
     // Get and set required inputs
     const inputNodes = e.sortNodes(e.activeInputNodes())
-    head.angle.north.set(headDegInput)
-    head.ros.set(headRosInput)
-    lwr.set(lwrInput)
-    time.set(timeInput)
+    head.bearing.set(bearing)
+    head.ros.set(headRos)
+    lwr.set(lwRatio)
+    time.set(elapsed)
 
     // Get lists of active inputs, selected nodes, and active nodes
     const activeInputNodes = e.sortNodes(e.activeInputNodes())
@@ -38,6 +44,7 @@
     const activeNodes = e.sortNodes(e.activeNodes())
 
     // Determine perimeter points at 'deg' degree intervals of beta, theta, and psi
+    // nodesTable(e.nodes())
     const betaPts = perimeterPoints(e, beta, deg, src)
     const psiPts = perimeterPoints(e, psi, deg, src)
     const thetaPts = perimeterPoints(e, theta, deg, src)
@@ -48,8 +55,8 @@
     // and let the Viewport-derived class define all the other properties
     let demo = new PerimeterViewport(400, 400, length.dist.get(),
         thetaPts, psiPts, betaPts,  // perimeter pt arrays
-        ignition.head.x.value, ignition.head.y.value,   // ignition pt
-        center.head.x.value, center.head.y.value,   // center pt
+        ignition.x.value, ignition.y.value,   // ignition pt
+        center.x.value, center.y.value,   // center pt
         true, true, true)   // show theta, psi, beta
 
     // Perimeter table

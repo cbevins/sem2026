@@ -34,8 +34,8 @@ export function startBannerStr() {
 }
 
 // Generic terminal ascii table
-export function table(rows, headers=null, title=null) { console.log(tableStr(rows, headers, title)) }
-export function tableStr(rows, headers=null, title=null) {
+export function table(rows, headers=null, title='') { console.log(tableStr(rows, headers, title)) }
+export function tableStr(rows, headers=null, title='') {
     // Determine column widths
     const width = []
     for(let col=0; col<rows[0].length; col++) width[col] = 0

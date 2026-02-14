@@ -54,6 +54,11 @@ export class DagNode extends Leaf {
         }
         this.suppliers = args
     }
+    // Returns DagNode to IGNORED and DIRTY
+    reset() {
+        this.dirty = DagNode.DIRTY
+        this.status = DagNode.IGNORED
+    }
     // Returns an array of this node's supplier fullKeys
     supplierFullKeys() { return this.suppliers.map(node => node.fullKey()) }
     // Returns string representation of updater invocation

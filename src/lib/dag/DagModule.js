@@ -43,6 +43,9 @@ export class DagModule extends Stem {
         return this
     }
 
+    // Sets all DagNodes to IGNORED and DIRTY
+    reset() { for(let key of Object.keys(this)) this[key].reset() }
+
     selectedNodes() { return this.nodes().filter(node => node.status === DagNode.SELECTED) }
 
     // Usually only called on the topmost Dag
@@ -68,7 +71,31 @@ export class DagModule extends Stem {
         stack.pop()
     }
 
+    getState() {
+        const inputs = []
+        for(let node of this.activeInputNodes()) inputs.push([node, node.value])
+        return { inputs, selects: this.selectedNodes() }
+    }
+    
+    setState(state) {
+        const {inputs, selects} = state
+        for(let node of selects) node.select()
+        for(let [node, value] of inputs) node.set(value)
+    }
+
     sortNodes(nodes) { return nodes.sort((a, b) => a.fullKey().localeCompare(b.fullKey())) }
+    
+    // Traverses all Stems of a module and invokes 'method' on each Leaf.  Use as follows:
+    //      function showName(node) { console.log('Node:', node)}
+    //      mod.traverse(showName)
+    traverse(method) {
+        console.log(`traverse(${this.fullKey()}, ${method.name})`)
+        for(let key of Object.keys(this)) {
+            const item = this[key]
+            if(item.isLeaf()) method.call(this, item.fullKey())
+            else item.traverse(method)
+        }
+    }
 
     updateAll() {
         for (let node of this.selectedNodes()) node.get()

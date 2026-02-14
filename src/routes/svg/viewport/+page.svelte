@@ -1,6 +1,7 @@
 <script>
-    import SvgEvent from "../svgevent/SvgEvent.svelte"
+    import {SvgEvent} from '$lib/index.js'
     import {ViewportDemo} from './ViewportDemo.js'
+
     // ViewportDemo is a class that draws the image and maintains its state
     // We only need to specify the SVG width, height here,
     // and let the Viewport-derived class define all the other properties

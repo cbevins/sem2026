@@ -1,4 +1,4 @@
-import { Viewport } from "./Viewport.js"
+import { Viewport } from "$lib/index.js"
 
 export class ViewportDemo extends Viewport {
     constructor(svgWidth, svgHeight) {

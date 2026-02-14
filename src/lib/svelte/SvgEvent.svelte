@@ -5,6 +5,7 @@
 
     // 'creator' is a class or object with svg 'width' and 'height' props and
     // a 'create' function that takes an event reference and returns SVG content
+    // See Viewport for a working example
     let {creator, mousable=true, keyable=true} = $props()
     // svelte-ignore state_referenced_locally
     let content = $state(creator.create())

@@ -1,10 +1,10 @@
 <script>
-    import SvgEvent from "./SvgEvent.svelte"
-    import {SvgEventDemo} from './SvgEventDemo.js'
+    import {SvgEvent} from "$lib/index.js"
+    import {SvgEventHandlerDemo} from './SvgEventHandlerDemo.js'
     import {SvgEventButtonDemo} from './SvgEventButtonDemo.js'
 
     // Create a class that draws the image and maintains its state
-    let demo = new SvgEventDemo(400, 400)
+    let demo = new SvgEventHandlerDemo(400, 400)
     let btn = new SvgEventButtonDemo(100, 100)
 </script>
 

@@ -90,6 +90,8 @@ export class DagNode extends Leaf {
         const args = []
         for(let supplier of this.suppliers)
             args.push(supplier._get())      // this may recurse upstream
+        if (typeof this.updater !== 'function')
+            throw new Error(`DagNode ${this.fullKey()}.updater is not a function.`)
         this.value = this.updater.apply(this, args)
         this.dirty = DagNode.CLEAN
         return this.value

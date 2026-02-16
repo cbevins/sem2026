@@ -77,10 +77,22 @@ export function betaVhr(betaHead, eccent) {
     return (1 - eccent) / (1 - eccent * Math.cos(radians(betaHead)))
 }
 
+// Beta perimeter pt easting
+export function betaE(betaHead, betaDist, headDeg=0, ignE=0) {
+    return ignE + betaDist * Math.cos(radians(450-(betaHead + headDeg)))
+}
+
+// Beta perimeter pt northing
+export function betaN(betaHead, betaDist, headDeg=0, ignN=0) {
+    return ignN + betaDist * Math.sin(radians(450-(betaHead + headDeg)))
+}
+
+// Beta perimeter pt Cartesian x coordinate
 export function betaX(betaHead, betaDist, headDeg=0, ignX=0) {
     return ignX + betaDist * Math.cos(radians(betaHead + headDeg))
 }
 
+// Beta perimeter pt Cartesian y coordinate
 export function betaY(betaHead, betaDist, headDeg=0, ignY=0) {
     return ignY + betaDist * Math.sin(radians(betaHead + headDeg))
 }
@@ -203,6 +215,16 @@ export function psiVhr(psiHead, fVhr, gVhr, hVhr) {
     return gVhr * cosPsi + Math.sqrt((fVhr * fVhr * cos2Psi) + (hVhr * hVhr * sin2Psi))
 }
 
+export function psiE(psiBeta, eccent, headDist, headDeg=0, ignE=0) {
+    const bVhr = betaVhr(psiBeta, eccent)
+    return betaE(psiBeta, bVhr * headDist, headDeg, ignE)
+}
+
+export function psiN(psiBeta, eccent, headDist, headDeg=0, ignN=0) {
+    const bVhr = betaVhr(psiBeta, eccent)
+    return betaN(psiBeta, bVhr * headDist, headDeg, ignN)
+}
+
 export function psiX(psiBeta, eccent, headDist, headDeg=0, ignX=0) {
     const bVhr = betaVhr(psiBeta, eccent)
     return betaX(psiBeta, bVhr * headDist, headDeg, ignX)
@@ -257,6 +279,16 @@ export function thetaPerimeterPoint(thetaDeg, fDist, hDist, ignx=0, igny=0, head
     const dx = ignx + fDist * Math.cos(rad)
     const dy = igny + hDist * Math.sin(rad)
     return [dx, dy]
+}
+
+export function thetaE(thetaBeta, eccent, headDist, headDeg=0, ignE=0) {
+    const bVhr = betaVhr(thetaBeta, eccent)
+    return betaE(thetaBeta, bVhr*headDist, headDeg, ignE)
+}
+
+export function thetaN(thetaBeta, eccent, headDist, headDeg=0, ignN=0) {
+    const bVhr = betaVhr(thetaBeta, eccent)
+    return betaN(thetaBeta, bVhr*headDist, headDeg, ignN)
 }
 
 export function thetaX(thetaBeta, eccent, headDist, headDeg=0, ignX=0) {

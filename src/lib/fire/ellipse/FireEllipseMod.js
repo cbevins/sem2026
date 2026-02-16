@@ -11,7 +11,11 @@ import * as Compass from '../lib/CompassLib.js'
 // Sub-module for referencing position relative to fire ellipse head and geographical north
 export class PositionMod extends DagModule {
     constructor(key='position') {
-        super(key, new Node.HeadX(), new Node.HeadY(), new Node.GeoEast(), new Node.GeoNorth())
+        super(key,
+            new Node.HeadX(),
+            new Node.HeadY(),
+            new Node.GeoEast(),
+            new Node.GeoNorth())
     }
 }
 
@@ -150,6 +154,8 @@ export class FireEllipseMod extends DagModule {
         right.vhr.link(h.vhr)
 
         beta.vhr.method(FE.betaVhr, beta.angle, eccent)
+        beta.perim.east.method(FE.betaE, beta.angle, beta.dist, head.bearing, ignition.east)
+        beta.perim.north.method(FE.betaN, beta.angle, beta.dist, head.bearing, ignition.east)
         beta.perim.x.method(FE.betaX, beta.angle, beta.dist, head.bearing, ignition.x)
         beta.perim.y.method(FE.betaY, beta.angle, beta.dist, head.bearing, ignition.y)
         // psi.angle at perim pt intersected by beta.angle
@@ -160,6 +166,8 @@ export class FireEllipseMod extends DagModule {
         beta.beta.method(FE.betaFromPsi, beta.psi, f.vhr, g.vhr, h.vhr)
 
         psi.vhr.method(FE.psiVhr, psi.angle, f.vhr, g.vhr, h.vhr)
+        psi.perim.east.method(FE.psiE(psi.angle, eccent, head.dist, head.bearing, ignition.east))
+        psi.perim.north.method(FE.psiN(psi.angle, eccent, head.dist, head.bearing, ignition.north))
         psi.perim.x.method(FE.psiX, psi.beta, eccent, head.dist, head.bearing, ignition.x)
         psi.perim.y.method(FE.psiY, psi.beta, eccent, head.dist, head.bearing, ignition.y)
 
@@ -171,6 +179,8 @@ export class FireEllipseMod extends DagModule {
         psi.theta.method(FE.thetaFromPsi, psi.angle, f.vhr, h.vhr)
         
         theta.vhr.method(FE.thetaVhr, theta.angle, f.vhr, h.vhr)
+        theta.perim.east.method(FE.thetaE(theta.angle, eccent, head.dist, head.bearing, ignition.east))
+        theta.perim.north.method(FE.thetaN(theta.angle, eccent, head.dist, head.bearing, ignition.north))
         theta.perim.x.method(FE.thetaX, theta.beta, eccent, head.dist, head.bearing, ignition.x)
         theta.perim.y.method(FE.thetaY, theta.beta, eccent, head.dist, head.bearing, ignition.y)
         // beta.angle at perim pt intersected by theta.angle

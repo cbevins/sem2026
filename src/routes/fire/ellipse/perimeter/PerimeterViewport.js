@@ -32,21 +32,21 @@ export class PerimeterViewport extends Viewport {
         str += `<circle cx=${this.px(this.ctr.x)} cy=${this.py(this.ctr.y)} r=4 fill='yellow'/>`
 
         // Beta 15-degree line
-        const degStep =  this.beta.pts[1][0] - this.beta.pts[0][0]
+        const degStep =  this.beta.pts[1].deg - this.beta.pts[0].deg
         const i15 = 15/degStep
         const beta15 = this.beta.pts[i15]
         // Line from ignition point to beta at 15 degrees from head
         str += `<line x1=${this.px(this.ign.x)} y1=${this.py(this.ign.y)} `
-            + ` x2=${this.px(beta15[1])} y2=${this.py(beta15[2])} stroke='red'/>`
+            + ` x2=${this.px(beta15.x)} y2=${this.py(beta15.y)} stroke='red'/>`
         // Perimeter point for beta=15
-        str += `<circle cx=${this.px(beta15[1])} cy=${this.py(beta15[2])} r=3 fill='red'/>`
+        str += `<circle cx=${this.px(beta15.x)} cy=${this.py(beta15.y)} r=3 fill='red'/>`
 
         const theta15 = this.theta.pts[i15]
         // Line from ellipse center to theta at 15 degrees from head -->
         str += `<line x1=${this.px(this.ctr.x)} y1=${this.py(this.ctr.y)} `
-            + `x2=${this.px(theta15[1])} y2=${this.py(theta15[2])} stroke='yellow' stroke-width='3'/>`
+            + `x2=${this.px(theta15.x)} y2=${this.py(theta15.y)} stroke='yellow' stroke-width='3'/>`
         // Perimeter point for theta=15 (should be ellipse head) -->
-        str += `<circle cx=${this.px(theta15[1])} cy=${this.py(theta15[2])} r='4' fill='yellow'/>`
+        str += `<circle cx=${this.px(theta15.x)} cy=${this.py(theta15.y)} r='4' fill='yellow'/>`
 
         // Labels
         str += this.drawZoomCenterLabels(textAttr)
@@ -57,10 +57,10 @@ export class PerimeterViewport extends Viewport {
     }
 
     drawPerim(pts, color, width) {
-        let [, x1, y1] = pts[0]
+        let {x:x1, y:y1} = pts[0]
         let str = ''
         for(let i=0; i<pts.length; i++) {
-            const [, x, y] = pts[i]
+            const {x, y} = pts[i]
             str += `<circle cx=${this.px(x)} cy=${this.py(y)} r='${width}' fill='${color}'/>`
             str += `<line x1=${this.px(x1)} y1=${this.py(y1)} x2=${this.px(x)} y2=${this.py(y)} `
                 + ` stroke='${color}' stroke-width='${width}'/>`

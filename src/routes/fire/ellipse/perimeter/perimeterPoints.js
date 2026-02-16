@@ -19,6 +19,7 @@ export function perimeterPoints(ellipseMod, vector, deg=5, src='angle') {
     const state = ellipseMod.getState()
     const pts = []
     let len = 0
+    let arclen = 0
     let lastX = 0
     let lastY = 0
     for(let i=0; i<=360; i+=deg) {
@@ -28,12 +29,14 @@ export function perimeterPoints(ellipseMod, vector, deg=5, src='angle') {
         if (i) {
             const dx = vector.perim.x.value - lastX
             const dy = vector.perim.y.value - lastY
-            const dl = Math.sqrt(dx*dx + dy*dy)
-            len += dl
+            len = Math.sqrt(dx*dx + dy*dy)
+            arclen += len
         }
-        pts.push([i, fmt(vector.perim.x), fmt(vector.perim.y),
-            fmt(vector.beta), fmt(vector.psi), fmt(vector.theta), fmt(vector.vhr),
-            len.toFixed(8)])
+        pts.push({deg: i,
+            x: fmt(vector.perim.x), y: fmt(vector.perim.y),
+            beta: fmt(vector.beta), psi: fmt(vector.psi), theta:fmt(vector.theta),
+            vhr: fmt(vector.vhr),
+            segleng: len.toFixed(8), arcleng: arclen.toFixed(8)})
         lastX = vector.perim.x.value
         lastY = vector.perim.y.value
     }

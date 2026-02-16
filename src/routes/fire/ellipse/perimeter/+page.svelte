@@ -1,10 +1,6 @@
 <script>
     // It seems we can import Svelte components from an index.js ...
-    import {SvgEvent} from '$lib/index.js'
-    import {Expand} from '$lib/index.js'
-    // But snippets must be imported from their source file
-    import {DagNodeTable} from '$lib/dag/DagNodeTable.svelte'
-    import {GenericTable} from '$lib/svelte/GenericTable.svelte'
+    import {DagNodeTable, Expand, GenericTable, SvgEvent} from '$lib/index.js'
 
     import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
     import * as FE from '$lib/fire/lib/FireEllipseLib'
@@ -47,11 +43,10 @@
 
     // Determine perimeter points at 'deg' degree intervals of beta, theta, and psi
     // nodesTable(e.nodes())
-    const betaPts = perimeterPoints(e, beta, deg, src)
-    const psiPts = perimeterPoints(e, psi, deg, src)
+    const betaPts  = perimeterPoints(e, beta, deg, src)
+    const psiPts   = perimeterPoints(e, psi, deg, src)
     const thetaPts = perimeterPoints(e, theta, deg, src)
-    const headers = ['Deg', 'Head X', 'Head Y', 'Beta', 'Psi', 'Theta', 'Vhr', 'Length']
-    
+
     // PerimeterViewport is a class that draws the image and maintains its state
     // We only need to specify the SVG width, height here,
     // and let the Viewport-derived class define all the other properties
@@ -62,10 +57,11 @@
         true, true, true)   // show theta, psi, beta
 
     // Perimeter table
+    const last = betaPts.length-1
     const perimTable = [
-        [`${deg}-deg beta intervals`, betaPts[betaPts.length-1][7]],
-        [`${deg}-deg theta intervals`, thetaPts[thetaPts.length-1][7]],
-        [`${deg}-deg psi intervals`, psiPts[psiPts.length-1][7]],
+        [`${deg}-deg beta intervals`, betaPts[last].arcleng],
+        [`${deg}-deg theta intervals`, thetaPts[last].arcleng],
+        [`${deg}-deg psi intervals`, psiPts[last].arcleng],
         ['10k numerical integration', FE.perimeterNumericalIntegration(e.f.dist.value, e.h.dist.value).toFixed(8)],
         ['Ramanujan method', FE.perimeterRamanujan(e.f.dist.value, e.h.dist.value).toFixed(8)],
         ['Simple Approximation', FE.perimeterSimpleApprox(e.f.dist.value, e.h.dist.value).toFixed(8)],
@@ -88,19 +84,19 @@
 
 <div class='ml-4 mt-2'>
     <Expand title='Perimeter Estimates'>
-        {@render GenericTable(perimTable, ['Method', 'Perim'])}
+        <GenericTable data={perimTable} headers={['Method', 'Perim']}/>
     </Expand>
 </div>
 
 <div class='ml-4 mt-2'>
     <Expand title='Selected Nodes'>
-        {@render DagNodeTable('Selected Nodes', selectedNodes)}
+        <DagNodeTable nodes={selectedNodes} title={'Selected Nodes'}/>
     </Expand>
 </div>
 
 <div class='ml-4'>
     <Expand title='Active Input  Nodes'>
-        {@render DagNodeTable('Active Input Nodes', activeInputNodes)}
+        <DagNodeTable title={'Active Input Nodes'} nodes={activeInputNodes}/>
     </Expand>
 </div>
 
@@ -113,16 +109,16 @@
 <div class='text-xl text-center'>FireEllipseMod</div>
 <div class='ml-4'>
     <Expand title='Perimeter at {deg}-deg Beta Intervals'>
-        {@render GenericTable(betaPts, headers, `Perimeter at ${deg}-deg Beta Intervals`)}
+        <GenericTable data={betaPts}}/>
     </Expand>
 </div>
 <div class='ml-4'>
     <Expand title='Perimeter at {deg}-deg Theta Intervals'>
-        {@render GenericTable(thetaPts, headers, `Perimeter at ${deg}-deg Theta Intervals`)}
+        <GenericTable data={thetaPts}/>
     </Expand>
 </div>
 <div class='ml-4'>
     <Expand title='Perimeter at ${deg}-deg Psi Intervals'>
-        {@render GenericTable(psiPts, headers, `Perimeter at ${deg}-deg Psi Intervals`)}
+        <GenericTable data={psiPts}/>
     </Expand>
 </div>

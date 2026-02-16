@@ -19,7 +19,8 @@
     const e = new FireEllipseMod('e', src).ready()
     const {beta, center, f, h, head, ignition, length, lwr, psi, theta, time} = e
     for(let v of [beta, psi, theta]) {
-        for(let node of [v.perim.x, v.perim.y, v.beta, v.psi, v.theta, v.vhr])
+        for(let node of [v.perim.x, v.perim.y, v.perim.east, v.perim.north,
+            v.beta, v.psi, v.theta, v.vhr])
             node.select()
     }
     center.x.select()
@@ -66,6 +67,12 @@
         ['Ramanujan method', FE.perimeterRamanujan(e.f.dist.value, e.h.dist.value).toFixed(8)],
         ['Simple Approximation', FE.perimeterSimpleApprox(e.f.dist.value, e.h.dist.value).toFixed(8)],
     ]
+
+    const dagNodeTables = [
+        {nodes: selectedNodes, title: 'Selected Nodes'},
+        {nodes: activeInputNodes, title: 'Active Input Nodes'},
+        {nodes: activeNodes, title: 'All Active Nodes'},
+    ]
 </script>
 
 <div class='ml-4 mt-4 mb-4'>
@@ -88,28 +95,18 @@
     </Expand>
 </div>
 
+{#each dagNodeTables as table}
 <div class='ml-4 mt-2'>
-    <Expand title='Selected Nodes'>
-        <DagNodeTable nodes={selectedNodes} title={'Selected Nodes'}/>
+    <Expand title={table.title}>
+        <DagNodeTable nodes={table.nodes} title={table.title}/>
     </Expand>
 </div>
-
-<div class='ml-4'>
-    <Expand title='Active Input  Nodes'>
-        <DagNodeTable title={'Active Input Nodes'} nodes={activeInputNodes}/>
-    </Expand>
-</div>
-
-<div class='ml-4'>
-    <Expand title='All Active Nodes'>
-        {@render DagNodeTable('Active Nodes', activeNodes)}
-    </Expand>
-</div>
+{/each}
 
 <div class='text-xl text-center'>FireEllipseMod</div>
 <div class='ml-4'>
     <Expand title='Perimeter at {deg}-deg Beta Intervals'>
-        <GenericTable data={betaPts}}/>
+        <GenericTable data={betaPts}/>
     </Expand>
 </div>
 <div class='ml-4'>

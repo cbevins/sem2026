@@ -34,6 +34,7 @@ export function perimeterPoints(ellipseMod, vector, deg=5, src='angle') {
         }
         pts.push({deg: i,
             x: fmt(vector.perim.x), y: fmt(vector.perim.y),
+            east: fmt(vector.perim.east), north: fmt(vector.perim.north),
             beta: fmt(vector.beta), psi: fmt(vector.psi), theta:fmt(vector.theta),
             vhr: fmt(vector.vhr),
             segleng: len.toFixed(8), arcleng: arclen.toFixed(8)})

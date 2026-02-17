@@ -1,5 +1,5 @@
 <script>
-    import EventfulSvg from './EventfulSvg.svelte'
+    import {EventfulSvg} from '$lib/index.js'
     import {DemoViewport} from './DemoViewport.js'
 
     let width = 400

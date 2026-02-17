@@ -1,14 +1,16 @@
 // place files you want to import through the `$lib` alias in this folder.
-export {DagModule} from './dag/DagModule.js'
-export {DagNode} from './dag/DagNode.js'
+export { DagModule } from './dag/DagModule.js'
+export { DagNode } from './dag/DagNode.js'
 
-export{Stem, Leaf} from './stem-leaf/StemLeaf.js'
+export{ Stem, Leaf } from './stem-leaf/StemLeaf.js'
+export { EventfulViewport } from './viewport/EventfulViewport.js'
 export { Viewport } from './viewport/Viewport.js'
 
-export {table} from './utils/terminal.js'
+export { table } from './utils/terminal.js'
 
-export {default as DagNodeTable} from './dag/DagNodeTable.svelte'
-
+// Svelte components
+export { default as DagNodeTable} from './dag/DagNodeTable.svelte'
+export { default as EventfulSvg } from './svelte/EventfulSvg.svelte'
 export { default as Expand } from './svelte/Expand.svelte'
 export { default as GenericTable } from './svelte/GenericTable.svelte'
 export { default as MenuPage } from './svelte/MenuPage.svelte'

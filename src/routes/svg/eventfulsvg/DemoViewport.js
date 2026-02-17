@@ -1,4 +1,4 @@
-import {EventfulViewport} from './EventfulViewport.js'
+import {EventfulViewport} from '$lib/index.js'
 
 export class DemoViewport extends EventfulViewport {
     constructor(svgWidth, svgHeight) {
@@ -18,7 +18,6 @@ export class DemoViewport extends EventfulViewport {
         const y1 = this.py(this.height / 3)
         const y2 = this.py(2 * this.height / 3)
         const ry = this.pd(rx / this.lwRatio)
-        const tr = `transform="rotate(${this.bearing}, ${c1}, ${y1})"`
         let str = `<rect x=${this.px(this.wxMin)} y=${this.py(this.wyMax)} width=${this.pd(this.width)} height=${this.pd(this.height)} fill='gray'/>`
         str += `<ellipse cx=${c1} cy=${y1} rx=${rx} ry=${ry} fill='red' opacity="0.6" transform="rotate(${this.bearing}, ${c1}, ${y1})"/>`
         str += `<ellipse cx=${c2} cy=${y1} rx=${rx} ry=${ry} fill='yellow' opacity="0.6" transform="rotate(${this.bearing}, ${c2}, ${y1})"/>`

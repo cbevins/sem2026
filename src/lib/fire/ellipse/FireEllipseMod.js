@@ -53,7 +53,7 @@ export class FireEllipseMod extends DagModule {
             new Node.FireLwr(),
             // Ellipse eccentricity (0 <= e <1)
             new Node.FireEccent(),
-            // Total elapsed time sing ignition
+            // Total elapsed time since ignition
             new Node.FireTime(),
             new Node.FirePerimeter(),
             new Node.FireSize(),

@@ -1,17 +1,22 @@
 <script>
-	import { stopPropagation } from "svelte/legacy";
-
     let svgRef  // reference to the SVG to programatically control focus
 
     // 'creator' is a class or object with svg 'width' and 'height' props and
     // a 'create' function that takes an event reference and returns SVG content
     // See Viewport for a working example
-    let {creator, mousable=true, keyable=true} = $props()
+    let {creator, mousable=true, keyable=true, callback=null} = $props()
+
     // svelte-ignore state_referenced_locally
     let content = $state(creator.create())
+
     // svelte-ignore state_referenced_locally
     const {width, height, create} = creator
-    
+
+    $effect(() => {
+        // console.log('SvgEvent effect() invoked...')
+        if(callback) callback(svgRef)
+    })
+
     function focusAction(node) { node.focus() }
 
     // Handle mouseenter/mouseleave separately so svg element focus can be set

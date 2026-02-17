@@ -8,11 +8,11 @@ export class Bearing extends DagNode {
 }
 
 // GeoRefMod
-export class GeoAngle extends DagNode {
-    constructor(value=0, units=U.compass) {
-        super('north', value, units)
-    }
-}
+// export class GeoAngle extends DagNode {
+//     constructor(value=0, units=U.compass) {
+//         super('north', value, units)
+//     }
+// }
 
 export class GeoEast extends DagNode {
     constructor(value=0, units=U.geoCoord) {
@@ -23,6 +23,12 @@ export class GeoEast extends DagNode {
 export class GeoNorth extends DagNode {
     constructor(value=0, units=U.geoCoord) {
         super('north', value, units)
+    }
+}
+
+export class FireBearing extends DagNode {
+    constructor(value=0, units=U.compass) {
+        super('firebearing', value, units)
     }
 }
 

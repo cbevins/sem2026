@@ -31,9 +31,9 @@ export class PerimeterViewport extends Viewport {
         str += `<circle cx=${this.px(this.ign.x)} cy=${this.py(this.ign.y)} r=4 fill='red'/>`
         str += `<circle cx=${this.px(this.ctr.x)} cy=${this.py(this.ctr.y)} r=4 fill='yellow'/>`
 
-        // Beta 15-degree line
-        const degStep =  this.beta.pts[1].deg - this.beta.pts[0].deg
-        const i15 = 15/degStep
+        // Beta 15-degree line (or there-abouts)
+        const degStep = this.beta.pts[1].deg - this.beta.pts[0].deg
+        const i15 = Math.ceil(15/degStep)
         const beta15 = this.beta.pts[i15]
         // Line from ignition point to beta at 15 degrees from head
         str += `<line x1=${this.px(this.ign.x)} y1=${this.py(this.ign.y)} `

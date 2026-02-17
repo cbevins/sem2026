@@ -1,121 +1,23 @@
 <script>
-    // It seems we can import Svelte components from an index.js ...
-    import {DagNodeTable, Expand, GenericTable, SvgEvent} from '$lib/index.js'
-
-    import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
-    import * as FE from '$lib/fire/lib/FireEllipseLib'
-    import { perimeterPoints } from './perimeterPoints.js'
-    import {PerimeterViewport} from './PerimeterViewport.js'
-    import {activeInputNodesTable} from '$lib/dag/DagTables.js'
-
-    let lwRatio = 2
-    let bearing = 135
-    let headRos = 1
-    let elapsed = 100
-    let deg = 5
-
-    // Create a FireEllipseMod with beta-psi-theta vector angle from 'head' and ready()
-    let src = 'angle'  // 'angle' or 'bearing'
-    const e = new FireEllipseMod('e', src).ready()
-    const {beta, center, f, h, head, ignition, length, lwr, psi, theta, time} = e
-    for(let v of [beta, psi, theta]) {
-        for(let node of [v.perim.x, v.perim.y, v.perim.east, v.perim.north,
-            v.beta, v.psi, v.theta, v.vhr])
-            node.select()
-    }
-    center.x.select()
-    center.y.select()
-    f.dist.select()
-    h.dist.select()
-    length.dist.select()
-
-    // Get and set required inputs
-    const inputNodes = e.sortNodes(e.activeInputNodes())
-    // activeInputNodesTable(e)
-    head.bearing.set(bearing)
-    head.ros.set(headRos)
-    lwr.set(lwRatio)
-    time.set(elapsed)
-
-    // Get lists of active inputs, selected nodes, and active nodes
-    const activeInputNodes = e.sortNodes(e.activeInputNodes())
-    const selectedNodes = e.sortNodes(e.selectedNodes())
-    const activeNodes = e.sortNodes(e.activeNodes())
-
-    // Determine perimeter points at 'deg' degree intervals of beta, theta, and psi
-    // nodesTable(e.nodes())
-    const betaPts  = perimeterPoints(e, beta, deg, src)
-    const psiPts   = perimeterPoints(e, psi, deg, src)
-    const thetaPts = perimeterPoints(e, theta, deg, src)
-
-    // PerimeterViewport is a class that draws the image and maintains its state
-    // We only need to specify the SVG width, height here,
-    // and let the Viewport-derived class define all the other properties
-    let demo = new PerimeterViewport(400, 400, length.dist.get(),
-        thetaPts, psiPts, betaPts,  // perimeter pt arrays
-        ignition.x.value, ignition.y.value,   // ignition pt
-        center.x.value, center.y.value,   // center pt
-        true, true, true)   // show theta, psi, beta
-
-    // Perimeter table
-    const last = betaPts.length-1
-    const perimTable = [
-        [`${deg}-deg beta intervals`, betaPts[last].arcleng],
-        [`${deg}-deg theta intervals`, thetaPts[last].arcleng],
-        [`${deg}-deg psi intervals`, psiPts[last].arcleng],
-        ['10k numerical integration', FE.perimeterNumericalIntegration(e.f.dist.value, e.h.dist.value).toFixed(8)],
-        ['Ramanujan method', FE.perimeterRamanujan(e.f.dist.value, e.h.dist.value).toFixed(8)],
-        ['Simple Approximation', FE.perimeterSimpleApprox(e.f.dist.value, e.h.dist.value).toFixed(8)],
-    ]
-
-    const dagNodeTables = [
-        {nodes: selectedNodes, title: 'Selected Nodes'},
-        {nodes: activeInputNodes, title: 'Active Input Nodes'},
-        {nodes: activeNodes, title: 'All Active Nodes'},
-    ]
+    import PerimeterDemo1 from './PerimeterDemo1.svelte'
+    let {lwRatio=2, bearing=135, headRos=1, elapsed=100, deg=5} = $props()
 </script>
 
-<div class='ml-4 mt-4 mb-4'>
-    <div class='text-xl'>Fire Ellipse Perimeter Example 1</div>
-    <div class='text-normal'>
-        Example using FireEllipseMod to determine the ellipse perimeter points
-        plotted at uniform intervals of {deg} degrees of beta (red), theta (yellow),
-        or psi (blue) from '{src}'.  SvgScope is used to display the ellipse
-        in either a Cartesian or geographic coordinate system.
-    </div>
-
-    <div class='ml-4 mt-4'>
-        <SvgEvent creator={demo} keyable={true} mousable={true}/>
-    </div>
+<div class='ml-4 mt-4 border rounded'>
+    LW Ratio is {lwRatio} 
+    <button onclick={() => lwRatio = Math.min(10, lwRatio+1)} class='border w-12 bg-gray-300'>+1</button>
+    <button onclick={() => lwRatio = Math.max(1, lwRatio-1)} class='border w-12 bg-gray-300'>-1</button>
 </div>
-
-<div class='ml-4 mt-2'>
-    <Expand title='Perimeter Estimates'>
-        <GenericTable data={perimTable} headers={['Method', 'Perim']}/>
-    </Expand>
+<div class='ml-4 mt-4 border rounded'>
+    Bearing is {bearing} 
+    <button onclick={() => bearing+=15} class='border w-12 bg-gray-300'>+15</button>
+    <button onclick={() => bearing-=15} class='border w-12 bg-gray-300'>-15</button>
 </div>
-
-{#each dagNodeTables as table}
-<div class='ml-4 mt-2'>
-    <Expand title={table.title}>
-        <DagNodeTable nodes={table.nodes} title={table.title}/>
-    </Expand>
+<div class='ml-4 mt-4 border rounded'>
+    Degree Step is {deg} 
+    <button onclick={() => deg+=5} class='border w-12 bg-gray-300'>+5</button>
+    <button onclick={() => deg = Math.max(5, deg-5)} class='border w-12 bg-gray-300'>-5</button>
 </div>
-{/each}
-
-<div class='text-xl text-center'>FireEllipseMod</div>
-<div class='ml-4'>
-    <Expand title='Perimeter at {deg}-deg Beta Intervals'>
-        <GenericTable data={betaPts}/>
-    </Expand>
-</div>
-<div class='ml-4'>
-    <Expand title='Perimeter at {deg}-deg Theta Intervals'>
-        <GenericTable data={thetaPts}/>
-    </Expand>
-</div>
-<div class='ml-4'>
-    <Expand title='Perimeter at ${deg}-deg Psi Intervals'>
-        <GenericTable data={psiPts}/>
-    </Expand>
+<div class='ml-4 mt-4 border rounded'>
+    <PerimeterDemo1 {lwRatio} {bearing} {headRos} {elapsed} {deg} />
 </div>

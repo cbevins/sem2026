@@ -120,6 +120,8 @@ export class FireEllipseMod extends DagModule {
         back.theta.fix(180)
         back.vhr.method(FE.backVhr, eccent)
 
+        center.east.method(FE.centerE, head.bearing, g.dist, ignition.east)
+        center.north.method(FE.centerN, head.bearing, g.dist, ignition.north)
         center.x.method(FE.centerX, head.bearing, g.dist, ignition.x)
         center.y.method(FE.centerY, head.bearing, g.dist, ignition.y)
 
@@ -166,8 +168,8 @@ export class FireEllipseMod extends DagModule {
         beta.beta.method(FE.betaFromPsi, beta.psi, f.vhr, g.vhr, h.vhr)
 
         psi.vhr.method(FE.psiVhr, psi.angle, f.vhr, g.vhr, h.vhr)
-        psi.perim.east.method(FE.psiE, psi.angle, eccent, head.dist, head.bearing, ignition.east)
-        psi.perim.north.method(FE.psiN, psi.angle, eccent, head.dist, head.bearing, ignition.north)
+        psi.perim.east.method(FE.psiE, psi.beta, eccent, head.dist, head.bearing, ignition.east)
+        psi.perim.north.method(FE.psiN, psi.beta, eccent, head.dist, head.bearing, ignition.north)
         psi.perim.x.method(FE.psiX, psi.beta, eccent, head.dist, head.bearing, ignition.x)
         psi.perim.y.method(FE.psiY, psi.beta, eccent, head.dist, head.bearing, ignition.y)
 
@@ -179,8 +181,8 @@ export class FireEllipseMod extends DagModule {
         psi.theta.method(FE.thetaFromPsi, psi.angle, f.vhr, h.vhr)
         
         theta.vhr.method(FE.thetaVhr, theta.angle, f.vhr, h.vhr)
-        theta.perim.east.method(FE.thetaE, theta.angle, eccent, head.dist, head.bearing, ignition.east)
-        theta.perim.north.method(FE.thetaN, theta.angle, eccent, head.dist, head.bearing, ignition.north)
+        theta.perim.east.method(FE.thetaE, theta.beta, eccent, head.dist, head.bearing, ignition.east)
+        theta.perim.north.method(FE.thetaN, theta.beta, eccent, head.dist, head.bearing, ignition.north)
         theta.perim.x.method(FE.thetaX, theta.beta, eccent, head.dist, head.bearing, ignition.x)
         theta.perim.y.method(FE.thetaY, theta.beta, eccent, head.dist, head.bearing, ignition.y)
         // beta.angle at perim pt intersected by theta.angle

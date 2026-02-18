@@ -48,10 +48,9 @@
     // Create a Viewport to display the perimeter using beta and/or theta and/or psi
     let viewport = $derived(new BetaThetaPsiViewport(400, 400, ellipse.length.dist.get(),
         thetaPts, psiPts, betaPts,  // perimeter pt arrays
-        ellipse.ignition.x.value, ellipse.ignition.y.value,   // ignition pt
-        ellipse.center.x.value, ellipse.center.y.value,   // center pt
+        ellipse.ignition.x.value, ellipse.ignition.y.value, ellipse.ignition.east.value, ellipse.ignition.north.value,
+        ellipse.center.x.value, ellipse.center.y.value, ellipse.center.east.value, ellipse.center.north.value,
         showBeta, showTheta, showPsi))
-
     let content = $derived(viewport.drawSvg())
 
     function handler(e) {

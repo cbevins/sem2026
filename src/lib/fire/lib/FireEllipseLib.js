@@ -97,6 +97,16 @@ export function betaY(betaHead, betaDist, headDeg=0, ignY=0) {
     return ignY + betaDist * Math.sin(radians(betaHead + headDeg))
 }
 
+// Center pt easting
+export function centerE(headDeg, gDist, ignE=0) {
+    return ignE + gDist * Math.cos(radians(450-headDeg))
+}
+
+// Center pt northing
+export function centerN(headDeg, gDist, ignN=0) {
+    return ignN + gDist * Math.sin(radians(450-headDeg))
+}
+
 export function centerX(headDeg, gDist, ignX=0) {
     return ignX + gDist * Math.cos(radians(headDeg))
 }

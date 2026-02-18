@@ -20,7 +20,8 @@ export class BetaThetaPsiDemo {
                 v.beta, v.psi, v.theta, v.vhr])
                 node.select()
         }
-        for(let node of [e.center.x, e.center.y, e.f.dist, e.h.dist, e.length.dist])
+        for(let node of [e.center.x, e.center.y, e.center.east, e.center.north,
+                e.ignition.east, e.ignition.north, e.f.dist, e.g.dist, e.h.dist, e.length.dist])
             node.select()
 
         // Set required inputs

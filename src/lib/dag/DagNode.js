@@ -68,8 +68,8 @@ export class DagNode extends Leaf {
     //--------------------------------------------------------------------------
     
     get() {
-        if (!this.status === DagNode.SELECTED)
-            throw new Error(`${this.fullKey()} is not a SELECTED DagNode and cannot be get()`)
+        if (this.status !== DagNode.SELECTED && ! this.isInput())
+            throw new Error(`${this.fullKey()} is not a SELECTED or INPUT DagNode and cannot be get()`)
         return this._get()
     }
     _get() {

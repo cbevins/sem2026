@@ -15,14 +15,11 @@ export class BetaThetaPsiDemo {
         let e = new FireEllipseMod('e', src).ready()
 
         // Select required nodes
-        for(let v of [e.beta, e.psi, e.theta]) {
-            for(let node of [v.perim.x, v.perim.y, v.perim.east, v.perim.north,
-                v.beta, v.psi, v.theta, v.vhr])
-                node.select()
-        }
-        for(let node of [e.center.x, e.center.y, e.center.east, e.center.north,
-                e.ignition.east, e.ignition.north, e.f.dist, e.g.dist, e.h.dist, e.length.dist])
-            node.select()
+        for(let v of [e.beta, e.psi, e.theta, e.center, e.ignition, e.length, e.f, e.g, e.h]) v.select()
+        // for(let node of [e.center.x, e.center.y, e.center.east, e.center.north,
+        //         e.ignition.x, e.ignition.y, e.ignition.east, e.ignition.north,
+        //         e.f.dist, e.g.dist, e.h.dist, e.length.dist])
+        //     node.select()
 
         // Set required inputs
         e.head.bearing.set(bearing)

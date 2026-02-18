@@ -46,6 +46,9 @@ export class DagModule extends Stem {
     // Sets all this module's DagNodes to IGNORED and DIRTY
     reset() { for(let key of Object.keys(this)) this[key].reset() }
 
+    // Selects all the DagNodes for this module
+    select() { for(let key of Object.keys(this)) this[key].select() }
+
     selectedNodes() { return this.nodes().filter(node => node.status === DagNode.SELECTED) }
 
     // Usually only called on the topmost Dag

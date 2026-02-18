@@ -1,10 +1,11 @@
-import { Viewport } from "$lib/index.js"
+import { EventfulViewport } from "$lib/index.js"
 
-export class ViewportDemo extends Viewport {
+export class ViewportDemo extends EventfulViewport {
     constructor(svgWidth, svgHeight) {
-        super(svgWidth, svgHeight, 200, 200,
+        super(svgWidth, svgHeight,
+            200, 200,   // centerX, centerY
             [16, 8, 4, 2, 1, 0.5, 0.1, 0.05], 4, 'ft',
-            0, 400, 0, 400)
+            0, 400, 0, 400) // wxMin, wxMax, wyMin, wyMax
     }
 
     drawSvg() {

@@ -43,7 +43,7 @@ export class DagModule extends Stem {
         return this
     }
 
-    // Sets all DagNodes to IGNORED and DIRTY
+    // Sets all this module's DagNodes to IGNORED and DIRTY
     reset() { for(let key of Object.keys(this)) this[key].reset() }
 
     selectedNodes() { return this.nodes().filter(node => node.status === DagNode.SELECTED) }
@@ -79,6 +79,7 @@ export class DagModule extends Stem {
     
     setState(state) {
         const {inputs, selects} = state
+        this.reset()
         for(let node of selects) node.select()
         for(let [node, value] of inputs) node.set(value)
     }

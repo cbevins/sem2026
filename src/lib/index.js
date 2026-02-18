@@ -8,6 +8,11 @@ export { Viewport } from './viewport/Viewport.js'
 
 export { table } from './utils/terminal.js'
 
+// Svelte markup
+export { default as ClassName} from './markup/ClassName.svelte'
+export { default as FileName} from './markup/FileName.svelte'
+export { default as P} from './markup/P.svelte'
+
 // Svelte components
 export { default as DagNodeTable} from './dag/DagNodeTable.svelte'
 export { default as EventfulSvg } from './svelte/EventfulSvg.svelte'

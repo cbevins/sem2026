@@ -30,7 +30,8 @@
 
     // Table of perimeter estimates by various methods
     let perimTable = $derived(demo.perimeterTable(
-        ellipse.f.dist.value, ellipse.h.dist.value))
+        ellipse.f.dist.value, ellipse.h.dist.value, degStep))
+
     // DagNode tables
     let inputNodes       = $derived(ellipse.sortNodes(ellipse.activeInputNodes()))
     let activeInputNodes = $derived(ellipse.sortNodes(ellipse.activeInputNodes()))
@@ -62,18 +63,22 @@
         content = viewport.drawSvg()
     }
 
+    function degStepChanged() {
+        content = viewport.drawSvg()
+    }
+
     function elapsedChanged() {
         viewport.time = elapsed
         content = viewport.drawSvg()
     }
 
-    function rosChanged() {
-        viewport.headRos = headRos
+    function lwrChanged() {
+        viewport.lwRatio = lwRatio
         content = viewport.drawSvg()
     }
 
-    function lwrChanged() {
-        viewport.lwRatio = lwRatio
+    function rosChanged() {
+        viewport.headRos = headRos
         content = viewport.drawSvg()
     }
 </script>
@@ -83,19 +88,72 @@
     or psi (blue) from '{src}'.
 </P>
 
-<div class='ml-4 mt-4 px-2 py-2 w-48 border rounded'>
-    <label for="lwRatio" class="w-16 h-8 text-sm font-medium text-gray-700">Length/Width</label>
-    <input  id="lwRatio" class="mt-1 w-16 h-8 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        bind:value={lwRatio} onchange={lwrChanged} type="number" min="1" max="10" />
-
-    <label for="headRos" class="w-16 h-8 text-sm font-medium text-gray-700">Head Ros</label>
-    <input id="headRos" class="mt-1 w-16 h-8 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        bind:value={headRos} onchange={rosChanged} type="number" min="0.1" max="100" />
-
-    <label for="bearing" class="w-16 h-8 text-sm font-medium text-gray-700">Bearing</label>
-    <input id="bearing" class="mt-1 w-16 h-8 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        bind:value={bearing} onchange={bearingChanged} type="number" min="-360" max="360" step="5"/>
-</div>
+<table class='ml-4 mt-4 border rounded'>
+    <tbody class='text-xs'>
+        <tr>
+            <td class='px-1'>Length/Width</td>
+            <td class='py-0.5'>
+                <input id='lwRatio'bind:value={lwRatio} onchange={lwrChanged} type="number" min="1" max="10"
+                    class='h-6 rounded w-full' />
+            </td>
+            <td class='px-1'>Head Spread Rate</td>
+            <td class='py-0.5'>
+                <input id='headRos' bind:value={headRos} onchange={rosChanged} type="number" min="0.1" max="100"
+                    class='h-6 rounded w-full' />
+            </td>
+        </tr>
+        <tr>
+            <td class='px-1'>Bearing</td>
+            <td class='p-0.5'>
+                <input id='bearing' bind:value={bearing} onchange={bearingChanged} type="number" min="-360" max="360" step="5"
+                class='h-6 rounded w-full' />
+            </td>
+            <td class='px-1'>Degree Increment</td>
+            <td class='py-0.5'>
+                <input id='degStep' bind:value={degStep} type="number" min="1" max="90" step="5"
+                class='h-6 rounded w-full' />
+            </td>
+        </tr>
+        <tr>
+            <td class='px-1'>Elapsed Time</td>
+            <td class='py-0.5'>
+                <input id='elapsed'bind:value={elapsed} onchange={elapsedChanged} type="number" min="1" max={60*24*7}
+                class='h-6 rounded w-full' />
+            </td>
+            <td class='px-1'></td>
+            <td class=''></td>
+        </tr>
+        <tr>
+            <td class='px-1 pt-1'>
+                <div class="flex items-center mb-2">
+                    <input id="checkbox-beta" type="checkbox" bind:checked={showBeta}
+                        class="w-4 h-4 border border-default-medium rounded-xs bg-red-500 focus:ring-2 focus:ring-brand-soft" >
+                    <label for="checkbox-beta" class="px-1 text-xs select-none">
+                        Show Beta
+                    </label>
+                </div>
+            </td>
+            <td class='px-1 pt-1'>
+                <div class="flex items-center mb-2">
+                    <input id="checkbox-theta" type="checkbox" bind:checked={showTheta}
+                        class="w-4 h-4 border border-default-medium rounded-xs bg-yellow-300 focus:ring-2 focus:ring-brand-soft">
+                    <label for="checkbox-theta" class="px-1 text-xs select-none">
+                        Show Theta
+                    </label>
+                </div>
+            </td>
+            <td class='px-1 pt-1'>
+                <div class="flex items-center mb-2">
+                    <input id="checkbox-psi" type="checkbox" bind:checked={showPsi}
+                        class="w-4 h-4 border border-default-medium rounded-xs bg-blue-600 focus:ring-2 focus:ring-brand-soft">
+                    <label for="checkbox-psi" class="px-1 text-xs select-none">
+                        Show Psi
+                    </label>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 <div class='ml-4 mt-4'>
     <EventfulSvg {width} {height} {content} {handler}/>
@@ -108,19 +166,19 @@
     </div>
 
     <div class='ml-4 mt-2 mb-2'>
-        <Expand title='Perimeter at {degStep}-deg Beta Intervals'>
+        <Expand title='Perimeter Points at {degStep}-deg Beta Intervals'>
             <GenericTable data={betaPts}/>
         </Expand>
     </div>
 
     <div class='ml-4 mt-2 mb-2'>
-        <Expand title='Perimeter at {degStep}-deg Psi Intervals'>
+        <Expand title='Perimeter Points at {degStep}-deg Psi Intervals'>
             <GenericTable data={psiPts}/>
         </Expand>
     </div>
 
     <div class='ml-4 mt-2 mb-2'>
-        <Expand title='Perimeter at {degStep}-deg Theta Intervals'>
+        <Expand title='Perimeter Points at {degStep}-deg Theta Intervals'>
             <GenericTable data={thetaPts}/>
         </Expand>
     </div>

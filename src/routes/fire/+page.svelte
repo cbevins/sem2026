@@ -7,6 +7,10 @@
         brief: 'A visual comparison of fire ellipse perimeter points '
             + 'derived from beta, theta, and/or psi angle increments.'
             + 'Also demonstrates use of EventfulViewport.svelte.'
+    },{
+        route: '/fire/ellipse/growth',
+        title: 'Fire Ellipse Growth',
+        brief: 'A visual demo if fire ellipse perimeter growth.'
     }]
 </script>
 <MenuPage {items} {title}/>

@@ -31,8 +31,7 @@ export class BetaThetaPsiViewport extends EventfulViewport {
         const i15 = Math.ceil(15/degStep)
         const beta15 = this.beta.pts[i15]
         const theta15 = this.theta.pts[i15]
-        console.log('beta15', beta15)
-        console.log('theta15', theta15)
+        
         // Perimeters
         if (this.drawAngle) {
             if (this.beta.draw) str += this.drawPerim(this.beta.pts, 'red', 3)

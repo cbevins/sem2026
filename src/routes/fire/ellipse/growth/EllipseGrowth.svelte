@@ -57,6 +57,9 @@
             normal.slope = lineSlope(x.x, x.y, b.east, b.north)
             normal.angle = lineSlopeToAngle(normal.slope)
             normal.bearing = lineSlopeToBearing(normal.slope)
+            points[i].normal = normal.bearing
+            points[i].slope = normal.slope
+            points[i].angle = normal.angle
             normals.push(normal)
             a = b
         }

@@ -67,4 +67,12 @@ export class EllipseGrowthViewport extends EventfulViewport {
         str += this.drawPerimPt(e0, n0, last.east, last.north, width, color)
         return str
     }
+
+    // drawNormal(point, width, color) {
+    //     const {x, y, east, north, slope, angle, bearing} = pt
+    //     let str = `<circle cx=${this.px(x1)} cy=${this.py(y1)} r='${width}' fill='${color}'/>`
+    //     str += `<line x1=${this.px(x0)} y1=${this.py(y0)} x2=${this.px(x1)} y2=${this.py(y1)} `
+    //         + ` stroke='${color}' stroke-width='${width}'/>`
+    //     return str
+    // }
 }

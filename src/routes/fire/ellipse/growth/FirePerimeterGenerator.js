@@ -1,11 +1,13 @@
 import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
+import { addBearings } from './Geometry.js'
 
 /**
  * This should only generate points, not angles or
  */
 export class FirePerimeterGenerator {
-    constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, src='angle') {
+    constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, degStep=5, src='angle') {
         this.bearing = bearing
+        this.degStep = degStep
         this.elapsed = elapsed
         this.headRos = headRos
         this.lwRatio = lwRatio
@@ -23,6 +25,7 @@ export class FirePerimeterGenerator {
         e.time.set(elapsed)
         e.updateAll()
         this.ellipse = e
+        this.points = addBearings(this.thetaPerimeterPoints(degStep))
     }
 
     betaPerimeterPoints(degStep=5) {
@@ -45,18 +48,21 @@ export class FirePerimeterGenerator {
         const {beta, psi, theta} = this.ellipse
         for(let i=0; i<points.length; i++) {
             beta.angle.set(points[i].beta)
+            points[i].betaAngle = beta.angle.get()
             points[i].betaVhr = beta.vhr.get()
             points[i].betaRos = beta.ros.get()
             points[i].betaDist = beta.dist.get()
         }
         for(let i=0; i<points.length; i++) {
             psi.angle.set(points[i].psi)
+            points[i].psiAngle = psi.angle.get()
             points[i].psiVhr = psi.vhr.get()
             points[i].psiRos = psi.ros.get()
             points[i].psiDist = psi.dist.get()
         }
         for(let i=0; i<points.length; i++) {
             theta.angle.set(points[i].theta)
+            points[i].thetaAngle = theta.angle.get()
             points[i].thetaVhr = theta.vhr.get()
             points[i].thetaRos = theta.ros.get()
             points[i].thetaDist = theta.dist.get()

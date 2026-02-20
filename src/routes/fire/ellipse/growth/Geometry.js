@@ -6,7 +6,7 @@
 export function angleBetweenPoints(a, b) {
     let dy = b.y - a.y
     let dx = b.x - a.x
-    return Math.atan2(dx, dy) * 180 / Math.PI
+    return Math.atan2(dy, dx) * 180 / Math.PI
 }
 
 // Returns angle (radians) between 3 points A, B, and C,
@@ -33,7 +33,7 @@ export function radians(degrees) {return degrees * Math.PI / 180 }
 export function bearingBetweenPoints(a, b) {
     let dy = b.y - a.y
     let dx = b.x - a.x
-    let angle = Math.atan2(dx, dy) * 180 / Math.PI
+    let angle = Math.atan2(dy, dx) * 180 / Math.PI
     let bearing = (450 - angle) % 360
     return bearing
 }

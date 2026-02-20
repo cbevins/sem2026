@@ -8,6 +8,10 @@
             + 'derived from beta, theta, and/or psi angle increments.'
             + 'Also demonstrates use of EventfulViewport.svelte.'
     },{
+        route: '/fire/ellipse/expansion',
+        title: 'Fire Ellipse Expansion Explorer',
+        brief: 'Initial attempts at fire perimeter expansion  modeling.'
+    },{
         route: '/fire/ellipse/growth',
         title: 'Fire Ellipse Growth',
         brief: 'A visual demo if fire ellipse perimeter growth.'

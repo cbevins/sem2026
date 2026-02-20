@@ -19,21 +19,19 @@
 
     // Generate an initial perimeter
     let generator = $derived(new FirePerimeterGenerator(
-        lwRatio, headRos, bearing, elapsed))
-    let points = $derived(
-        addBearings(generator.thetaPerimeterPoints(degStep), 'east', 'north'))
+        lwRatio, headRos, bearing, elapsed, degStep))
+    let points = $derived(generator.points)
     let ellipse = $derived(generator.ellipse)
     
     let generator2 = $derived(new FirePerimeterGenerator(
-        lwRatio, headRos, bearing, elapsed+timeStep))
-    let points2 = $derived(
-        addBearings(generator2.thetaPerimeterPoints(degStep), 'east', 'north'))
+        lwRatio, headRos, bearing, elapsed+timeStep, degStep))
+    let points2 = $derived(generator2.points)
     let ellipse2 = $derived(generator2.ellipse)
 
     // Create a Viewport to display the perimeter
     let viewport = $derived(new EllipseGrowthViewport(400, 400,
         headRos, elapsed, timeStep,
-        points,  points2,// perimeter pt arrays
+        points, points2,    // perimeter pt arrays
         ellipse.ignition.x.get(), ellipse.ignition.y.get(), ellipse.ignition.east.get(), ellipse.ignition.north.get(),
         ellipse.center.x.get(), ellipse.center.y.get(), ellipse.center.east.get(), ellipse.center.north.get()))
     let content = $derived(viewport.drawSvg())

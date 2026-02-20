@@ -1,6 +1,5 @@
 <script>
-    import {findNormalIntersection, lineSlope, lineSlopeToAngle, lineSlopeToBearing,
-        vectorEndpoint, calculateDestinationPoint } from './Geometry.js'
+    import {normalIntersection } from './Geometry.js'
     import {Expand, GenericTable} from '$lib/index.js'
 
     let {width, height} = $props()
@@ -42,7 +41,7 @@
     }
 
     // Intersection point between line segment AC and point B
-    let i = $derived(findNormalIntersection(b.x, b.y, a.x, a.y, c.x, c.y))
+    let i = $derived(normalIntersection(b.x, b.y, a.x, a.y, c.x, c.y))
 
     // Vector B->I
     let bi = $derived(vector(b, i))

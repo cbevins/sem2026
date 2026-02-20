@@ -1,9 +1,9 @@
 <script>
-    import {findNormalIntersection, lineSlope, lineSlopeToAngle, lineSlopeToBearing} from './Geometry.js'
     import {FirePerimeterGenerator} from './FirePerimeterGenerator.js'
     import {DagNodeTable, EventfulSvg, Expand, GenericTable} from '$lib/index.js'
     import {EllipseGrowthViewport} from './EllipseGrowthViewport.js'
     import FireEllipseControls from './FireEllipseControls.svelte'
+    import { addBearings } from './Geometry.js'
 
     let {width, height} = $props()
     // Input parameter controls
@@ -12,19 +12,28 @@
     let elapsed = $state(100)
     let headRos = $state(1)
     let lwRatio = $state(2)
+    let timeStep = $state(10)
 
     function x(east) { return east }
     function y(north) { return height - north }
 
     // Generate an initial perimeter
-    let generator = $derived(new FirePerimeterGenerator(lwRatio, headRos, bearing, elapsed))
-    let points = $derived(generator.thetaPerimeterPoints(degStep))
-    let normals = $derived(addNormals(points))
+    let generator = $derived(new FirePerimeterGenerator(
+        lwRatio, headRos, bearing, elapsed))
+    let points = $derived(
+        addBearings(generator.thetaPerimeterPoints(degStep), 'east', 'north'))
     let ellipse = $derived(generator.ellipse)
+    
+    let generator2 = $derived(new FirePerimeterGenerator(
+        lwRatio, headRos, bearing, elapsed+timeStep))
+    let points2 = $derived(
+        addBearings(generator2.thetaPerimeterPoints(degStep), 'east', 'north'))
+    let ellipse2 = $derived(generator2.ellipse)
 
     // Create a Viewport to display the perimeter
-    let viewport = $derived(new EllipseGrowthViewport(400, 400, ellipse.length.dist.get(),
-        points,  // perimeter pt arrays
+    let viewport = $derived(new EllipseGrowthViewport(400, 400,
+        headRos, elapsed, timeStep,
+        points,  points2,// perimeter pt arrays
         ellipse.ignition.x.get(), ellipse.ignition.y.get(), ellipse.ignition.east.get(), ellipse.ignition.north.get(),
         ellipse.center.x.get(), ellipse.center.y.get(), ellipse.center.east.get(), ellipse.center.north.get()))
     let content = $derived(viewport.drawSvg())
@@ -42,28 +51,15 @@
         content = viewport.drawSvg()
     }
 
-    // Determine normal to each point based on its neighbors' base line
-    function addNormals(points) {
-        const normals = []
-        let a = points[points.length-2]  // point *before* 360
-        let b, c, x
-        for(let i=0; i<points.length-1; i++) {
-            const p = points[i]
-            const normal = {east: p.east, north: p.north, x: p.x, y: p.y}
-            b = points[i]
-            c = (i>points.length) ? points[0] : points[i+1]
-            // derive normal of 'ac' through 'b'
-            x = findNormalIntersection(b.east, b.north, a.east, a.north, c.east, c.north)
-            normal.slope = lineSlope(x.x, x.y, b.east, b.north)
-            normal.angle = lineSlopeToAngle(normal.slope)
-            normal.bearing = lineSlopeToBearing(normal.slope)
-            points[i].normal = normal.bearing
-            points[i].slope = normal.slope
-            points[i].angle = normal.angle
-            normals.push(normal)
-            a = b
-        }
-        return normals
+    // table of expansion points
+    let t2 = []
+    // svelte-ignore state_referenced_locally
+        for(let i=0; i<points.length; i++) {
+        const p = points[i]
+        t2.push({deg:p.deg,
+            x: p.x.toFixed(2), y:p.y.toFixed(2),
+            east:p.east.toFixed(2), north:p.north.toFixed(2),
+            mx:p.mx, my:p.my, angle:p.angle, bearing:p.bearing, deg2:p.deg})
     }
 </script>
 
@@ -77,10 +73,11 @@
     </div>
 
     <div class='ml-4 mt-2 mb-2'>
-        <Expand title='Normals to Perimeter Points at {degStep}-deg Theta Intervals'>
-            <GenericTable data={normals}/>
+        <Expand title='Expansion Points at {degStep}-deg Theta Intervals'>
+            <GenericTable data={t2}/>
         </Expand>
     </div>
+
     <div class='ml-4 mt-2 mb-2'>
         <Expand title='Perimeter Points at {degStep}-deg Theta Intervals'>
             <GenericTable data={points}/>

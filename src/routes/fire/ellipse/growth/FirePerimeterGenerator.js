@@ -1,5 +1,8 @@
 import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
 
+/**
+ * This should only generate points, not angles or
+ */
 export class FirePerimeterGenerator {
     constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, src='angle') {
         this.bearing = bearing
@@ -23,29 +26,41 @@ export class FirePerimeterGenerator {
     }
 
     betaPerimeterPoints(degStep=5) {
-        return this.perimeterPoints(this.ellipse.beta, degStep)
+        const points =  this.perimeterPoints(this.ellipse.beta, degStep)
+        return this.addVhr(points)
     }
 
     psiPerimeterPoints(degStep=5) {
-        return this.perimeterPoints(this.ellipse.psi, degStep)
+        const points = this.perimeterPoints(this.ellipse.psi, degStep)
+        return this.addVhr(points)
     }
 
     thetaPerimeterPoints(degStep=5) {
         const points = this.perimeterPoints(this.ellipse.theta, degStep)
+        return this.addVhr(points)
+    }
+
+    addVhr(points) {
         // Add beta and psi vhr at this angle
-        // const {beta, psi} = this.ellipse
-        // for(let i=0; i<points.length; i++) {
-        //     psi.angle.set(points[i].psi)
-        //     points[i].psiVhr = psi.vhr.get()
-        //     points[i].psiRos = psi.ros.get()
-        //     points[i].psiDist = psi.dist.get()
-        // }
-        // for(let i=0; i<points.length; i++) {
-        //     beta.angle.set(points[i].beta)
-        //     points[i].betaVhr = beta.vhr.get()
-        //     points[i].betaRos = beta.ros.get()
-        //     points[i].betaDist = beta.dist.get()
-        // }
+        const {beta, psi, theta} = this.ellipse
+        for(let i=0; i<points.length; i++) {
+            beta.angle.set(points[i].beta)
+            points[i].betaVhr = beta.vhr.get()
+            points[i].betaRos = beta.ros.get()
+            points[i].betaDist = beta.dist.get()
+        }
+        for(let i=0; i<points.length; i++) {
+            psi.angle.set(points[i].psi)
+            points[i].psiVhr = psi.vhr.get()
+            points[i].psiRos = psi.ros.get()
+            points[i].psiDist = psi.dist.get()
+        }
+        for(let i=0; i<points.length; i++) {
+            theta.angle.set(points[i].theta)
+            points[i].thetaVhr = theta.vhr.get()
+            points[i].thetaRos = theta.ros.get()
+            points[i].thetaDist = theta.dist.get()
+        }
         return points
     }
 

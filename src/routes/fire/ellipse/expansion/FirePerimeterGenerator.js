@@ -3,7 +3,7 @@
  * where x is an easting and y is a northing
 */
 import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
-import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
+// import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
 
 export class FirePerimeterGenerator {
     constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, degStep=5,

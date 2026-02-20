@@ -3,6 +3,8 @@
     import {FirePerimeterGenerator} from './FirePerimeterGenerator.js'
     import {EllipseExpansionViewport} from './EllipseExpansionViewport.js'
     import FireEllipseControls from '../growth/FireEllipseControls.svelte'
+    import {addBearings} from './addBearings.js'
+	import { makeFireRing } from './FireRing.js';
 
     let width = $state(400)
     let height = $state(400)
@@ -16,15 +18,19 @@
     let lwRatio = $state(2)
     let timeStep = $state(10)
 
-    // Get an initial fire perimeter to expand
+    // 1a - Get an initial fire perimeter closed polygon of {x, y} points
     let generator = $derived(new FirePerimeterGenerator(
         lwRatio, headRos, bearing, elapsed, degStep, ignEast, ignNorth))
-    let points = $derived(generator.points)
+    let points = $derived(addBearings(generator.points))
     let e = $derived(generator.ellipse)
 
-    // Create a Viewport to display the perimeter
+    // 1b - convert the polygon array to a FireRing linked list
+    let fireRing = $derived(makeFireRing(points))
+    let ringTable = $derived(fireRing.table())
+
+    // 2 - Create a Viewport to display the firering
     let viewport = $derived(new EllipseExpansionViewport(width, height,
-        headRos, elapsed, timeStep, points,
+        headRos, elapsed, timeStep, fireRing,
         e.ignition.x.get(), e.ignition.y.get(), e.ignition.east.get(), e.ignition.north.get(),
         e.center.x.get(), e.center.y.get(), e.center.east.get(), e.center.north.get()))
     let content = $derived(viewport.drawSvg())
@@ -50,6 +56,13 @@
 
     <div class='ml-4 mt-4'>
         <EventfulSvg {width} {height} {content} {handler}/>
+    </div>
+    
+    <div class='ml-4 mt-2 mb-2'>
+        <Expand title='FireRing at {degStep}-deg Theta Intervals'>
+            <div class='ml-4 text-normal'>Note that x is easting, y is northing</div>
+            <GenericTable data={ringTable}/>
+        </Expand>
     </div>
     
     <div class='ml-4 mt-2 mb-2'>

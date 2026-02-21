@@ -3,7 +3,7 @@
  * where x is an easting and y is a northing
 */
 import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
-// import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
+import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
 
 export class FirePerimeterGenerator {
     constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, degStep=5,
@@ -15,11 +15,13 @@ export class FirePerimeterGenerator {
         this.ignEast = ignEast
         this.ignNorth = ignNorth
         this.lwRatio = lwRatio
-        let e = new FireEllipseMod('e').ready()
+        let e = new FireEllipseMod('e', 'north').ready()
 
         // Select required nodes
-        for(let node of [e.theta.perim.east, e.theta.perim.north, e.center.east, e.center.north])
+        for(let node of [e.theta.perim.east, e.theta.perim.north, e.theta.beta, e.theta.psi,
+                e.center.east, e.center.north, e.beta, e.psi])
             node.select()
+        
         // selectedNodesTable(e)
         // activeInputNodesTable(e)
 
@@ -42,9 +44,7 @@ export class FirePerimeterGenerator {
         for(let deg=0; deg<=360; deg+=this.degStep) {
             vector.bearing.set(deg)
             this.ellipse.updateAll()
-            pts.push({deg,
-                x: vector.perim.east.get(),
-                y: vector.perim.north.get()})
+            pts.push({deg, x: vector.perim.east.get(), y: vector.perim.north.get()})
         }
         return pts
     }

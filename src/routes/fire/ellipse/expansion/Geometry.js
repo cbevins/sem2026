@@ -27,19 +27,26 @@ export function addBearings(pts, x='x', y='y') {
 }
 
 // All points are objects with {x, y} as *easting* and *northing*
-export function angleBetweenPoints(a, b) {
-    let dy = b.y - a.y
-    let dx = b.x - a.x
-    return Math.atan2(dy, dx) * 180 / Math.PI
-}
+// export function angleBetweenPoints(a, b) {
+//     let dy = b.y - a.y
+//     let dx = b.x - a.x
+//     return Math.atan2(dy, dx) * 180 / Math.PI
+//     // return Math.atan2(dx, dy) * 180 / Math.PI
+// }
 
 // All points are objects with {x, y} as *easting* and *northing*
 export function bearingBetweenPoints(a, b) {
     let dy = b.y - a.y
     let dx = b.x - a.x
-    let angle = Math.atan2(dy, dx) * 180 / Math.PI
-    let bearing = (450 - angle) % 360
-    return bearing
+
+    // Method 1
+    // let angle = Math.atan2(dy, dx) * 180 / Math.PI
+    // let bearing1 =  (450 - angle) % 360
+
+    // Method 2 works for FireRing 1, and all Beta AND Expand Bearing Tables
+    // NOTE that atan2() args (dy,dx) are reversed as we are using geo coords instead of Cartesian coords
+    let bearing2 = Math.atan2(dx, dy) * 180 / Math.PI
+    return bearing2
 }
 
 // Given a vector starting point, bearing, and distance,
@@ -47,8 +54,8 @@ export function bearingBetweenPoints(a, b) {
 export function bearingEndpoint(pt, bearing, dist) {
     const radians = bearing * Math.PI / 180
     return {
-        x: pt.x + dist * Math.cos(radians),
-        y: pt.y + dist * Math.sin(radians)
+        x: pt.x + dist * Math.sin(radians), // use sin() instead of cos() for cartesian-to-geo
+        y: pt.y + dist * Math.cos(radians) // use cos() instead of sin() for cartesian-to-geo
     }
 }
 

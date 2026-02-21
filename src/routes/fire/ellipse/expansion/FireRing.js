@@ -1,3 +1,5 @@
+import { bearingBetweenPoints, bearingEndpoint, midPoint } from "./Geometry.js"
+
 // Node for a linked list of fire point locations
 export class FireNode {
     constructor(prev, next, x, y) {
@@ -9,11 +11,12 @@ export class FireNode {
     }
 }
 
-// Helper function that returns a new FireNode or one from a free node list.
+// Helper function that returns either a new FireNode or one from a free node list.
 export function getNode() {
     return new FireNode()
 }
 
+// Data structure for a FireRing, which is a doubly-linked list of points
 export class FireRing {
     constructor() {
         this.head = null
@@ -25,6 +28,7 @@ export class FireRing {
         node.y = y
         node.idx = idx
         node.from = from
+        node.bearing = null
         if (!this.head) {
             this.head = node
             node.prev = node
@@ -46,16 +50,22 @@ export class FireRing {
         let node = this.head
         do {
             // console.log(`${node.prev.idx} -> ${node.idx} [${node.x}, ${node.y}] -> ${node.next.idx}`)
-            ar.push({prev: node.prev.idx, idx: node.idx, x: node.x, y: node.y, next: node.next.idx})
+            ar.push({
+                prev: node.prev.idx,
+                idx: node.idx,
+                x: node.x,
+                y: node.y,
+                bearing: (node.bearing) ? node.bearing : 'NA',
+                from: (node.from) ? node.from.idx : 'NA',
+                next: node.next.idx})
             node = node.next
         } while(node !== this.head.prev)
         return ar
     }
-
 }
 
-// polygon is an array of {x, y} point objects
-// whose first and last elements are the same point
+// Converts a polygon from an array of {x, y} point objects,
+// whose first and last elements are the same point, into a FireRing.
 export function makeFireRing(points) {
     const ring = new FireRing()
     for(let i=0; i<points.length-1; i++)

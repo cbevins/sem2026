@@ -35,9 +35,9 @@ export class FireRing {
             node.next = node
         } else {
             const prev = this.head.prev
-            node.prev = prev
             prev.next = node
-            node.next = node.head
+            node.prev = prev
+            node.next = this.head
             this.head.prev = node
         }
         this.length++

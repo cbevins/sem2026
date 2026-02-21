@@ -50,7 +50,7 @@ export class EllipseExpansionViewport extends EventfulViewport {
         do {
             str += this.drawPerimeterPt(node.prev.x, node.prev.y, node.x, node.y, color, width)
             node = node.next
-        } while(node !== fireRing.head.prev)
+        } while(node !== fireRing.head)
         return str
     }
 

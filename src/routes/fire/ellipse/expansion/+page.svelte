@@ -31,7 +31,7 @@
             const ep = bearingEndpoint(node, node.bearing, dist)
             newRing.append(idx++, ep.x, ep.y, node)
             node = node.next
-        } while(node !== fireRing.head.prev)
+        } while(node !== fireRing.head)
         return newRing
     }
 

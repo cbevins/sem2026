@@ -58,7 +58,7 @@
             d.endy = ep.y
             data.push(d)
             node = node.next
-        } while(node !== fireRing.head.prev)
+        } while(node !== fireRing.head)
         return data
     }
 

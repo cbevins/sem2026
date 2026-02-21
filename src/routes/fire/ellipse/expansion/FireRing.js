@@ -59,7 +59,7 @@ export class FireRing {
                 from: (node.from) ? node.from.idx : 'NA',
                 next: node.next.idx})
             node = node.next
-        } while(node !== this.head.prev)
+        } while(node !== this.head)
         return ar
     }
 }

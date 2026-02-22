@@ -149,7 +149,7 @@ function bbox(el) {
         const height = Object.hasOwn(el, 'height') ? el.height : 0
         return {x, y, width, height}
     } else if (el.el === 'circle') {
-        const r = Object.hasOwn(el, 'r') ? el.r : 0
+        // const r = Object.hasOwn(el, 'r') ? el.r : 0
         const rx = Object.hasOwn(el, 'rx') ? el.rx : el.r
         const ry = Object.hasOwn(el, 'ry') ? el.ry : el.r
         const x = el.cx - rx

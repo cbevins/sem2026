@@ -2,8 +2,12 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     const title = 'Fire Ellipse Demos'
     const items = [{
+        route: '/fire/ellipse/growth2',
+        title: 'Fire Growth Attempt - 2/23/26',
+        brief: 'Initial attempts at fire perimeter expansion modeling.'
+    },{
         route: '/fire/map',
-        title: 'Fire Map',
+        title: 'Fire Map (2/22/26)',
         brief: 'Yet another attempt at fire front modeling.'
     },{
         route: '/fire/ellipse/beta-theta-psi',

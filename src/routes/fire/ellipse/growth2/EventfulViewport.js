@@ -219,6 +219,7 @@ export class EventfulViewport {
     //--------------------------------------------------------------------------
 
     circle(cx, cy, r, fill, stroke, props) { return {el: 'circle', cx, cy, r, fill, stroke, ...props} }
+    ellipse(cx, cy, rx, ry, fill, stroke, props) { return {el: 'ellipse', cx, cy, rx, ry, fill, stroke, ...props} }
     line(x1, y1, x2, y2, props) { return {el: 'line', x1, y1, x2, y2, ...props} }
     rect(x, y, width, height, fill, props) { return {el: 'rect', x, y, width, height, fill, ...props} }
     text(x, y, content, props) { return {el: 'text', x, y, ...props, els: [{el: 'inner', content}]} }

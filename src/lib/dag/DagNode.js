@@ -68,7 +68,7 @@ export class DagNode extends Leaf {
     //--------------------------------------------------------------------------
     
     get() {
-        // if (this.status === DagNode.SELECTED || this.isInput() || this.isFixed())
+        if (this.status === DagNode.SELECTED || this.isInput() || this.isFixed())
             return this._get()
         // throw new Error(`${this.fullKey()} is not a SELECTED, INPUT, or FIXED DagNode and cannot be get()`)
     }

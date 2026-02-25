@@ -25,7 +25,8 @@ export function area(length, width) {return (Math.PI * length * width) / 4}
  * @param eccent Fire ellipse eccentricity (ratio).
  * @returns The fire spread rate at the ellipse back (ft+1 min-1).
  */
-export function backRos(headRos, eccent) { return headRos * (1 - eccent) / (1 + eccent) }
+export function backRos(headRos, eccent) {
+    return headRos * (1 - eccent) / (1 + eccent) }
 
 // Returns ratio of back-to-head velocity or distance
 export function backVhr(eccent) { return (1 - eccent) / (1 + eccent) }

@@ -3,7 +3,7 @@
     import {EllipseGeometryMod} from './EllipseGeometryMod.js'
     import {EllipseGeometryViewport} from './EllipseGeometryViewport.js'
     import FireEllipseControls from './FireEllipseControls.svelte'
-    import {ellipse, ellipseTable, pointsTable} from './ellipse.js'
+    // import {ellipse, ellipseTable, pointsTable} from './ellipse.js'
 
     let width = $state(400)
     let height = $state(400)
@@ -21,10 +21,10 @@
     // let data = $derived(dataBuilder(lwRatio, bearing, headRos, elapsed, degStep, timeStep,
     //     beta, psi, theta))
 
-    let zip = $derived(ellipse(lwRatio))
-    let zipEllipses = $derived(ellipseTable(lwRatio))  // Parameters at various lwr
-    let zipPoints = $derived(pointsTable(lwRatio))    // Perimeters for above
-    console.log('Zip', zip)
+    // let zip = $derived(ellipse(lwRatio))
+    // let zipEllipses = $derived(ellipseTable(lwRatio))  // Parameters at various lwr
+    // let zipPoints = $derived(pointsTable(lwRatio))    // Perimeters for above
+    // console.log('Zip', zip)
     // Uses a single module to build all the required data and draw SVG
     // const mod2 = new EllipseGeometryMod('e')
     // mod2.select()
@@ -102,7 +102,7 @@
         <DagNodeTable nodes={allNodes} title={''}/>
     </Expand>
 </div>
-
+<!-- 
 <div class='ml-4 mt-4 mb-4'>
     <Expand title={'Zip Ellipses'}>
         <GenericTable data={zipEllipses} title={'Zip'}/>
@@ -113,4 +113,4 @@
     <Expand title={'Zip Points'}>
         <GenericTable data={zipPoints} title={'Zip'}/>
     </Expand>
-</div>
+</div> -->

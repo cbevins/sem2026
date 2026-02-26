@@ -2,7 +2,7 @@
     import {DagNodeTable, EventfulSvg, Expand, GenericTable} from '$lib/index.js'
     import {ZipViewport} from './ZipViewport.js'
     import FireEllipseControls from './FireEllipseControls.svelte'
-    import {ellipse, ellipseTable, pointsTable} from './ellipse.js'
+    import {Ellipse, ellipseData, pointsData} from './ellipse.js'
 
     let width = $state(400)
     let height = $state(400)
@@ -18,9 +18,10 @@
     let theta   = $state(80)        
     let timeStep = $state(10)
 
-    let zip = $derived(ellipse(lwRatio))
-    let zipEllipses = $derived(ellipseTable(lwRatio))  // Parameters at various lwr
-    let zipPoints = $derived(pointsTable(lwRatio))    // Perimeters for above
+    let zip = $derived(new Ellipse(lwRatio))
+    let zipEllipse = $derived([ellipseData(zip)])
+    let zipPoints = $derived(pointsData(zip, degStep))    // Perimeters for above
+    // console.log(zipPoints)
     
     //--------------------------------------------------------------------------
     // Viewport instance, content, and event handler
@@ -50,13 +51,13 @@
 </div>
 
 <div class='ml-4 mt-4 mb-4'>
-    <Expand title={'Zip Ellipses'}>
-        <GenericTable data={zipEllipses} title={'Zip'}/>
+    <Expand title={'Zip Ellipse'}>
+        <GenericTable data={zipEllipse} title={'Zip Ellipse'}/>
     </Expand>
 </div>
 
 <div class='ml-4 mt-4 mb-4'>
     <Expand title={'Zip Points'}>
-        <GenericTable data={zipPoints} title={'Zip'}/>
+        <GenericTable data={zipPoints} title={'Zip Points'}/>
     </Expand>
 </div>

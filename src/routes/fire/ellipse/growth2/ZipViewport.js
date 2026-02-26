@@ -3,9 +3,9 @@ import { gxmlStr } from "$lib/gxml/gxmlStr.js"
 
 export class ZipViewport extends EventfulViewport {
     constructor(svgWidth, svgHeight, zip) {
-        super(svgWidth, svgHeight, 0.2, 0, 0.005, 'dl', {l:-1.2, r:1.2, t:1.2, b:-1.2})
+        super(svgWidth, svgHeight, 0.2, 0, 0.005, 'dl') // {l:-1.2, r:1.2, t:1.2, b:-1.2})
         this.zip = zip
-        console.log('Zip', zip)
+        // console.log('Zip', zip)
     }
     bearingEndpoint(x, y, bearing, dist) {
         const radians = bearing * Math.PI / 180
@@ -13,7 +13,7 @@ export class ZipViewport extends EventfulViewport {
             x: x + dist * Math.cos(radians),
             y: y + dist * Math.sin(radians)
         }
-        consolz.log(`endpoint(${x.toFixed(2)}, ${y.toFixed(2)}, ${bearing}, ${dist}) => [${pt.x.toFixed(2)}, ${pt.y.toFixed(2)}]`)
+        console.log(`endpoint(${x.toFixed(2)}, ${y.toFixed(2)}, ${bearing}, ${dist}) => [${pt.x.toFixed(2)}, ${pt.y.toFixed(2)}]`)
         return pt
     }
 
@@ -23,18 +23,20 @@ export class ZipViewport extends EventfulViewport {
         const lineProps = {stroke:'black'}
         
         const rad = this.pd(0.01)
-        const a1Dist = this.pd(z.a1.dist)
-        const b1Dist = this.pd(z.b1.dist)
-        // const backx = this.px(z.back.x)
-        // const backy = this.py(z.back.y)
+        const aDist = this.pd(z.a.dist)
+        const bDist = this.pd(z.b.dist)
+        const backDist = this.px(z.back.dist)
+        const backX = this.px(z.back.x)
+        const backY = this.py(z.back.y)
         // const betax = this.px(z.beta.x)
         // const betay = this.py(z.beta.y)
         const centerX = this.px(z.center.x)
         const centerY = this.py(z.center.y)
         // const fx = this.px(z.center.x+z.f.dist)
         // const gx = this.px(z.ignition.x+z.g.dist)
-        // const headx = this.px(z.head.x)
-        // const heady = this.py(z.head.y)
+        const headDist = this.px(z.head.dist)
+        const headX = this.px(z.head.x)
+        const headY = this.py(z.head.y)
         const ignX = this.px(z.ign.x)
         const ignY = this.py(z.ign.y)
         // const psix = this.px(z.psi.x)
@@ -52,31 +54,39 @@ export class ZipViewport extends EventfulViewport {
             // + this.drawAxis(lineProps, textProps)
 
         // Subtending circle
-        els.push(this.circle(centerX, centerY, a1Dist, 'none', 'black'))
+        els.push(this.circle(centerX, centerY, aDist, 'none', 'black'))
         
         // Parametric ellipse based on length/width
-        els.push(this.ellipse(centerX, centerY, a1Dist, b1Dist, 'none', 'red'))
+        els.push(this.ellipse(centerX, centerY, aDist, bDist, 'none', 'red'))
 
-        // // 'f', 'g', 'back' axis
-        // els.push(this.line(centerx, centery, fx, this.py(0), {stroke:'red'}))
-        // els.push(this.line(ignx, igny, gx, this.py(0), {stroke:'cyan'}))
-        // els.push(this.line(ignx, igny, backx, backy, {stroke:'blue'}))
-        // // theta
-        // els.push(this.line(centerx, centery, thetax, thetay, {stroke:'yellow'}))
-        // els.push(this.circle(thetax, thetay, rad, 'yellow'))
-        // els.push(this.line(centerx, centery, thetax2, thetay2, {stroke:'yellow'}))
-
-        // // beta
-        // els.push(this.line(ignx, igny, betax, betay, {stroke:'magenta'}))
-        // els.push(this.circle(betax, betay, rad, 'magenta'))
-
-        // // psi
-        // els.push(this.circle(psix, psiy, rad, 'blue'))
-
-        els.push(this.circle(ignX, ignY, rad, 'red'))
+        // Ignition, center, head, and back points
+        els.push(this.circle(ignX, ignY, 2*rad, 'red'))
         els.push(this.circle(centerX, centerY, rad, 'yellow'))
-        // els.push(this.circle(headx, heady, rad, 'cyan'))
+        els.push(this.circle(backX, backY, rad, 'blue'))
+        els.push(this.circle(headX, headY, rad, 'red'))
 
+        // head, back, and center segments of x-axis
+        els.push(this.line(ignX, ignY, headX, headY, {stroke:'red', 'stroke-width': 3}))
+        els.push(this.line(ignX, ignY, centerX, centerY, {stroke:'cyan'}))
+        els.push(this.line(ignX, ignY, backX, backY, {stroke:'blue'}))
+
+        // Calculated ellipse perimeter points
+        for(let deg=0; deg<360; deg+=15) {
+            const p = z.thetaPoint(deg)
+            const x = this.px(p.x)
+            const y = this.py(p.y)
+            const dist = p.dist.toFixed(2)
+            els.push(this.circle(x, y, rad, deg===45?'green':'yellow'))
+            if(deg===45) {
+                els.push(this.line(centerX, centerY, x, y, {stroke: 'yellow'}))
+                els.push(this.line(ignX, ignY, x, y, {stroke:'cyan'}))
+                els.push(this.textBeg(100, 100, `Beta Length ${p.betaDist.toFixed(4)}`))
+            }   
+            const xy = `${p.x.toFixed(2)}, ${p.y.toFixed(2)} `
+            els.push(this.textBeg(x+2, y+2, deg.toFixed(0), textProps))
+        }
+        els.push(this.line(centerX, centerY, this.px(z.center.x+1),
+            this.py(z.center.y+1), {stroke:'yellow'}))
 
         str += gxmlStr(els)
         this.svgContent = str

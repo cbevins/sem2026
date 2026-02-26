@@ -2,6 +2,10 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     let title = 'SEM2006 Projects'
     let items = [{
+        route: '/fundamentals',
+        title: 'Fundamentals of Wildland Fire Modeling (2/26/2026)',
+        brief: 'Development from scratch of a fire behavior and growth model.'
+    },{
         route: '/fire',
         title: 'Fire Behavior Projects',
         brief: 'Demos of various wildland fire behavior models',

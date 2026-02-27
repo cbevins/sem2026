@@ -20,7 +20,7 @@ export class View extends EventfulViewport {
         let str = this.drawBackdrop('gray')
             + this.drawCenterScale(textProps)
             + this.drawAxis(lineProps, textProps)
-            + this.drawZoom(10,10,10,10)
+            + this.drawZoom(20,20,20)
         // Subtending circle
         // els.push(this.circle(centerx, centery, this.pd(e.f.vhr.get()), 'none', 'black'))
         

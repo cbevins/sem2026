@@ -310,8 +310,10 @@ export class EventfulViewport {
     drawZoom(x, y, d) {
         this.zoomControl = {zx: x, zy: y, zd: d}
         return gxmlStr([
-            this.rect(x, y, d, d, 'red'),
-            this.rect(x, y+d, d, d, 'green'),
+            this.rect(x, y, d, d, 'none', {stroke: 'black'}),
+            this.rect(x, y+d, d, d, 'none', {stroke: 'black'}),
+            this.textMid(x+d/2, y+d, '+' ),
+            this.textMid(x+d/2, y+d+d, '-' ),
         ])
     }
 }

@@ -38,7 +38,7 @@ export class EventfulViewport {
         this.clickDelay = 200       // maximum milliseconds between mousedown and mouse up to qualify as a 'click'
         this.panRatio = 0.25        // Proportion of width or height shifted by each pan
         this.zoomRatio = 2          // Change in units-per-pixel with each zoom
-        this.zoomControl = null     // {zx: x, zy: y, zd: d}
+        this.controls = null        //
     }
     
     // This function must be reimplemented by derived classes
@@ -96,11 +96,8 @@ export class EventfulViewport {
     // Moves the clicked location to the image center
     // eslint-disable-next-line no-unused-vars
     click(xy) {
-        let {x,y} = xy
-        const {zx, zy, zd} = this.zoomControl
-        if (x>=zx && x<=zx+zd && y>=zy && y<=zy+2*zd){
-            return (y<=zy+zd) ? this.zoomout(xy) : this.zoomin(xy)
-        }
+        const controlZone = this.controlsZone(xy)
+        if (controlZone) return this.handleControlsClick(controlZone, xy)
         return false
     }
     
@@ -138,10 +135,16 @@ export class EventfulViewport {
     }
 
     // eslint-disable-next-line no-unused-vars
-    mouseenter(xy) { return false; /* not currently used */ }
+    mouseenter(xy) {
+        const controlZone = this.controlsZone(xy)
+        if (controlZone) return this.handleControlsEnter(controlZone, xy)
+        return false
+    }
 
     // mouseleave cancels any on-going panning action
     mouseleave(xy) {
+        const controlZone = this.controlsZone(xy)
+        if (controlZone) return this.handleControlsLeave(controlZone, xy)
         if (this.isPanning) {
             this.endPan = {...xy, t: Date.now()}
             this.isPanning = false
@@ -221,10 +224,18 @@ export class EventfulViewport {
     // All these return Gxml elements, not strings!
     //--------------------------------------------------------------------------
 
-    circle(cx, cy, r, fill, stroke, props) { return {el: 'circle', cx, cy, r, fill, stroke, ...props} }
-    ellipse(cx, cy, rx, ry, fill, stroke, props) { return {el: 'ellipse', cx, cy, rx, ry, fill, stroke, ...props} }
-    line(x1, y1, x2, y2, props) { return {el: 'line', x1, y1, x2, y2, ...props} }
-    rect(x, y, width, height, fill, props) { return {el: 'rect', x, y, width, height, fill, ...props} }
+    circle(cx, cy, r, fill='none', stroke='black', props) {
+        return {el: 'circle', cx, cy, r, fill, stroke, ...props}
+    }
+    ellipse(cx, cy, rx, ry, fill='none', stroke='black', props) {
+        return {el: 'ellipse', cx, cy, rx, ry, fill, stroke, ...props}
+    }
+    line(x1, y1, x2, y2, props) {
+        return {el: 'line', x1, y1, x2, y2, ...props}
+    }
+    rect(x, y, width, height, fill='none', stroke='black', props) {
+        return {el: 'rect', x, y, width, height, fill, stroke, ...props}
+    }
     text(x, y, content, props) { return {el: 'text', x, y, ...props, els: [{el: 'inner', content}]} }
     textBeg(x, y, content, props) { return this.text(x, y, content, {...props, 'text-anchor': 'start'}) }
     textEnd(x, y, content, props) { return this.text(x, y, content, {...props, 'text-anchor': 'end'}) }
@@ -307,13 +318,41 @@ export class EventfulViewport {
             this.textBeg(w-10, h-10, right, textProps),
         ])
     }
-    drawZoom(x, y, d) {
-        this.zoomControl = {zx: x, zy: y, zd: d}
+    drawController(x, y, r) {
+        const r1 = r
+        const r2 =0.4 *  r
+        const r3 = 0.1 * r
+        this.controls = {x, y, r1, r2, r3}
         return gxmlStr([
-            this.rect(x, y, d, d, 'none', {stroke: 'black'}),
-            this.rect(x, y+d, d, d, 'none', {stroke: 'black'}),
-            this.textMid(x+d/2, y+d, '+' ),
-            this.textMid(x+d/2, y+d+d, '-' ),
+            this.circle(x, y, r1, 'gray', 'black'),
+            this.circle(x, y, r2, 'gray', 'black'),
+            this.line(x-r2, y, x+r2, y, {stroke: 'black'}),
+            this.circle(x, y, r3, 'gray', 'black'),
+            this.circle(x, y, r3/2, 'red', 'black'),
+            this.textMid(x, y-r2/2, '+', {stroke: 'red'}),
+            this.textMid(x, y+r2, '-', {stroke: 'red'}),
         ])
     }
+    handleControlsClick(zone, xy) {
+        if (zone===1) return this.zoomin(xy)
+        else if (zone===2) return this.zoomin(xy)
+        else if (zone===3) return this.zoomout(xy)
+        else if (zone===4) return this.center(xy)
+    }
+    // On each mouse move, returns its location relative to the controls:
+    //  0=outside controls, 1=outer ring (pan), 2=upper middle ring,
+    //  3 = lower middle ring, 4 = center ring
+    controlsZone(xy) {
+        if (! this.controls) return 0
+        let {x,y} = xy
+        const {x:cx, y:cy, r1, r2, r3} = this.controls
+        // Distance squared of mouse click from control center
+        const d2 = (x-cx)**2 + (y-cy)**2    // click dist^2 from control center
+        if (d2 > r1*r1) return 0                        // outsode
+        else if (d2 <= r3*r3) return 4                  // inner ring
+        else if (d2 <= r2*r2) return (y<=cy) ? 2 : 3    // middle ring
+        else return 1                                 // outer ring
+    }
+    handleControlsEnter(xy){}
+    handleControlsLeave(xy){}
 }

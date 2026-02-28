@@ -27,12 +27,17 @@
 
     <div class='overflow-scroll border rounded'>
         <P>
-            Lets start out as simply as possible.
-            First, let us assume a perfectly level field
-            containing a uniform distribution of similarly shaped fuel particles,
-            all at the same moisture content.
-            Tall annual grasses are a good real-world approximation of such fuel.
-            Second, we will assume absolutely no wind.
+            Lets start out as simply as possible...
+        </P><P>
+            Envision a large, perfectly level field supporting a tall, dense, crop
+            of fully-cured annual grasses of the same species and height.
+            There is absolutely no wind blowing when you drop a lighted match
+            at the center of the field, and a fire springs to life.
+        </P><P>
+            Over the next few minutes, what shape do you think the resulting fire will assume?
+        </P><P>
+            Indeed, it is intuitively evident the resulting fire will assume a circular shape
+            as long as the prevailing conditions hold.
         </P>
     </div>
 

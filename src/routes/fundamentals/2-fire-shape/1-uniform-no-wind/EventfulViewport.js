@@ -38,7 +38,8 @@ export class EventfulViewport {
         this.clickDelay = 200       // maximum milliseconds between mousedown and mouse up to qualify as a 'click'
         this.panRatio = 0.25        // Proportion of width or height shifted by each pan
         this.zoomRatio = 2          // Change in units-per-pixel with each zoom
-        this.controls = null        //
+        this.controller = {
+            enabled: true, x: svgWidth-50, y: 50, r1: 50, r2: 20, r3: 5, zone: 0}
     }
     
     // This function must be reimplemented by derived classes
@@ -96,8 +97,7 @@ export class EventfulViewport {
     // Moves the clicked location to the image center
     // eslint-disable-next-line no-unused-vars
     click(xy) {
-        const controlZone = this.controlsZone(xy)
-        if (controlZone) return this.handleControlsClick(controlZone, xy)
+        if(this.controller.zone) return this.handleControllerClick(xy)
         return false
     }
     
@@ -136,15 +136,11 @@ export class EventfulViewport {
 
     // eslint-disable-next-line no-unused-vars
     mouseenter(xy) {
-        const controlZone = this.controlsZone(xy)
-        if (controlZone) return this.handleControlsEnter(controlZone, xy)
         return false
     }
 
     // mouseleave cancels any on-going panning action
     mouseleave(xy) {
-        const controlZone = this.controlsZone(xy)
-        if (controlZone) return this.handleControlsLeave(controlZone, xy)
         if (this.isPanning) {
             this.endPan = {...xy, t: Date.now()}
             this.isPanning = false
@@ -152,9 +148,10 @@ export class EventfulViewport {
         return false
     }
     
-    // Currently unused, but could use mousemove update display of current pointer position
+    // Currently, if controller is enabled, determines which zone the mouse is over
     mousemove(xy) {
         this.movexy = xy
+        if(this.controller.enabled) return this.getControllerZone(xy)
         return false
     }
 
@@ -257,10 +254,10 @@ export class EventfulViewport {
         return gxmlStr([
             this.line(0, my, w, my, lineProps),
             this.line(mx, 0, mx, h, lineProps),
-            this.textBeg(2, my-2, this.wleft().toString(), textProps),
-            this.textEnd(w-2, my-2, this.wright().toString(), textProps),
-            this.textBeg(mx, 10, this.wtop().toString(), {...textProps, transform: rotateTop}),
-            this.textBeg(mx+8, h-2, this.wbottom().toString(), {...textProps, transform: rotateBot}),
+            this.textBeg(2, my-2, this.wleft().toFixed(2), textProps),
+            this.textEnd(w-2, my-2, this.wright().toFixed(2), textProps),
+            this.textBeg(mx, 10, this.wtop().toFixed(2), {...textProps, transform: rotateTop}),
+            this.textBeg(mx+8, h-2, this.wbottom().toFixed(2), {...textProps, transform: rotateBot}),
         ])
     }
 
@@ -318,41 +315,58 @@ export class EventfulViewport {
             this.textBeg(w-10, h-10, right, textProps),
         ])
     }
-    drawController(x, y, r) {
-        const r1 = r
-        const r2 =0.4 *  r
-        const r3 = 0.1 * r
-        this.controls = {x, y, r1, r2, r3}
+    drawController() {
+        const {x, y, r1, r2, r3, zone} = this.controller
+        const active = 'cyan'
+        const inactive = 'gray'
         return gxmlStr([
-            this.circle(x, y, r1, 'gray', 'black'),
-            this.circle(x, y, r2, 'gray', 'black'),
+            // Zone 1
+            this.circle(x, y, r1, (zone===1)?active:inactive, 'black'),
+            // Zone 2 and 3
+            this.circle(x, y, r2,  (zone===2 || zone===3)?active:inactive,'black'),
             this.line(x-r2, y, x+r2, y, {stroke: 'black'}),
-            this.circle(x, y, r3, 'gray', 'black'),
-            this.circle(x, y, r3/2, 'red', 'black'),
             this.textMid(x, y-r2/2, '+', {stroke: 'red'}),
             this.textMid(x, y+r2, '-', {stroke: 'red'}),
+            // Zone 4
+            this.circle(x, y, r3,  (zone===4)?active:inactive, 'black'),
+            this.circle(x, y, r3/2, 'red', 'black'),
         ])
     }
-    handleControlsClick(zone, xy) {
-        if (zone===1) return this.zoomin(xy)
-        else if (zone===2) return this.zoomin(xy)
-        else if (zone===3) return this.zoomout(xy)
-        else if (zone===4) return this.center(xy)
+    handleControllerClick(xy) {
+        const {zone} = this.controller
+        if (zone===1) return this.move(xy)
+        if (zone===2) return this.zoomin() 
+        if (zone===3) return this.zoomout()
+        if (zone===4) return this.center()
+        return false
     }
-    // On each mouse move, returns its location relative to the controls:
-    //  0=outside controls, 1=outer ring (pan), 2=upper middle ring,
-    //  3 = lower middle ring, 4 = center ring
-    controlsZone(xy) {
-        if (! this.controls) return 0
+    move(xy) {
+        const {x,y} = xy
+        const dx = x - this.controller.x
+        const dy = y - this.controller.y
+        this.wcx += this.upp * dx/4
+        this.wcy += this.upp * dy/4
+        return true // should redraw
+    }
+
+    // On each mouse move, returns its location relative to the controller, where
+    //  0 = outside controller, 1 = outer ring (pan), 2 = upper middle ring (zoom),
+    //  3 = lower middle ring (zoom), or 4 = center ring (center)
+    getControllerZone(xy) {
+        if (! this.controller.enabled) return false
         let {x,y} = xy
-        const {x:cx, y:cy, r1, r2, r3} = this.controls
+        const {x:cx, y:cy, r1, r2, r3} = this.controller
+        let zone = 0
         // Distance squared of mouse click from control center
-        const d2 = (x-cx)**2 + (y-cy)**2    // click dist^2 from control center
-        if (d2 > r1*r1) return 0                        // outsode
-        else if (d2 <= r3*r3) return 4                  // inner ring
-        else if (d2 <= r2*r2) return (y<=cy) ? 2 : 3    // middle ring
-        else return 1                                 // outer ring
+        const d2 = (x-cx)**2 + (y-cy)**2                // click dist^2 from control center
+        if (d2 > r1*r1) zone = 0                        // outside of controller
+        else if (d2 <= r3*r3) zone = 4                  // inner ring (center)
+        else if (d2 <= r2*r2) zone = (y<=cy) ? 2 : 3    // middle ring (zoom)
+        else zone = 1                                   // outer ring (pan)
+        if (zone !== this.controller.zone) {
+            this.controller.zone = zone
+            return true
+        }
+        return false
     }
-    handleControlsEnter(xy){}
-    handleControlsLeave(xy){}
 }

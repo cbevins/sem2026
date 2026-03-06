@@ -11,7 +11,6 @@ export class View extends EventfulViewport {
 
     drawSvg() {
         const textProps = {stroke:'black', 'font-size':10, 'font-family':'sans-serif', 'font-weight':'light'}
-        // eslint-disable-next-line no-unused-vars
         const lineProps = {stroke:'black'}
         const rad = this.pd(0.01)   // 'dot' size
         const color = {head: 'red', back: 'blue', perim: 'yellow', ign: 'magenta', center: 'yellow'}
@@ -20,7 +19,7 @@ export class View extends EventfulViewport {
         let str = this.drawBackdrop('gray')
             + this.drawCenterScale(textProps)
             + this.drawAxis(lineProps, textProps)
-            + this.drawController(this.width-50,50, 50)
+            + this.drawController()
         // Subtending circle
         // els.push(this.circle(centerx, centery, this.pd(e.f.vhr.get()), 'none', 'black'))
         

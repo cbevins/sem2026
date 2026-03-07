@@ -7,7 +7,8 @@ export class PcsViewport {
         focusEast=null, focusNorth=null) {
 
         // West, east, south, and north bounds
-        this.bounds = {west, east, south, north}
+        this.bounds = {west, east, south, north,
+            width: east-west, height: north-south}
         
         // SVG image width and height in pixels
         this.svg = { width: svgPixelWidth, height: svgPixelHeight }
@@ -112,7 +113,7 @@ export class PcsViewport {
     // Some shared drawing elements
     // All these return SVG strings
     //--------------------------------------------------------------------------
-    drawAxis(lineProps, textProps) {
+    addCentralAxis(lineProps, textProps) {
         const mx = this.svg.width / 2
         const my = this.svg.height / 2
         const rotateTop = `rotate(270,${mx+8},10)`
@@ -129,7 +130,7 @@ export class PcsViewport {
     }
 
     // Draws either a bounded or unbounded backdrop rect.
-    drawBackdrop(props) {
+    addBoundsRect(props) {
         const {north, south, east, west} = this.bounds
         if (east!==null && west!==null && north!==null && south!==null) {
             return gxmlStr(this.rect(west, north, east-west, north-south, props))

@@ -3,8 +3,9 @@ import { gxmlStr } from "$lib/gxml/gxmlStr.js"
 // import {Model} from './model.js'
 
 export class ViewDemo1 extends PcsViewport {
-    constructor(svgPixelWidth, svgPixelHeight, west, east, south, north,
-        unitsPerPixel=1, unitsLabel='units') {
+    constructor(svgPixelWidth, svgPixelHeight,
+            west, east, south, north,
+            unitsPerPixel=1, unitsLabel='units') {
         super(svgPixelWidth, svgPixelHeight, west, east, south, north,
             unitsPerPixel, unitsLabel)
     }
@@ -12,19 +13,17 @@ export class ViewDemo1 extends PcsViewport {
     content() {
         const lineProps = {stroke: 'black'}
         const textProps = {stroke: 'black', 'font-size':12}
-        let str = this.drawBackdrop({fill:'gray'})
-            + this.drawAxis(lineProps, textProps)
-            + this.drawSquares()
+        let str = this.addBoundsRect({fill:'gray'})
+            + this.addColoredGrid(100, 100)
+            + this.addCentralAxis({stroke: 'green', 'stroke-width': 4}, textProps)
         return str
     }
 
-    drawSquares() {
+    addColoredGrid(xdim=100, ydim=100) {
         const textProps = {stroke: 'black', 'font-size':12, 'text-anchor':'middle'}
         const {north, south, east, west} = this.bounds
-        const rows = 10
-        const cols = 10
-        const xdim = (east-west) / cols
-        const ydim = (north-south) / rows
+        const cols = (east-west)/xdim
+        const rows = (north-south) / xdim
         const els = []
         let hue = 0
         // Start at row 1 since 'y' must be the cell TOP

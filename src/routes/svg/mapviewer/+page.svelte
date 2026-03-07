@@ -3,9 +3,32 @@
     import {ViewDemo1} from './ViewDemo1.js'
 
     //--------------------------------------------------------------------------
-    // Controller
+    // Controller state and handlers
     //--------------------------------------------------------------------------
+    let svgWidth = $state(1600)
+    let svgHeight = $state(800)
+    let svgLevel = $state(1)
+    let uppLevel = $state(1)
+    let unitsPerPixel = $state(1)
 
+    function doubleSvg() {
+        svgLevel = svgLevel + 1
+        svgWidth = 2 * svgWidth
+        svgHeight = 2 * svgHeight
+    }
+    function halveSvg() {
+        svgLevel = svgLevel - 1
+        svgWidth = svgWidth / 2
+        svgHeight = svgHeight / 2
+    }
+    function halveUpp() {
+        uppLevel = uppLevel + 1
+        unitsPerPixel = unitsPerPixel / 2
+    }
+    function doubleUpp() {
+        uppLevel = uppLevel - 1
+        unitsPerPixel = 2 * unitsPerPixel
+    }
     //--------------------------------------------------------------------------
     // View (which also handles the Model based upon the Controller props).
     //--------------------------------------------------------------------------
@@ -14,10 +37,26 @@
             d.upp, d.units, d.focusEast, d.focusNorth)
     }
 
-    let demo1 = {width:400, height:400, west:0, east:1000, south:2000, north:3000,
-                upp:1, units:'ft', focusEast:null, focusNorth:null}
-    let view1 = makeView(demo1)
-    let content1 = view1.content()
+    function viewbox(v) {
+        const x = (v1.svg.width - v1.bounds.width) / 2
+        const y = (v1.svg.height - v1.bounds.height) / 2
+        const w = v.bounds.width
+        const h = v.bounds.height
+        return `${x} ${y} ${w} ${h}`
+    }
+    let d1 = $derived({
+        width: svgWidth, height: svgHeight,
+        // width: 400, height: 200,  // zoom x 0.25
+        // width: 800, height: 400,  // zoom x 0.5
+        // width: 1600, height: 800,  // zoom x 1
+        // width: 3200, height: 1600,  // zoom x 2
+        west: 0, east: 1600, south:2000, north:2800,
+        upp: unitsPerPixel, units: 'ft', focusEast: null, focusNorth: null})
+
+    let v1 = $derived(makeView(d1))
+    // console.log('v1', v1)
+    // console.log('viewbox(v1)', viewbox(v1))
+    let content1 = $derived(v1.content())
 </script>
 
 <div class='ml-4 mt-4 mb-4'>
@@ -32,18 +71,34 @@
         </P>
     </div>
 
+    {#snippet data(v)}
+        <div class='text-sm'>
+        <div class='ml-4'>- SVG is {v.svg.width} x {v.svg.height}.
+        Map is {v.bounds.width} x {v.bounds.height}.
+        Focus point = [{v.focus.east} e, {v.focus.north} n].</div>
+        <div class='ml-4'>- viewBox = '{viewbox(v)}'</div>
+        </div>
+    {/snippet}
+
     <div class='mt-4 border rounded'>
         <div class='mx-2 my-2 border rounded'>
-            <P>Controller Goes Here</P>
-            <div class='ml-4'>- SVG is 400 x 400, and bounds are 1000 x 1000.</div>
-            <div class='ml-4'>- PCSViewport auto-focus is 500, 500</div>
-            <div class='ml-4'>- viewBox is '-300, -300, 1000, 1000', calculated as:</div>
-            <div class='ml-8'>vb x = (400 - 1000)/2 = -300</div>
-            <div class='ml-8'>vb y = (svgHeight-1000)/2 = (400 - 1000)/2 = -300</div>
+            <div>
+                <button class='border rounded text-md bg-blue-300'
+                    onclick={doubleSvg}>Double SVG</button>
+                <button class='border rounded text-md bg-blue-300'
+                    onclick={halveSvg}>Halve SVG</button>
+            <div>
+            These aren't that useful
+                <button class='border rounded text-md bg-blue-300'
+                    onclick={halveUpp}>Halve Upp</button>
+                <button class='border rounded text-md bg-blue-300'
+                    onclick={doubleUpp}>Double Upp</button>
+                </div>
         </div>
-        <div class="w-64 h-64 overflow-auto border border-gray-400">
-            <svg width=1000 height=1000 viewBox='-300 -300 1000 1000'>
-            <!-- <svg width={width} height={height}> -->
+            {@render data(v1)}
+        </div>
+        <div class="w-lg h-128 overflow-auto border border-gray-400">
+            <svg width={v1.svg.width} height={v1.svg.height} viewBox='{viewbox(v1)}'>
                 {@html content1}
             </svg>
         </div>

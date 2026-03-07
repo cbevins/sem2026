@@ -1,17 +1,52 @@
 import { PcsViewport } from "./PcsViewport.js"
 import { gxmlStr } from "$lib/gxml/gxmlStr.js"
-import {Model} from './model.js'
+// import {Model} from './model.js'
 
 export class ViewDemo1 extends PcsViewport {
-    constructor(svgPixelWidth, svgPixelHeight) {
-        super(svgPixelWidth, svgPixelHeight, 500, 2500, 1, 'ft', 0, 1000, 2000, 3000)
+    constructor(svgPixelWidth, svgPixelHeight, west, east, south, north,
+        unitsPerPixel=1, unitsLabel='units') {
+        super(svgPixelWidth, svgPixelHeight, west, east, south, north,
+            unitsPerPixel, unitsLabel)
     }
     
     content() {
         const lineProps = {stroke: 'black'}
         const textProps = {stroke: 'black', 'font-size':12}
-        let str = this.drawBackdrop({fill:'green'})
+        let str = this.drawBackdrop({fill:'gray'})
             + this.drawAxis(lineProps, textProps)
+            + this.drawSquares()
         return str
+    }
+
+    drawSquares() {
+        const textProps = {stroke: 'black', 'font-size':12, 'text-anchor':'middle'}
+        const {north, south, east, west} = this.bounds
+        const rows = 10
+        const cols = 10
+        const xdim = (east-west) / cols
+        const ydim = (north-south) / rows
+        const els = []
+        let hue = 0
+        // Start at row 1 since 'y' must be the cell TOP
+        for(let row=1, h=0; row<=rows; row++) {
+            const y = south + row * ydim
+            for(let col=0; col<cols; col++, h++) {
+                const x = west + col * xdim
+                hue = h * 360 / (rows*cols)
+                const sat = 100
+                const light = 70 - 2*row
+                els.push(this.rect(x, y, xdim, ydim,
+                    {fill: `hsl(${hue}, ${sat}%,${light}%)`, stroke: 'black'}))
+            }
+        }
+        // Add coordinates
+            for(let col=0; col<cols; col++) {
+                const x = west + col * xdim + xdim/2
+                for(let row=0; row<rows; row++) {
+                    const y = south + row * ydim + ydim/2
+                    els.push(this.text(x, y, `[${x}, ${y}]`, textProps))
+                }
+            }
+        return gxmlStr(els)
     }
 }

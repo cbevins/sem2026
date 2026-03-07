@@ -1,5 +1,4 @@
 <script>
-import EventfulSvg from './EventfulSvg.svelte'
     import {P} from '$lib/index.js'
     import {ViewDemo1} from './ViewDemo1.js'
 
@@ -7,15 +6,18 @@ import EventfulSvg from './EventfulSvg.svelte'
     // Controller
     //--------------------------------------------------------------------------
 
-    let width = $state(400)
-    let height = $state(400)
-    
     //--------------------------------------------------------------------------
     // View (which also handles the Model based upon the Controller props).
     //--------------------------------------------------------------------------
-    let viewDemo1 = $derived(new ViewDemo1(width, height))
-    let content = $derived(viewDemo1.content())
-    function handler(e) { /* nothing */ }
+    function makeView(d) {
+        return new ViewDemo1(d.width, d.height, d.west, d.east, d.south, d.north,
+            d.upp, d.units, d.focusEast, d.focusNorth)
+    }
+
+    let demo1 = {width:400, height:400, west:0, east:1000, south:2000, north:3000,
+                upp:1, units:'ft', focusEast:null, focusNorth:null}
+    let view1 = makeView(demo1)
+    let content1 = view1.content()
 </script>
 
 <div class='ml-4 mt-4 mb-4'>
@@ -27,22 +29,23 @@ import EventfulSvg from './EventfulSvg.svelte'
             Example of creating interactive, pannable, zoomable SVG images
             from geographic projected coordinates (eastings, northings, bearings)
             using the Model-View-Controller design pattern.
-        </P><P>
-            Within the +page.svelte, an EventfulSvg component captures mouse and keyboard
-            events and passes them onto the handler() function. The handler()
-            merely passes the event along to the View.content() method,
-            which returns new SVG content.
         </P>
     </div>
 
     <div class='mt-4 border rounded'>
         <div class='mx-2 my-2 border rounded'>
-            Controller Goes Here
+            <P>Controller Goes Here</P>
+            <div class='ml-4'>- SVG is 400 x 400, and bounds are 1000 x 1000.</div>
+            <div class='ml-4'>- PCSViewport auto-focus is 500, 500</div>
+            <div class='ml-4'>- viewBox is '-300, -300, 1000, 1000', calculated as:</div>
+            <div class='ml-8'>vb x = (400 - 1000)/2 = -300</div>
+            <div class='ml-8'>vb y = (svgHeight-1000)/2 = (400 - 1000)/2 = -300</div>
         </div>
-        <div class='mx-2 my-2'>
-        <!-- The EventfulSvg captures mouse and keyboard events and passes
-        them along to the handler() function. -->
-            <EventfulSvg {width} {height} {content} {handler}/>
+        <div class="w-64 h-64 overflow-auto border border-gray-400">
+            <svg width=1000 height=1000 viewBox='-300 -300 1000 1000'>
+            <!-- <svg width={width} height={height}> -->
+                {@html content1}
+            </svg>
         </div>
     </div>
 </div>

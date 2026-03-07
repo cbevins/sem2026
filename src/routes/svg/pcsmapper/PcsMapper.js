@@ -1,6 +1,6 @@
 import { gxmlStr } from "$lib/gxml/gxmlStr.js"
 
-export class PcsViewport {
+export class PcsMapper {
     constructor(svgPixelWidth, svgPixelHeight,
         west, east, south, north,           // PCS map bounds
         unitsPerPixel=1, unitsLabel='units',

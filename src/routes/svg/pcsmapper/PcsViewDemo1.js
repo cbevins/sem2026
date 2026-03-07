@@ -1,21 +1,21 @@
-import { PcsViewport } from "./PcsViewport.js"
+import { PcsMapper } from "./PcsMapper.js"
 import { gxmlStr } from "$lib/gxml/gxmlStr.js"
 // import {Model} from './model.js'
 
-export class ViewDemo1 extends PcsViewport {
-    constructor(svgPixelWidth, svgPixelHeight,
-            west, east, south, north,
-            unitsPerPixel=1, unitsLabel='units') {
-        super(svgPixelWidth, svgPixelHeight, west, east, south, north,
-            unitsPerPixel, unitsLabel)
+export class PcsViewDemo1 extends PcsMapper {
+    constructor(model) {
+        super(model.width, model.height,
+            model.west, model.east, model.south, model.north,
+            model.upp, model.units, model.focusEast, model.focusNorth)
+        this.model = model
     }
     
     content() {
-        const lineProps = {stroke: 'black'}
-        const textProps = {stroke: 'black', 'font-size':12}
+        const textProps = {stroke: 'black', 'font-size':16}
         let str = this.addBoundsRect({fill:'gray'})
             + this.addColoredGrid(100, 100)
             + this.addCentralAxis({stroke: 'green', 'stroke-width': 4}, textProps)
+        this.svgContent = str
         return str
     }
 

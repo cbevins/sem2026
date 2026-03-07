@@ -2,14 +2,10 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     let title = 'SEM2006 SVG Classes & Utilities'
     let items = [{
-        route: '/svg/mapviewer',
-        title: 'SVG Map Viewer',
-        brief: 'Class for creating pannable/zoomable SVG content '
-        + 'based on eastings/northings/bearings',
-    },{
-        route: '/svg/viewbox',
-        title: 'SVG Viewbox Sandbox',
-        brief: 'Fun (?) with SVG viewbox',
+        route: '/svg/pcsmapper',
+        title: 'Projected Coordinate System Mapper',
+        brief: 'Class and demo of creating pannable/zoomable SVG content '
+        + 'based on project coordinate eastings, northings, and bearings.',
     },{
         route: '/svg/eventfulsvg',
         title: 'EventfulSvg',

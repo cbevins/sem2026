@@ -158,29 +158,59 @@ export class PcsMapper {
         ])
     }
 
-    // Places world coordinates around viewport frame
-    drawEdgeLabels(textProps) {
-        const w = this.width
-        const h = this.height
-        const top = this.wtop().toString()
-        const left = this.wleft().toString()
-        const right = this.wright().toString()
-        const bottom = this.wbottom().toString()
-        return gxmlStr([
-            this.textBeg(20, 10, top, textProps),
-            this.textEnd(w-20, 10, top, textProps),
+    // // Places world coordinates around viewport frame
+    // drawEdgeLabels(textProps) {
+    //     const w = this.width
+    //     const h = this.height
+    //     const top = this.wtop().toString()
+    //     const left = this.wleft().toString()
+    //     const right = this.wright().toString()
+    //     const bottom = this.wbottom().toString()
+    //     return gxmlStr([
+    //         this.textBeg(20, 10, top, textProps),
+    //         this.textEnd(w-20, 10, top, textProps),
             
-            this.textEnd(5, 10, left, textProps),
-            this.textBeg(w-10, 10, right, textProps),
+    //         this.textEnd(5, 10, left, textProps),
+    //         this.textBeg(w-10, 10, right, textProps),
             
-            this.textBeg(5, h/2, left, textProps),
-            this.textBeg(w-10, h/2, right, textProps),
+    //         this.textBeg(5, h/2, left, textProps),
+    //         this.textBeg(w-10, h/2, right, textProps),
         
-            this.textBeg(20, h-5, bottom, textProps),
-            this.textBeg(w-20, h-5, bottom, textProps),
+    //         this.textBeg(20, h-5, bottom, textProps),
+    //         this.textBeg(w-20, h-5, bottom, textProps),
         
-            this.textBeg(5, h-10, left, textProps),
-            this.textBeg(w-10, h-10, right, textProps),
-        ])
+    //         this.textBeg(5, h-10, left, textProps),
+    //         this.textBeg(w-10, h-10, right, textProps),
+    //     ])
+    // }
+
+    addGridLines(eastStep, northStep, decimals=0,
+        lineProps={stroke: 'white'},
+        textProps={stroke: 'black', 'font-size':16}) {
+        let {north, south, east, west} = this.bounds
+        const ml = 10 * this.scale.upp
+        const mr = -ml
+        const els = []
+        // north-south longitudinal lines with laebls at top and bottom
+        for(let e=west; e<=east; e+=eastStep) {
+            els.push(this.line(e, south, e, north, lineProps))
+            if (e>west && e<east) {
+                els.push(this.textMid(e, south, e.toFixed(decimals),
+                    {...textProps, 'alignment-baseline': 'after-edge'}))
+                els.push(this.textMid(e, north, e.toFixed(decimals),
+                    {...textProps, 'alignment-baseline': 'before-edge'}))
+            }
+        }
+        // west-east latitudinal lines
+        for(let n=south; n<=north; n+=northStep) {
+            els.push(this.line(west, n, east, n, lineProps))
+            if (n>south && n<north) {
+                els.push(this.textBeg(west+ml, n, n.toFixed(decimals),
+                    {...textProps, 'alignment-baseline': 'middle'}))
+                els.push(this.textEnd(east+mr, n, n.toFixed(decimals),
+                    {...textProps, 'alignment-baseline': 'middle'}))
+            }
+        }
+        return gxmlStr(els)
     }
 }

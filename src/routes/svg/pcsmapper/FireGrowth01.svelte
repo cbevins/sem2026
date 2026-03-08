@@ -1,5 +1,8 @@
 <script>
     import { onMount } from 'svelte'
+    import Button from './GlowButton.svelte'
+    // import Button from './OrangeButton.svelte'
+
     import {FireGrowth01Model} from './FireGrowth01Model.js'
     import {FireGrowth01Pcs} from './FireGrowth01Pcs.js'
     import {FireGrowth01View} from './FireGrowth01View.js'
@@ -40,8 +43,8 @@
     let animation = $state('waiting') // 'waiting', 'running', 'paused', finished'
     let animButton = $state('Run')
     let frame = $state(0)
-    let speed = $state(1000)
-    const frames = 5
+    let speed = $state(50)  // msec
+    const frames = 500
     function pause() { 
         if (frame===frames) frame = 0
         if (animation === 'running') {
@@ -84,8 +87,8 @@
     //--------------------------------------------------------------------------
     // Model & View - uses controller state to change Model and any of its Views
     //--------------------------------------------------------------------------
-    let spreadRate = $state(10)
-    let elapsedTime = $state(10)
+    let spreadRate = $state(1)
+    let elapsedTime = $state(1)
 
     let pcs = $derived(new FireGrowth01Pcs(svgWidth, svgHeight, unitsPerPixel))
     let model = $derived(new FireGrowth01Model(spreadRate, elapsedTime))
@@ -105,31 +108,24 @@
 
     <div class='mt-4 border rounded'>
         {@render viewData(view)}
-        <div class='mx-2 my-2 border rounded'>
+        <div class='mx-2 my-2 py-1 border rounded'>
             <div class='ml-2 mt-1'>
-                Zoom Level {svgLevel}
-                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={doubleSvg}>Zoom In (2*SVG)</button>
-                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={halveSvg}>Zoom Out (SVG/2)</button>
+                <Button label="Zoom In (2*SVG)" handler={doubleSvg}/>
+                <Button label='Zoom Out (2*SVG/2)' handler={halveSvg}/>
+                <span>Current Zoom Level {svgLevel}</span>
             </div>
             <div class='ml-2 mt-1'>
-                Units per pixel: {unitsPerPixel}
-                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={halveUpp}>Halve Upp</button>
-                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={doubleUpp}>Double Upp</button>
-                <div class='text-xs'>(The above aren't that useful without pan controls)</div>
+                <Button label='Halve Upp' handler={halveUpp}/>
+                <Button label='Double Upp' handler={doubleUpp}/>
+                <span>Units per pixel: {unitsPerPixel}</span>
+                <span class='text-xs'>(&lt;- Not very useful without pan controls)</span>
             </div>
             
             <div class='ml-2 mt-1'>
-                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={pause}>{animButton}</button>
-                Frame {frame} of {frames} at 1 frame per {speed} msec
-                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={faster}>Faster</button>
-                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={slower}>Slower</button>
+                <Button label={animButton} handler={pause}/>
+                <Button label='Faster' handler={faster}/>
+                <Button label='Slower' handler={slower}/>
+                <span>Frame {frame}/{frames} at {1000/speed} fps</span>
             </div>
         </div>
 

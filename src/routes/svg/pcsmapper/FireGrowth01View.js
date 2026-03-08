@@ -13,21 +13,25 @@ export class FireGrowth01View extends PcsMapper {
     }
     
     content(frame) {
-        const textProps = {stroke: 'black', 'font-size':16}
-        let str = this.addBoundsRect({fill:'gray'})
+        let str = this.addBoundsRect({fill:'khaki'})
             + this.addPerimeter(frame)
-            + this.addCentralAxis({stroke: 'green', 'stroke-width': 4}, textProps)
+            + this.addGridLines(100, 100, 0)
         this.svgContent = str
         return str
     }
 
     addPerimeter(frame) {
-        // const textProps = {stroke: 'black', 'font-size':16, 'text-anchor':'middle'}
         const {ign, rate, time} = this.model
-        const els = []
         const radius = rate * time * frame
-        els.push(this.circle(ign.east, ign.north, radius,
-            {fill: 'red', stroke: 'yellow'}))
-        return gxmlStr(els)
+        let str = '<defs>'
+        str += '<radialGradient id="fire1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">'
+        str += '<stop offset="80%" stop-color="slategray" />'
+        str += '<stop offset="90%" stop-color="red" />'
+        str += '<stop offset="100%" stop-color="yellow" />'
+        str += '</radialGradient>'
+        str += '</defs>'
+        str += gxmlStr(this.circle(ign.east, ign.north, radius,
+            {fill: 'url(#fire1)'}))
+        return str
     }
 }

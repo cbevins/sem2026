@@ -1,4 +1,4 @@
-export class PcsModelDemo1 {
+export class PcsDemo01Pcs {
     constructor(svgWidth, svgHeight, unitsPerPixel) {
         this.width = svgWidth
         this.height = svgHeight

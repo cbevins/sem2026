@@ -39,6 +39,13 @@ export class PcsMapper {
     content() {
         throw new Error('Classes derived from PcsViewport must re-implement their own content() method.')
     }
+    
+    viewbox() {
+        const {svg, bounds} = this
+        const x = (svg.width - bounds.width) / 2
+        const y = (svg.height - bounds.height) / 2
+        return `${x} ${y} ${bounds.width} ${bounds.height}`
+    }
 
     //--------------------------------------------------------------------------
     // Methods used by clients to draw at various coordinates
@@ -114,18 +121,20 @@ export class PcsMapper {
     // All these return SVG strings
     //--------------------------------------------------------------------------
     addCentralAxis(lineProps, textProps) {
-        const mx = this.svg.width / 2
-        const my = this.svg.height / 2
-        const rotateTop = `rotate(270,${mx+8},10)`
-        const rotateBot = `rotate(270,${mx+8},${this.svg.height-2})`
-
+        const {north, south, east, west} = this.bounds
+        const midEast = west+(east-west)/2
+        const midNorth = south + (north-south)/2
+        const mt = -20 * this.scale.upp
+        const mb = 10 * this.scale.upp
+        const ml = 10 * this.scale.upp
+        const mr = -ml
         return gxmlStr([
-            this.line(this.west(), this.focus.north, this.east(), this.focus.north, lineProps),
-            this.line(this.focus.east, this.south(), this.focus.east, this.north(), lineProps),
-            this.svgText(2, my-4, this.west().toFixed(0), {...textProps, 'text-anchor': 'start'}),
-            this.svgText(this.svg.width-2, my-4, this.east().toFixed(0), {...textProps, 'text-anchor':'end'}),
-            this.svgText(mx-8, -2, this.north().toFixed(0), {...textProps, transform: rotateTop}),
-            this.svgText(mx+8, this.svg.height-14, this.south().toFixed(0), {...textProps, transform: rotateBot}),
+            this.line(west, this.focus.north, east, this.focus.north, lineProps),
+            this.line(this.focus.east, south, this.focus.east, north, lineProps),
+            this.textBeg(west+ml, midNorth, west.toFixed(0), textProps),
+            this.textEnd(east+mr, midNorth, east.toFixed(0), textProps),
+            this.textMid(midEast, north+mt, north.toFixed(0), textProps),
+            this.textMid(midEast, south+mb, south.toFixed(0), textProps),
         ])
     }
 

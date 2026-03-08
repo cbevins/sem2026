@@ -5,7 +5,7 @@
     import {FireGrowth01View} from './FireGrowth01View.js'
 
     //--------------------------------------------------------------------------
-    // Controller state and handlers
+    // View controller state and handlers
     //--------------------------------------------------------------------------
     
     let svgWidth = $state(500)
@@ -13,14 +13,6 @@
     let svgLevel = $state(0)
     let uppLevel = $state(1)
     let unitsPerPixel = $state(1)
-
-    let paused = $state(true)
-    let frame = $state(0)
-    const frames = 5
-    function pause() { 
-        if (frame===frames) frame = 0
-        paused = !paused
-    }
 
     function doubleSvg() {
         svgLevel = svgLevel + 1
@@ -40,6 +32,54 @@
         uppLevel = uppLevel - 1
         unitsPerPixel = 2 * unitsPerPixel
     }
+
+    //--------------------------------------------------------------------------
+    // Animation controller state and handlers
+    //--------------------------------------------------------------------------
+    
+    let animation = $state('waiting') // 'waiting', 'running', 'paused', finished'
+    let animButton = $state('Run')
+    let frame = $state(0)
+    let speed = $state(1000)
+    const frames = 5
+    function pause() { 
+        if (frame===frames) frame = 0
+        if (animation === 'running') {
+            animation = 'paused'
+            animButton = 'Resume'
+        } else { // if (animation === 'waiting' || animation === 'paused' || animation === 'finished') {
+            animation = 'running'
+            animButton = 'Pause'
+        }
+    }
+    function faster() {
+        speed = speed / 2
+        startLoop()
+    }
+    function slower() {
+        speed = 2* speed
+        startLoop()
+    }
+    function runFrame() {
+        if (animation === 'running') {
+            if (frame < frames) {
+                frame = frame + 1
+            } else {
+                animation = 'finished'
+                animButton = 'Run Again'
+            }
+        }
+    }
+    let intervalId = null
+    function startLoop() {
+        // Clear any existing interval before starting a new one
+        if (intervalId) clearInterval(intervalId)
+        intervalId = setInterval(runFrame, speed)
+    }
+	onMount(() => {
+        startLoop()
+		return () => {clearInterval(intervalId)}
+	})
     
     //--------------------------------------------------------------------------
     // Model & View - uses controller state to change Model and any of its Views
@@ -51,25 +91,6 @@
     let model = $derived(new FireGrowth01Model(spreadRate, elapsedTime))
     let view = $derived(new FireGrowth01View(pcs, model, frames))
     let content = $derived(view.content(frame))
-
-    //--------------------------------------------------------------------------
-    // Animation
-    //--------------------------------------------------------------------------
-	onMount(() => {
-		const interval = setInterval(() => {
-            if (! paused) {
-                if (frame < frames) {
-			        frame = frame + 1
-                } else {
-                    paused = true
-                    // frame = 0
-                }
-            }
-		}, 1000)
-
-		return () => {clearInterval(interval)}
-	})
-
 </script>
 
 <div class='ml-4 mt-4 mb-4'>
@@ -88,9 +109,10 @@
             <div class='ml-2 mt-1'>
                 Zoom Level {svgLevel}
                 <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={doubleSvg}>Zoom In (double SVG size)</button>
+                    onclick={doubleSvg}>Zoom In (2*SVG)</button>
                 <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                    onclick={halveSvg}>Zoom Out (halve SVG size)</button>
+                    onclick={halveSvg}>Zoom Out (SVG/2)</button>
+            </div>
             <div class='ml-2 mt-1'>
                 Units per pixel: {unitsPerPixel}
                 <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
@@ -99,11 +121,16 @@
                     onclick={doubleUpp}>Double Upp</button>
                 <div class='text-xs'>(The above aren't that useful without pan controls)</div>
             </div>
-        </div>
-        
-            <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
-                onclick={pause}>{paused? 'Run' : 'Pause'}</button>
-            Frame {frame} of {frames}
+            
+            <div class='ml-2 mt-1'>
+                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
+                    onclick={pause}>{animButton}</button>
+                Frame {frame} of {frames} at 1 frame per {speed} msec
+                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
+                    onclick={faster}>Faster</button>
+                <button class='px-2 mt-1 mb-1 border rounded text-md bg-blue-300'
+                    onclick={slower}>Slower</button>
+            </div>
         </div>
 
         <div class="w-lg h-128 overflow-auto border border-gray-400">

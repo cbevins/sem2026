@@ -13,9 +13,10 @@ export class FireGrowth01View extends PcsMapper {
     }
     
     content(frame) {
+        const poi = {east: 250, north: 250, type: 'building', burned: 0}
         let str = this.addBoundsRect({fill:'khaki'})
             + this.addPerimeter(frame)
-            + this.addBuilding(250, 250)
+            + this.addBuilding(poi, frame)
             + this.addGridLines(100, 100, 0)
         this.svgContent = str
         return str
@@ -37,18 +38,32 @@ export class FireGrowth01View extends PcsMapper {
         )
         return str
     }
-    addBuilding(easting, northing) {
-        const lineProps = {stroke: 'black'}
+    addBuilding(poi, frame) {
+        const {east, north, burned, type} = poi
+        const {ign, rate, time} = this.model
+        const radius = (rate * time * frame)**2
+        const dist = (ign.east-east)**2 + (ign.north-north)**2
+        const arrived = (radius >= dist)
+        if (arrived && !poi.burned) {
+            poi.burned = time * frame
+            console.log(`${type} burned at time ${time*frame}`)
+        }
+        const color = (burned) ? 'brown' : 'black'
+        const lineProps = {stroke: color}
         const dim = 10
         const els = [
-            this.circle(easting, northing, 5, {fill: 'red'}),
-            this.line(easting-dim, northing-dim, easting-dim, northing+dim, lineProps),
-            this.line(easting+dim, northing-dim, easting+dim, northing+dim, lineProps),
-            this.line(easting-dim, northing+dim, easting+dim, northing+dim, lineProps),
-            this.line(easting-dim, northing-dim, easting+dim, northing-dim, lineProps),
-            this.line(easting-dim, northing+dim, easting, northing+2*dim, lineProps),
-            this.line(easting+dim, northing+dim, easting, northing+2*dim, lineProps),
+            this.circle(east, north, 5, {fill: 'red'}),
+            this.line(east-dim, north-dim, east-dim, north+dim, lineProps),
+            this.line(east+dim, north-dim, east+dim, north+dim, lineProps),
+            this.line(east-dim, north+dim, east+dim, north+dim, lineProps),
+            this.line(east-dim, north-dim, east+dim, north-dim, lineProps),
+            this.line(east-dim, north+dim, east, north+2*dim, lineProps),
+            this.line(east+dim, north+dim, east, north+2*dim, lineProps),
         ]
+        if (poi.burned) {
+            els.push(this.line(east-2*dim, north-2*dim, east+2*dim, north+2*dim, lineProps))
+            els.push(this.line(east+2*dim, north-2*dim, east-2*dim, north+2*dim, lineProps))
+        }
         return gxmlStr(els)
     }
 }

@@ -15,6 +15,7 @@ export class FireGrowth01View extends PcsMapper {
     content(frame) {
         let str = this.addBoundsRect({fill:'khaki'})
             + this.addPerimeter(frame)
+            + this.addBuilding(250, 250)
             + this.addGridLines(100, 100, 0)
         this.svgContent = str
         return str
@@ -30,8 +31,24 @@ export class FireGrowth01View extends PcsMapper {
         str += '<stop offset="100%" stop-color="yellow" />'
         str += '</radialGradient>'
         str += '</defs>'
-        str += gxmlStr(this.circle(ign.east, ign.north, radius,
-            {fill: 'url(#fire1)'}))
+        str += gxmlStr([
+            this.circle(ign.east, ign.north, radius, {fill: 'url(#fire1)'}),
+            this.circle(ign.east, ign.north, 5, {fill: 'red'})]
+        )
         return str
+    }
+    addBuilding(easting, northing) {
+        const lineProps = {stroke: 'black'}
+        const dim = 10
+        const els = [
+            this.circle(easting, northing, 5, {fill: 'red'}),
+            this.line(easting-dim, northing-dim, easting-dim, northing+dim, lineProps),
+            this.line(easting+dim, northing-dim, easting+dim, northing+dim, lineProps),
+            this.line(easting-dim, northing+dim, easting+dim, northing+dim, lineProps),
+            this.line(easting-dim, northing-dim, easting+dim, northing-dim, lineProps),
+            this.line(easting-dim, northing+dim, easting, northing+2*dim, lineProps),
+            this.line(easting+dim, northing+dim, easting, northing+2*dim, lineProps),
+        ]
+        return gxmlStr(els)
     }
 }

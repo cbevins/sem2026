@@ -126,7 +126,6 @@
 
         <div class="w-lg h-128 overflow-auto border border-gray-400">
             <svg width={view.svg.width} height={view.svg.height} viewBox='{view.viewbox()}'>
-                // eslint-disable-next-line svelte/no-at-html-tags
                 {@html content}
             </svg>
         </div>

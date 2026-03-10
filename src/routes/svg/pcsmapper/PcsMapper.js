@@ -185,8 +185,8 @@ export class PcsMapper {
     // }
 
     addGridLines(eastStep, northStep, decimals=0,
-        lineProps={stroke: 'white'},
-        textProps={stroke: 'black', 'font-size':16}) {
+            lineProps={stroke: 'white', opacity: '50%'},
+            textProps={stroke: 'black', 'font-size':16}) {
         let {north, south, east, west} = this.bounds
         const ml = 10 * this.scale.upp
         const mr = -ml

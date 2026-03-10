@@ -7,6 +7,10 @@
         brief: 'Class and demo of creating pannable/zoomable SVG content '
         + 'based on project coordinate eastings, northings, and bearings.',
     },{
+        route: '/svg/bearing',
+        title: 'PCS Easting, Northing, Bearing Demo',
+        brief: 'Demo and test'
+    },{
         route: '/svg/eventfulsvg',
         title: 'EventfulSvg',
         brief: 'A component responds to both (a) mouse and keyboard events on its SVG '

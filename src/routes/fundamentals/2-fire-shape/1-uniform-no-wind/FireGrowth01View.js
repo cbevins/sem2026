@@ -46,7 +46,7 @@ export class FireGrowth01View extends PcsMapper {
         const arrived = (radius >= dist)
         if (arrived && !poi.burned) {
             poi.burned = time * frame
-            console.log(`${type} burned at time ${time*frame}`)
+            // console.log(`${type} burned at time ${time*frame}`)
         }
         const color = (burned) ? 'brown' : 'black'
         const lineProps = {stroke: color}

@@ -67,6 +67,24 @@ export class PcsMapper {
     easting(svgX) { return this.west() + (this.scale.upp *svgX) }
     northing(svgY) { return this.north() - (this.scale.upp * svgY) }
 
+    // Returns bearing from north between 2 PCS coordinate pairs
+    bearing(easting1, northing1, easting2, northing2) {
+        let dy = northing2 - northing1
+        let dx = easting2 - easting1
+        let angle = Math.atan2(dy, dx) * 180 / Math.PI
+        let bearing = (450 - angle) % 360
+        return bearing
+    }
+
+    // Returns {east, north} coordinates of vector at some distance
+    vectorEndpoint(easting, northing, bearing, distance) {
+        const radians = bearing * Math.PI / 180
+        return {
+            east: easting + distance * Math.sin(radians),
+            north: northing + distance * Math.cos(radians)
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Gxml convenience funcions: all these return Gxml elements, not strings!
     //--------------------------------------------------------------------------
@@ -146,14 +164,6 @@ export class PcsMapper {
         }
         return gxmlStr([{el: 'rect', x:0, y:0,
             width: this.svg.width, height: this.svg.height, ...props}])
-    }
-
-    bearingEndpoint(easting, northing, bearing, distance) {
-        const radians = bearing * Math.PI / 180
-        return {
-            east: easting + distance * Math.sin(radians),
-            north: northing + distance * Math.cos(radians)
-        }
     }
 
     // Draws units per pixel and viewport center point in world coordinates

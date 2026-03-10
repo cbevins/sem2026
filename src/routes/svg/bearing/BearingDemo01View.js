@@ -32,14 +32,6 @@ export class BearingDemo01View extends PcsMapper {
         return gxmlStr(els)
     }
 
-    bearingEndpoint(easting, northing, bearing, distance) {
-        const radians = bearing * Math.PI / 180
-        return {
-            east: easting + distance * Math.sin(radians),
-            north: northing + distance * Math.cos(radians)
-        }
-    }
-
     content() {
         const distance = 150
         const e = 300

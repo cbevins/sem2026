@@ -148,6 +148,14 @@ export class PcsMapper {
             width: this.svg.width, height: this.svg.height, ...props}])
     }
 
+    bearingEndpoint(easting, northing, bearing, distance) {
+        const radians = bearing * Math.PI / 180
+        return {
+            east: easting + distance * Math.sin(radians),
+            north: northing + distance * Math.cos(radians)
+        }
+    }
+
     // Draws units per pixel and viewport center point in world coordinates
     drawCenterScale(textProps) {
         const upp = `${this.upp} ${this.units} per pixel`

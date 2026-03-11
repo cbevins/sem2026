@@ -1,7 +1,7 @@
 /* eslint-disable svelte/no-at-html-tags */
 <script>
     import { onMount } from 'svelte'
-    import Button from './GlowButton.svelte'
+    import {GlowButton as Button} from '$lib/index.js'
     // Uses the same [0,0] origin PCS as FireGrowth01
     import {FireGrowth01Pcs} from './FireGrowth01Pcs.js'
     // But uses its own Model, View, and Text

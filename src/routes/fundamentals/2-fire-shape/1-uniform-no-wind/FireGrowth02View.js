@@ -1,4 +1,4 @@
-import { PcsMapper } from "$lib/fire/PcsMapper.js"
+import { PcsMapper } from "$lib/fundamentals/PcsMapper.js"
 import { gxmlStr } from "$lib/gxml/gxmlStr.js"
 
 export class FireGrowth02View extends PcsMapper {

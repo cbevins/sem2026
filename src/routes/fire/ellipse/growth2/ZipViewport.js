@@ -1,4 +1,4 @@
-import { EventfulViewport } from "./EventfulViewport.js"
+import { EventfulViewport } from "./EventfulViewportV2.js"
 import { gxmlStr } from "$lib/gxml/gxmlStr.js"
 
 export class ZipViewport extends EventfulViewport {

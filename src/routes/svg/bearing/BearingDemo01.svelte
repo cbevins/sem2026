@@ -1,5 +1,5 @@
 <script>
-    import Button from './GlowButton.svelte'
+    import {GlowButton as Button} from '$lib/index.js'
     import {BearingDemo01Pcs} from './BearingDemo01Pcs.js'
     import {BearingDemo01View} from './BearingDemo01View.js'
 

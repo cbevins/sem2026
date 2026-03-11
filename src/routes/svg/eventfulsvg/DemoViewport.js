@@ -1,4 +1,4 @@
-import {EventfulViewport} from '$lib/index.js'
+import { EventfulViewport } from '$lib/index.js'
 
 export class DemoViewport extends EventfulViewport {
     constructor(svgWidth, svgHeight) {

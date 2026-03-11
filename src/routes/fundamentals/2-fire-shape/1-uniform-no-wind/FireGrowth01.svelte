@@ -1,7 +1,7 @@
 /* eslint-disable svelte/no-at-html-tags */
 <script>
     import { onMount } from 'svelte'
-    import Button from './GlowButton.svelte'
+    import {GlowButton as Button} from '$lib/index.js'
     import {FireGrowth01Model} from './FireGrowth01Model.js'
     import {FireGrowth01Pcs} from './FireGrowth01Pcs.js'
     import {FireGrowth01View} from './FireGrowth01View.js'

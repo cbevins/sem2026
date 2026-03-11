@@ -7,6 +7,7 @@ export { EventfulViewport } from './viewport/EventfulViewport.js'
 export { Viewport } from './viewport/Viewport.js'
 
 export { gxmlStr } from './gxml/gxmlStr.js'
+export { FireGeometry } from './fundamentals/FireGeometry.js'
 export { PcsMapper } from './fundamentals/PcsMapper.js'
 export { table } from './utils/terminal.js'
 

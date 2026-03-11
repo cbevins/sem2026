@@ -11,6 +11,10 @@
         title: 'PCS Easting, Northing, Bearing Demo',
         brief: 'Demo and test'
     },{
+        route: '/svg/normal-to-tangent',
+        title: 'Fire Perimeter Point Normal-to-Tangent Demo',
+        brief: 'Demo and test'
+    },{
         route: '/svg/eventfulsvg',
         title: 'EventfulSvg',
         brief: 'A component responds to both (a) mouse and keyboard events on its SVG '

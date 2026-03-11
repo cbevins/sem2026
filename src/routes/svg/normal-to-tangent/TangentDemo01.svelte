@@ -1,8 +1,8 @@
 <script>
     import {GlowButton as Button} from '$lib/index.js'
-    import {BearingDemo01Pcs} from './BearingDemo01Pcs.js'
-    import {BearingDemo01Model} from './BearingDemo01Model.js'
-    import {BearingDemo01View} from './BearingDemo01View.js'
+    import {TangentDemo01Pcs} from './TangentDemo01Pcs.js'
+    import {TangentDemo01Model} from './TangentDemo01Model.js'
+    import {TangentDemo01View} from './TangentDemo01View.js'
 
     //--------------------------------------------------------------------------
     // Controller state and handlers
@@ -27,15 +27,15 @@
     //--------------------------------------------------------------------------
     // Model & View - uses controller state to change Model and any of its Views
     //--------------------------------------------------------------------------
-    let pcs = $derived(new BearingDemo01Pcs(svgWidth, svgHeight, unitsPerPixel))
-    let model = $derived(new BearingDemo01Model())
-    let view = $derived(new BearingDemo01View(pcs, model))
+    let pcs = $derived(new TangentDemo01Pcs(svgWidth, svgHeight, unitsPerPixel))
+    let model = $derived(new TangentDemo01Model())
+    let view = $derived(new TangentDemo01View(pcs, model))
     let content = $derived(view.content())
 </script>
 
 <div class='ml-4 mt-4 mb-4'>
     <div class='text-xl border rounded bg-gray-300'>
-        PCSMapper Easting, Northing, Bearing Demo
+        Fire Perimeter Point Normal-to-Tangent Demo
     </div>
 
     <div class='mx-2 my-2 py-1 border rounded'>

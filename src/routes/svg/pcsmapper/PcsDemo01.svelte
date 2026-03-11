@@ -1,8 +1,8 @@
 <script>
-    import {P} from '$lib/index.js'
-    import {PcsDemo01Model} from './PcsDemo01Model.js'
-    import {PcsDemo01Pcs} from './PcsDemo01Pcs.js'
-    import {PcsDemo01View} from './PcsDemo01View.js'
+    import { P } from '$lib/index.js'
+    import { PcsDemo01Model } from './PcsDemo01Model.js'
+    import { PcsDemo01Pcs } from './PcsDemo01Pcs.js'
+    import { PcsDemo01View } from './PcsDemo01View.js'
 
     //--------------------------------------------------------------------------
     // Controller state and handlers

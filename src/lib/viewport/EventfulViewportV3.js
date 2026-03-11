@@ -95,7 +95,6 @@ export class EventfulViewport {
     }
     
     // Moves the clicked location to the image center
-    // eslint-disable-next-line no-unused-vars
     click(xy) {
         if(this.controller.zone) return this.handleControllerClick(xy)
         return false

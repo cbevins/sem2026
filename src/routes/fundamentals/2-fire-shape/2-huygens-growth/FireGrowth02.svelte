@@ -2,9 +2,7 @@
 <script>
     import { onMount } from 'svelte'
     import {GlowButton as Button} from '$lib/index.js'
-    // Uses the same [0,0] origin PCS as FireGrowth01
-    import {FireGrowth01Pcs} from './FireGrowth01Pcs.js'
-    // But uses its own Model, View, and Text
+    import {FireGrowth02Pcs} from './FireGrowth02Pcs.js'
     import {FireGrowth02Model} from './FireGrowth02Model.js'
     import {FireGrowth02View} from './FireGrowth02View.js'
     import FireGrowth02Text from './FireGrowth02Text.svelte'
@@ -91,7 +89,7 @@
     // Model & View - uses controller state to change Model and any of its Views
     //--------------------------------------------------------------------------
 
-    let pcs = $derived(new FireGrowth01Pcs(svgWidth, svgHeight, unitsPerPixel))
+    let pcs = $derived(new FireGrowth02Pcs(svgWidth, svgHeight, unitsPerPixel))
     let model = $derived(new FireGrowth02Model(200, 50, degStep, 0, 0))
     let view = $derived(new FireGrowth02View(pcs, model, frames))
     let content = $derived(view.content(degStep, frame))

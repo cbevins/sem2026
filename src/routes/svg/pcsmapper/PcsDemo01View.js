@@ -1,5 +1,5 @@
-import { PcsMapper } from "./PcsMapper.js"
-import { gxmlStr } from "$lib/gxml/gxmlStr.js"
+import { PcsMapper } from "$lib/index.js"
+import { gxmlStr } from "$lib/index.js"
 
 export class PcsDemo01View extends PcsMapper {
     constructor(pcs, model) {

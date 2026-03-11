@@ -94,6 +94,7 @@ export class CoordinatesViewport extends EventfulViewport {
 
         const els = []
         for(let i=0; i<this.points.length; i++) {
+            // eslint-disable-next-line no-unused-vars
             let {x, y, e, n, idx, an, ap, bn, bp, next, prev} = this.points[i]
             els.push(this.circle(this.px(x), this.py(y), 8, 'red'))
             els.push(this.line(this.px(x), this.py(y),

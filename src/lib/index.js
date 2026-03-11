@@ -6,6 +6,7 @@ export{ Stem, Leaf } from './stem-leaf/StemLeaf.js'
 export { EventfulViewport } from './viewport/EventfulViewport.js'
 export { Viewport } from './viewport/Viewport.js'
 
+export {PcsMapper} from './fire/PcsMapper.js'
 export { table } from './utils/terminal.js'
 
 // Svelte markup

@@ -1,5 +1,5 @@
 export class FireGrowth01Model {
-    constructor(spreadRate=10, elapsedTime=10, ignEast=0, ignNorth=0) {
+    constructor(spreadRate=1, elapsedTime=1, ignEast=0, ignNorth=0) {
         this.rate = spreadRate
         this.time = elapsedTime
         this.ign = {east: ignEast, north: ignNorth}

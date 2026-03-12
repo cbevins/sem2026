@@ -10,6 +10,9 @@ export { gxmlStr } from './gxml/gxmlStr.js'
 export { FireGeometry } from './fundamentals/FireGeometry.js'
 export { PcsMapper } from './fundamentals/PcsMapper.js'
 export { table } from './utils/terminal.js'
+export { expandPoint, expandPerim, midPoint, pointSide, side,
+    vectorEndpoint, vectorBearing, perimSeedPoints, segmentSeedPoints,
+    isColinear, isLeft, isRight } from './fundamentals/PerimeterGrowth.js'
 
 // Svelte markup
 export { default as ClassName} from './markup/ClassName.svelte'

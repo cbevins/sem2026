@@ -2,8 +2,8 @@ import { FireGeometry } from "$lib/index.js"
 export class TangentDemo01Model {
     constructor() {
         this.triplets = [
-            [[100, 100], [200, 100], [200, 200]],
-            [[100, 400], [400, 200], [300, 200]]
+            [{east: 100, north: 100}, {east: 200, north: 100}, {east: 200, north: 200}],
+            [{east: 100, north: 400}, {east: 400, north: 200}, {east: 300, north: 200}]
         ]
         this.constructCircularPerim(0, 0, 300, 15)
     }

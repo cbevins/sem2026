@@ -127,6 +127,19 @@ export class TangentDemo01View extends PcsMapper {
             const {east, north} = seedPts[i]
             els.push(this.circle(east, north, 6, seedDot))
         }
+
+        // Fill on the expansion polygons
+        let j = perim0.length-1
+        for(let i=0; i<perim0.length; i++) {
+            let points = ''
+            for (let p of [perim0[j], perim0[i], perim1[i], perim1[j]]) {
+                points += `${this.px(p.east)}, ${this.py(p.north)} `
+            }
+            els.push({el: 'polygon', points, fill:'yellow', stroke: 'black',
+                opacity: '20%'
+            })
+            j=i
+        }
         return gxmlStr(els)
     }
 }

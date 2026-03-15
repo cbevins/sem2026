@@ -2,6 +2,11 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     const title = 'Fire Ellipse Demos'
     const items = [{
+        route: '/fire/perimeter-growth',
+        title: 'Fire Perimeter Growth Demo - 3/12/26',
+        brief: 'Each fire perimeter point is expanded in a direction determined by'
+            + ' the midpoint of the line segment connecting the previous and next perimeter point.'
+    },{
         route: '/fire/ellipse/growth2',
         title: 'Fire Growth Attempt - 2/23/26',
         brief: 'Initial attempts at fire perimeter expansion modeling.'

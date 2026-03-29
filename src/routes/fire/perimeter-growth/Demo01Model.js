@@ -1,4 +1,6 @@
 import { vectorEndpoint } from "$lib/index.js"
+import { regularPolygon } from "./gjlib"
+
 export class Demo01Model {
     constructor() {
         this.triplets = [
@@ -6,6 +8,8 @@ export class Demo01Model {
             [{east: 100, north: 400}, {east: 400, north: 200}, {east: 300, north: 200}]
         ]
         this.constructCircularPerim(0, 0, 300, 15)
+        this.gj = regularPolygon([0,0], 72, 300)
+        console.log(this.gj)
     }
 
     constructCircularPerim(ctrEast, ctrNorth, radius, degStep=15) {

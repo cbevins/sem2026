@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import FireFront from './FireFront.svelte'
 </script>
 

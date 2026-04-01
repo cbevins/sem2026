@@ -1,8 +1,11 @@
 /**
- * Simply generates some starting fire peimeter points {x,y}
- * where x is an easting and y is a northing
+ * Generates perimeter points at regular theta angles ('degStep')
+ * given a fire ellipse length-to-width ratio, bearing from north, head spread rate,
+ * elpased time since ignition, and its ignition point easting and northing.
+ * 
+ * The 'points' member is an aray of [easting, northing, bearing] arrays
 */
-import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
+import {FireEllipseMod} from './FireEllipseMod.js'
 // import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
 
 export class FirePerimeterGenerator {
@@ -43,7 +46,7 @@ export class FirePerimeterGenerator {
         for(let deg=0; deg<=360; deg+=this.degStep) {
             vector.bearing.set(deg)
             this.ellipse.updateAll()
-            pts.push({deg, x: vector.perim.east.get(), y: vector.perim.north.get()})
+            pts.push([vector.perim.east.get(), vector.perim.north.get(), deg])
         }
         return pts
     }

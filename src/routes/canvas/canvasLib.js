@@ -24,6 +24,28 @@ export function aByte(imageData, col, row) {
     return imageData.data[aindex(imageData, col, row)]
 }
 
+// 'data' is an array of [cmd, x, y] where cmd of 0  is MOVE, 1 is LINE
+export function path(ctx, data) {
+    for(let [cmd, x, y] of data) {
+        if (cmd) ctx.lineTo(x, y)
+        else ctx.moveTo(x, y)
+    }
+}
+
+export function fillPath(ctx, style, data) {
+    ctx.fillStyle = style
+    ctx.beginPath()
+    path(ctx, data)
+    ctx.fill()
+}
+
+export function strokePath(ctx, style, data) {
+    ctx.strokeStyle = style
+    ctx.beginPath()
+    path(ctx, data)
+    ctx.stroke()
+}
+
 export function rgbaNeighbors(imageData, col, row, radius=1) {
     const data = imageData.data
     const hood = []

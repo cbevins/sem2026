@@ -1,10 +1,10 @@
-import {FireEllipseMod} from '$lib/fire/ellipse/FireEllipseMod.js'
-import { addBearings } from './Geometry.js'
-
 /**
  * Generates fire ellipse perimeter points at regular beta, theta, and psi angle intervals
  */
-export class FirePerimeterGenerator {
+import {FireEllipseMod} from './FireEllipseMod.js'
+import { addBearings } from './Geometry.js'
+
+export class FirePerimeterGenerator3 {
     constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, degStep=5, src='angle') {
         this.bearing = bearing
         this.degStep = degStep

@@ -87,7 +87,7 @@ export class FireEllipseMod extends DagModule {
             new FireVectorMod('theta'),
         )
         const str = (configVector==='head') ? 'fire head' : 'north'
-        console.log(`FireEllipseMod beta, psi, and theta angles are input as degrees clockwise from ${str}.`)
+        // console.log(`FireEllipseMod beta, psi, and theta angles are input as degrees clockwise from ${str}.`)
         this.assignUpdaters(configVector)
     }
 

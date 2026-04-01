@@ -1,4 +1,4 @@
-# Fire Ellipse Peimeter Points
+# Fire Ellipse Perimeter Points
 
 ## Determing Perimeter Points
 

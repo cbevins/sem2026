@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import GridPaths from './GridPaths.svelte'
 </script>
 

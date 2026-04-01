@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte"
-    import {drawEllipse, rgbaNeighbors, rByte, rindex} from './canvasLib.js'
-    import Neighbors from './Neighbors.svelte'
+    import {drawEllipse, rgbaNeighbors, rByte, rindex} from '../canvasLib.js'
+    import Neighbors from '../Neighbors.svelte'
 
     let {width=512, height=512} = $props()
 

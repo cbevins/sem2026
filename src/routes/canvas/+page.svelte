@@ -1,11 +1,26 @@
-<script lang="ts">
-    // import FireFront from './FireFront.svelte'
-    import GridPaths from './GridPaths.svelte'
-    // import D3GeoJson from './D3GeoJson.svelte'
-    // import GeoJson2Canvas from './GeoJson2Canvas.svelte'
+<script>
+    import MenuPage from "$lib/svelte/MenuPage.svelte"
+    const title = 'Canvas Fire Growth Demos'
+    const items = [{
+        route: '/canvas/d3-geojason',
+        title: 'D3 GeoJSON World Map on HTML Canvas (3/20/2026)',
+        brief: 'Using D3 to project and plot GeoJSON a world map.',
+    },{
+        route: '/canvas/fire-front',
+        title: 'Fire Front Detection Using HTML Canvas (3/20/2026)',
+        brief: 'Initial attempts at fire perimeter expansion modeling.'
+    },{
+        route: '/canvas/geojson-to-canvas',
+        title: 'GeoJSON Polygon to HTML Canvas (3/20/26)',
+        brief: 'Drawing a GeoJSON ellipse on an HTML canvas.'
+    },{
+        route: '/canvas/grid-paths',
+        title: 'Canvas Grid Line-of-Sight Paths (3/25/2026)',
+        brief: 'Demo of line-of-site paths from grid central cell.',
+    },{
+        route: '/canvas/ellipse-scan-lines',
+        title: 'Ellipse Scan Lines for HTML Canvas (4/1/2026)',
+        brief: 'Demo of rotated fire ellipse scan lines',
+    }]
 </script>
-
-<GridPaths width={512} height={512}/>
-<!-- <FireFront width={512} height={512}/> -->
-<!-- <D3GeoJson width={512} height={512}/> -->
-<!-- <GeoJson2Canvas width={512} height={512}/> -->
+<MenuPage {items} {title}/>

@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte"
-    let {width=512, height=512, children} = $props()
+    let {width=512, height=512} = $props()
 
     let burnedCells = $state(0)
     let elapsed = $state(0)

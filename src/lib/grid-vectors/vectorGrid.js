@@ -116,7 +116,7 @@ function gridIntersections(x1, y1, x2, y2, gridWidth, gridHeight) {
 }
 
 function junctions(intersections, epsilon=1.0e-9) {
-    let prev = intersetions[0]
+    let prev = intersections[0]
     for(let i=1; i<intersections.length; i++) {
         const current = intersections[i]
         if (Math.abs(prev.dist-current.dist) < epsilon) {

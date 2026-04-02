@@ -2,11 +2,17 @@
     import { onMount } from 'svelte'
     import { setPixel, strokePath } from '../canvasLib.js'
     import { FirePerimeterGenerator } from '$lib/fire/ellipse/FirePerimeterGenerator.js'
-    // import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
-    // import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
 
-    let {width=512, height=512, lwr=2, bearing=0, headRos=100, elapsed=1, ignEast=0, ignNorth=0, degStep=1} = $props()
-    // let fe = $state(new FireEllipseMod('fe', 'north').ready())
+    let {width=512, height=512} = $props()
+
+    let ignEast = $state(0)
+    let ignNorth = $state(0)
+    let lwr = $state(3.2)
+    let headRos = $state(115.31)
+    let bearing = $state(0)
+    let headDeg = $derived((450-bearing)%360)
+    let elapsed = $state(1)
+    let degStep = $state(1)
 
     let offsetX = $state(0)
     let offsetY = $state(0)
@@ -60,9 +66,7 @@
         points = gen.points
     }
 
-    function clicked(e) {
-        offsetX = e.offsetX
-        offsetY = e.offsetY
+    function runpause() {
         if (running) {
 			window.cancelAnimationFrame(animId)
         } else {
@@ -70,12 +74,20 @@
         }
         running = ! running
     }
+    function clicked(e) {
+        offsetX = e.offsetX
+        offsetY = e.offsetY
+    }
 </script>
 
 <div class='mt-4 ml-4 px-4 border'>
-    <div class='text-2xl'>Fire Ellipse Perimeter Animation</div>
-    <div class='text-normal'>Click the green field to start and stop the animation:</div>
-    <div class='text-lg'>Bearing is {bearing}&deg; (last click at [{offsetX}, {offsetY}])</div>
+    <div class='ml-4 text-2xl'>Fire Ellipse Perimeter Animation</div>
+    <div class='ml-4 text-normal'>Uses FirePerimeterGenerator (via FireEllipseMod) to generate perimeter points.</div>
+    <div class='ml-4 text-lg'>
+        <button class='border rounded' onclick={runpause}>{running?'Pause':'Animate'}</button>
+        Bearing is {bearing}&deg; from North (Cartesian angle is {headDeg}&deg; above horizon)
+    </div>
+    <div class='ml-4 text-lg'>Last click at [{offsetX}, {offsetY}]</div>
     <canvas class='mt-4 ml-4 border' 
         bind:this={canvasElement} onclick={clicked} width={width} height={height}>
     </canvas>

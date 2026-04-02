@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte'
-    import { setPixel, strokePath } from '../canvasLib.js'
+    import { strokePath } from '../canvasLib.js'
     import { scanEllipse2 } from '../scanEllipse.js'
     import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
     import { DagNodeTable, Expand } from '$lib/index.js'
@@ -43,10 +43,10 @@
     ignition.north.select()
     eccent.select()
 
-    let inputNodes       = ellipse.sortNodes(ellipse.activeInputNodes())
+    // let inputNodes       = ellipse.sortNodes(ellipse.activeInputNodes())
     let activeInputNodes = ellipse.sortNodes(ellipse.activeInputNodes())
     let selectedNodes    = ellipse.sortNodes(ellipse.selectedNodes())
-    let activeNodes      = ellipse.sortNodes(ellipse.activeNodes())
+    // let activeNodes      = ellipse.sortNodes(ellipse.activeNodes())
     const allNodes = ellipse.sortNodes(ellipse.nodes())
 
     //-----------------------------------------------------------------------------------------
@@ -106,9 +106,7 @@
             headDeg, 1, 'h')
     }
 
-    function clicked(e) {
-        offsetX = e.offsetX
-        offsetY = e.offsetY
+    function runpause() {
         if (running) {
 			window.cancelAnimationFrame(animId)
         } else {
@@ -116,14 +114,25 @@
         }
         running = ! running
     }
+    function clicked(e) {
+        offsetX = e.offsetX
+        offsetY = e.offsetY
+    }
+
 </script>
 
 <div class='mt-4 ml-4 px-4 border'>
-    <div class='text-2xl'>FireEllipseMod Scan Lines</div>
-    <div class='text-lg'>Bearing is {bearing}&deg; (last click at [{offsetX}, {offsetY}])</div>
+    <div class='ml-4 text-2xl'>FireEllipseMod Scan Lines</div>
+    <div class='ml-4 text-normal'>Uses FireEllipseMod for scan line generation.</div>
+    <div class='ml-4 text-lg'>
+        <button class='border rounded' onclick={runpause}>{running?'Pause':'Animate'}</button>
+        Bearing is {bearing}&deg; from North (Cartesian angle is {headDeg}&deg; above horizon)
+    </div>
+    <div class='ml-4 text-lg'>Last click at [{offsetX}, {offsetY}]</div>
     <canvas class='mt-4 ml-4 border' 
         bind:this={canvasElement} onclick={clicked} width={width} height={height}>
     </canvas>
+
     <Expand title='Selected Nodes'>
         <DagNodeTable nodes={selectedNodes} title='Selected Nodes'/>
     </Expand>

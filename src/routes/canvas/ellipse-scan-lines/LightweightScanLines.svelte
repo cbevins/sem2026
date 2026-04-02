@@ -34,17 +34,6 @@
     function canvasX(easting) { return Math.trunc(easting+0.5) + cx }
     function canvasY(northing) { return cy - Math.trunc(northing+0.5) }
 
-    function clicked(e) {
-        offsetX = e.offsetX
-        offsetY = e.offsetY
-        if (running) {
-			window.cancelAnimationFrame(animId)
-        } else {
-			animId = window.requestAnimationFrame(draw)
-        }
-        running = ! running
-    }
-
     function draw() {
         updateData()
         drawBackground(ctx)
@@ -81,11 +70,28 @@
         bearing = (bearing<355) ? bearing + 5 : 0
     }
 
+    function runpause() {
+        if (running) {
+			window.cancelAnimationFrame(animId)
+        } else {
+			animId = window.requestAnimationFrame(draw)
+        }
+        running = ! running
+    }
+    function clicked(e) {
+        offsetX = e.offsetX
+        offsetY = e.offsetY
+    }
+
 </script>
 <div class='mt-4 ml-4 px-4 border'>
-    <div class='ml-5 text-lg'>Lightweight Fire Ellipse Scan Lines</div>
-    <div class='text-lg'>Bearing is {bearing}&deg; Cartesian Angle is {headDeg}&deg;</div>
-    <div class='text-lg'>Last click at [{offsetX}, {offsetY}]</div>
+    <div class='ml-4 text-2xl'>Lightweight Fire Ellipse Scan Lines</div>
+    <div class='ml-4 text-normal'>Uses lightweight FireEllipse object for scan line generation.</div>
+    <div class='ml-4 text-lg'>
+        <button class='border rounded' onclick={runpause}>{running?'Pause':'Animate'}</button>
+        Bearing is {bearing}&deg; from North (Cartesian angle is {headDeg}&deg; above horizon)
+    </div>
+    <div class='ml-4 text-lg'>Last click at [{offsetX}, {offsetY}]</div>
     <canvas class='mt-4 ml-4 border' 
         bind:this={canvasElement} onclick={clicked} width={width} height={height}>
     </canvas>

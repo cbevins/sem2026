@@ -59,3 +59,11 @@ export function rgbaNeighbors(imageData, col, row, radius=1) {
     }
     return hood
 }
+
+export function setPixel(imageData, col, row, r=0, g=0, b=0, a=255) {
+    const idx = rindex(imageData, col, row)
+    imageData.data[idx] = r
+    imageData.data[idx+1] = g
+    imageData.data[idx+2] = b
+    imageData.data[idx+3] = a
+}

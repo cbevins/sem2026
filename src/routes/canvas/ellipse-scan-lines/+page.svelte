@@ -1,5 +1,7 @@
 <script>
-    import ScanLines from './ScanLines.svelte'
+    import FireEllipseModScanLines from './FireEllipseModScanLines.svelte'
+    import LightweightScanLines from './LightweightScanLines.svelte'
 </script>
 
-<ScanLines/>
+<LightweightScanLines/>
+<FireEllipseModScanLines/>

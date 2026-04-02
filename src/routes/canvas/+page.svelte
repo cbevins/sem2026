@@ -2,6 +2,14 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     const title = 'Canvas Fire Growth Demos'
     const items = [{
+        route: '/canvas/ellipse-scan-lines',
+        title: 'Ellipse Scan Lines for HTML Canvas (4/1/2026)',
+        brief: 'Demo of rotated fire ellipse scan lines',
+    },{
+        route: '/canvas/ellipse-perimeter',
+        title: 'Fire Ellipse Perimeter Animation (4/1/2026)',
+        brief: 'Canvas animation of fire ellipse being rotated around the compass.',
+    },{
         route: '/canvas/d3-geojason',
         title: 'D3 GeoJSON World Map on HTML Canvas (3/20/2026)',
         brief: 'Using D3 to project and plot GeoJSON a world map.',
@@ -17,10 +25,6 @@
         route: '/canvas/grid-paths',
         title: 'Canvas Grid Line-of-Sight Paths (3/25/2026)',
         brief: 'Demo of line-of-site paths from grid central cell.',
-    },{
-        route: '/canvas/ellipse-scan-lines',
-        title: 'Ellipse Scan Lines for HTML Canvas (4/1/2026)',
-        brief: 'Demo of rotated fire ellipse scan lines',
     }]
 </script>
 <MenuPage {items} {title}/>

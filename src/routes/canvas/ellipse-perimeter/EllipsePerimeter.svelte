@@ -1,22 +1,20 @@
 <script>
     import { onMount } from 'svelte'
-    import { rindex, strokePath } from '../canvasLib.js'
+    import { setPixel, strokePath } from '../canvasLib.js'
     import { FirePerimeterGenerator } from '$lib/fire/ellipse/FirePerimeterGenerator.js'
     // import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
     // import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
 
     let {width=512, height=512, lwr=2, bearing=0, headRos=100, elapsed=1, ignEast=0, ignNorth=0, degStep=1} = $props()
-    // let gen = $derived(new FirePerimeterGenerator(lwr, headRos, bearing, elapsed, degStep, ignEast, ignNorth))
     // let fe = $state(new FireEllipseMod('fe', 'north').ready())
 
     let offsetX = $state(0)
     let offsetY = $state(0)
     let running = $state(false)
     let points = $state([])
-    let animId
 
-    // Bind this variable to the canvas element
-    let canvasElement, ctx
+    // Bind canvasElement variable to the <canvas> element
+    let canvasElement, ctx, animId
 
     let cx = $derived(Math.trunc(width/2))
     let cy = $derived(Math.trunc(height/2))
@@ -51,11 +49,7 @@
         for(let [easting, northing /*, bearing*/] of points) {
             const col = canvasX(easting)
             const row = canvasY(northing)
-            // console.log('e', easting.toFixed(2), col, 'n', northing.toFixed(2), row)
-            const idx = rindex(imageData, col, row)
-            imageData.data[idx] = 255  
-            imageData.data[idx+1] = 0
-            imageData.data[idx+2] = 0
+            setPixel(imageData, col, row, 255, 0, 0)
         }
         ctx.putImageData(imageData, 0, 0)
     }
@@ -71,16 +65,16 @@
         offsetY = e.offsetY
         if (running) {
 			window.cancelAnimationFrame(animId)
-            running = false
         } else {
 			animId = window.requestAnimationFrame(draw)
-            running = true
         }
+        running = ! running
     }
 </script>
 
 <div class='mt-4 ml-4 px-4 border'>
-    <div class='text-2xl'>Fire Ellipse Scan Lines</div>
+    <div class='text-2xl'>Fire Ellipse Perimeter Animation</div>
+    <div class='text-normal'>Click the green field to start and stop the animation:</div>
     <div class='text-lg'>Bearing is {bearing}&deg; (last click at [{offsetX}, {offsetY}])</div>
     <canvas class='mt-4 ml-4 border' 
         bind:this={canvasElement} onclick={clicked} width={width} height={height}>

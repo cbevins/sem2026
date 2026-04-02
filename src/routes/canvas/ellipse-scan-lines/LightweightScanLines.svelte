@@ -8,7 +8,6 @@
     let cx = $derived(Math.trunc(width/2))
     let cy = $derived(Math.trunc(height/2))
 
-    let radius = $state(250)
     let headRos= $state(115.31)
     let lwr = $state(3.2)
     let ignX = $state(0)
@@ -24,10 +23,7 @@
     // Bind canvasElement variable to the <canvas> element
     let canvasElement, ctx, animId
 
-    let actual = $derived(LightweightFireEllipse(headRos, lwr, ignX, ignY, headDeg, minutes, beta))
-    // Clone the ellipse scaled with an elapsed time to fill 90% the axis length
-    let tscale = $derived(minutes * 0.9 * radius / actual.fDist / 2)
-    let ellipse = $derived(LightweightFireEllipse(headRos, lwr, ignX, ignY, headDeg, tscale, beta))
+    let ellipse = $derived(LightweightFireEllipse(headRos, lwr, ignX, ignY, headDeg, minutes, beta))
     let hlines = $derived(scanEllipse(ellipse, 1, 'h'))
     
     onMount(() => {

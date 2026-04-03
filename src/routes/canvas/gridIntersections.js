@@ -79,4 +79,3 @@ const cellSize = 1; // Assuming a standard 1x1 grid
 
 const intersections = gridIntersections(startPoint, endPoint, cellSize);
 console.log(intersections);
-

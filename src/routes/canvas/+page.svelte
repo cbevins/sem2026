@@ -10,6 +10,10 @@
         title: 'Fire Ellipse Perimeter Animation (4/1/2026)',
         brief: 'Canvas animation of fire ellipse being rotated around the compass.',
     },{
+        route: '/canvas/bresenham',
+        title: 'Bresenham Line-of-Sight (4/2/2026)',
+        brief: "Interactive line-of-sight demo using Bresenham's algorithm",
+    },{
         route: '/canvas/d3-geojason',
         title: 'D3 GeoJSON World Map on HTML Canvas (3/20/2026)',
         brief: 'Using D3 to project and plot GeoJSON a world map.',

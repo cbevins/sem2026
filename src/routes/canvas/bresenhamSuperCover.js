@@ -66,3 +66,44 @@ export function bresenham(x1, y1, x2, y2) {
     }
     return points
 }
+
+// Returns JUST the endpoint
+export function bresenhamWalk(x1, y1, x2, y2, testMethod) {
+    // Ensure coordinates are integers (Bresenham is an integer algorithm)
+    x1 = Math.floor(x1)
+    y1 = Math.floor(y1)
+    x2 = Math.floor(x2)
+    y2 = Math.floor(y2)
+
+    const points = []
+    // Define differences and direction steps
+    const dx = Math.abs(x2 - x1)
+    const dy = Math.abs(y2 - y1)
+    const sx = (x1 < x2) ? 1 : -1
+    const sy = (y1 < y2) ? 1 : -1
+    let err = dx - dy   // Initial error parameter
+
+    while (true) {
+        // Store or plot the current point
+        points.push([x1,y1])
+
+        if (x1 === x2 && y1 === y2) {
+            break // Exit the loop if the end point is reached
+        }
+
+        if (!testMethod(x1, y1)) {
+            break // Exit the loop if the cell is not passable
+        }
+
+        const e2 = 2 * err
+        if (e2 > -dy) {
+            err -= dy
+            x1 += sx
+        }
+        if (e2 < dx) {
+            err += dx
+            y1 += sy
+        }
+    }
+    return [x1, y1]
+}

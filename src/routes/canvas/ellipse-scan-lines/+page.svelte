@@ -3,5 +3,5 @@
     import LightweightScanLines from './LightweightScanLines.svelte'
 </script>
 
-<LightweightScanLines/>
 <FireEllipseModScanLines/>
+<LightweightScanLines/>

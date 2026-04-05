@@ -1,19 +1,17 @@
 <script>
+    import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
     import { onMount } from 'svelte'
-    import { strokePath } from '../canvasLib.js'
-    import { scanEllipse2 } from '../scanEllipse.js'
+    import { drawBackground, drawCentralAxis, drawFireEllipseScanLines } from '../canvasLib.js'
     import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
     import { DagNodeTable, Expand } from '$lib/index.js'
     // import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
 
     let {width=512, height=512} = $props()
-    let cx = $derived(Math.trunc(width/2))
-    let cy = $derived(Math.trunc(height/2))
     
     let offsetX = $state(0)
     let offsetY = $state(0)
     let running = $state(false)
-    let hlines = $state([])
+    let fireEllipseScanLines = $state(null)
 
     // Bind canvasElement variable to the <canvas> element
     let canvasElement, ctx, animId
@@ -26,7 +24,7 @@
     let ignNorth = $state(0)
     let lwr = $state(3.2)
     let headRos = $state(115.31)
-    let bearing = $state(0)
+    let bearing = $state(-5)
     let headDeg = $derived((450-bearing)%360)
     let elapsed = $state(1)
 
@@ -51,47 +49,32 @@
 
     //-----------------------------------------------------------------------------------------
 
-    function canvasX(easting) { return Math.trunc(easting+0.5) + cx }
-    function canvasY(northing) { return cy - Math.trunc(northing+0.5) }
+    function clicked(e) {
+        offsetX = e.offsetX
+        offsetY = e.offsetY
+    }
+
+    function draw() {
+        updateData()
+        drawBackground(ctx)
+        drawFireEllipseScanLines(ctx, fireEllipseScanLines, 'red')
+        drawCentralAxis(ctx)
+        if (running) animId = window.requestAnimationFrame(draw)
+    }
 
     onMount(() => {
         ctx = canvasElement.getContext("2d", { willReadFrequently: true })
         draw()
     })
 
-    function draw() {
-        updateData()
-        drawBackground(ctx)
-        drawScanLines(ctx, hlines)
-        drawAxis(ctx)
-        if (running) animId = window.requestAnimationFrame(draw)
-    }
-
-    function drawAxis(ctx) {
-        strokePath(ctx, 'black', [[0,cx,0], [1,cx,height], [0,0,cy], [1,width,cy]])
-    }
-
-    function drawBackground(ctx) {
-        ctx.fillStyle = 'green'
-        ctx.fillRect(0, 0, width, height)
-    }
-
-    function drawScanLines(ctx, lines) {
-        ctx.strokeStyle = 'red'
-        ctx.beginPath()
-        for(let [p1, p2] of lines) {
-            const col1 = canvasX(p1.x)
-            const row1 = canvasY(p1.y)
-            const col2 = canvasX(p2.x)
-            const row2 = canvasY(p2.y)
-            ctx.moveTo(col1, row1)
-            ctx.lineTo(col2, row2)
-        }
-        ctx.stroke()
+    function runpause() {
+        if (running) window.cancelAnimationFrame(animId)
+        else animId = window.requestAnimationFrame(draw)
+        running = ! running
     }
     
     function updateData() {
-        bearing = (bearing<355) ? bearing + 5 : 0
+        bearing = (bearing + 5)%360
         ellipse.head.bearing.set(bearing)
         ignition.east.set(ignEast)
         ignition.north.set(ignNorth)
@@ -100,25 +83,10 @@
         ellipse.lwr.set(lwr)
         ellipse.time.set(elapsed)
         ellipse.updateAll()
-        hlines = scanEllipse2(ignEast, ignNorth,
-            ellipse.length.dist.get(), ellipse.width.dist.get(),
-            ellipse.center.east.get(), ellipse.center.north.get(),
-            headDeg, 1, 'h')
+        fireEllipseScanLines = new FireEllipseScanLines(ignEast, ignNorth,
+            ellipse.length.dist.get(), ellipse.width.dist.get(), bearing,
+            ellipse.center.east.get(), ellipse.center.north.get(), 1, 'ft')
     }
-
-    function runpause() {
-        if (running) {
-			window.cancelAnimationFrame(animId)
-        } else {
-			animId = window.requestAnimationFrame(draw)
-        }
-        running = ! running
-    }
-    function clicked(e) {
-        offsetX = e.offsetX
-        offsetY = e.offsetY
-    }
-
 </script>
 
 <div class='mt-4 ml-4 px-4 border'>

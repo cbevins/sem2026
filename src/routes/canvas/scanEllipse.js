@@ -62,12 +62,12 @@ function scanLine(x1, y1, x2, y2, cx, cy, rx, ry, angle) {
     return intersections
 }
 
-export function scanEllipse2(ignX, ignY, length, width, cX, cY, headDeg, step=10, dir='h') {
+export function scanEllipse2(ignX, ignY, length, width, cX, cY, headDeg, step=1, dir='h') {
     const e = {ignX, ignY, length, width, cX, cY, headDeg}
     return scanEllipse(e, step, dir)
 }
 
-export function scanEllipse(e, step=10, dir='h') {
+export function scanEllipse(e, step=1, dir='h') {
     const lines = []
     // Use the ellipse length as the bounding radius
     const xMin = e.ignX - e.length

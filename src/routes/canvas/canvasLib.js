@@ -1,27 +1,45 @@
+/**
+ * Functions for manipulating Canvas context
+ * All functions take a canvas context reference, and not an imageData
+ */
+
+
+export function xmid(ctx) { return Math.trunc(ctx.canvas.width/2) }
+export function ymid(ctx) { return Math.trunc(ctx.canvas.height/2) }
+
+export function canvasX(ctx, easting) { return Math.round(easting) + xmid(ctx) }
+export function canvasY(ctx, northing) { return ymid(ctx) - Math.round(northing) }
+
+export function drawBackground(ctx, style='green') {
+    ctx.fillStyle = style
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+}
+
+export function drawCentralAxis(ctx, style='black') {
+    const cx = xmid(ctx)
+    const cy = ymid(ctx)
+    const {height, width} = ctx.canvas
+    strokePath(ctx, style, [[0,cx,0], [1,cx,height], [0,0,cy], [1,width,cy]])
+}
+
+
 // Convenience function for drawing ellipse with a bearing
 export function drawEllipse(ctx, cx, cy, rx, ry, bearing, start=0, end=2*Math.PI) {
     const rads = ((90 + bearing) % 360) * Math.PI / 180
     ctx.ellipse(cx, cy, rx, ry, rads, start, end)
 }
 
-// Returns index offset of [col, row] rgba of Canvas imageData.data
-export function rindex(imageData, col, row) {return 4 * (col + row * imageData.width)}
-export function gindex(imageData, col, row) {return 1 + 4 * (col + row * imageData.width)}
-export function bindex(imageData, col, row) {return 2 + 4 * (col + row * imageData.width)}
-export function aindex(imageData, col, row) {return 3 + 4 * (col + row * imageData.width)}
-
-// The following return just the red, green, blue, or alpha value at [col,row]
-export function rByte(imageData, col, row) {
-    return imageData.data[rindex(imageData, col, row)]
-}
-export function gByte(imageData, col, row) {
-    return imageData.data[gindex(imageData, col, row)]
-}
-export function bByte(imageData, col, row) {
-    return imageData.data[bindex(imageData, col, row)]
-}
-export function aByte(imageData, col, row) {
-    return imageData.data[aindex(imageData, col, row)]
+export function drawFireEllipseScanLines(ctx, fireEllipseScanLines, style='red') {
+    ctx.strokeStyle = style
+    ctx.beginPath()
+    for(let [y, x1, x2] of fireEllipseScanLines.lines) {
+        const row = canvasY(ctx, y)
+        const col1 = canvasX(ctx, x1) // convert from floating pt to raster
+        const col2 = canvasX(ctx, x2)
+        ctx.moveTo(col1, row)
+        ctx.lineTo(col2, row)
+    }
+    ctx.stroke()
 }
 
 // 'data' is an array of [cmd, x, y] where cmd of 0  is MOVE, 1 is LINE
@@ -44,26 +62,4 @@ export function strokePath(ctx, style, data) {
     ctx.beginPath()
     path(ctx, data)
     ctx.stroke()
-}
-
-export function rgbaNeighbors(imageData, col, row, radius=1) {
-    const data = imageData.data
-    const hood = []
-    for(let r=row-radius; r<=row+radius; r++) {
-        const ar = []
-        for(let c=col-radius; c<=col+radius; c++) {
-            const idx = rindex(imageData, c, r)
-            ar.push([data[idx],data[idx+1],data[idx+2],data[idx+3]])
-        }
-        hood.push(ar)
-    }
-    return hood
-}
-
-export function setPixel(imageData, col, row, r=0, g=0, b=0, a=255) {
-    const idx = rindex(imageData, col, row)
-    imageData.data[idx] = r
-    imageData.data[idx+1] = g
-    imageData.data[idx+2] = b
-    imageData.data[idx+3] = a
 }

@@ -4,14 +4,27 @@
     import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
     import { canvasX, canvasY, xmid, ymid, drawCentralAxis } from '../canvasLib.js'
     import { FirePerimeterGenerator } from '$lib/fire/ellipse/FirePerimeterGenerator.js'
+    import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
 
     let {width=512, height=512} = $props()
     let burnMap = $derived(new BurnMap(width, height))
+    let burnGaps = $derived(burnMap.getGaps())
+    let counts = $derived([0,0,0,0])
+    let gap = $state({distance: 0, angle: 0, index: 0})
+    let msec = $state(0)
     let offsetX = $state(0)
     let offsetY = $state(0)
-    let running = $state(false)
+    let perimeterMod = $state(0)
+    let perimeterScan = $state(0)
     let points = $state([])
-    let msec = $state(0)
+    let running = $state(false)
+    let sizeMod = $state(0)
+    let sizeScan = $state(0)
+    let rasterScan = $state(0)
+
+    let showBurnCounts = $state(true)
+    let showBurnGaps = $state(false)
+    let showScanLineStats = $state(false)
 
     // Bind this variable to the canvas element
     let canvasElement, ctx, animId
@@ -40,6 +53,8 @@
     ignition.east.select()
     ignition.north.select()
     eccent.select()
+    ellipse.size.select()
+    ellipse.perimeter.select()
 
     //-----------------------------------------------------------------------------------------
 
@@ -60,11 +75,6 @@
     }
 
     function overlayEllipse(burnMap, points) {
-        // const [x1,y1] = points[0]
-        // const [x2,y2] = points[1]
-        // const dist = Math.sqrt((x2-x1)**2 + (y2-y1)**2)
-        // console.log(`Head point gap for ${degStep} degrees is ${dist}.`)
-        // const t0 = new Date()
         const ignCol = canvasX(ctx, ignEast)
         const ignRow = canvasY(ctx, ignNorth)
         for(let [easting, northing /*, bearing*/] of points) {
@@ -111,26 +121,6 @@
         ctx = canvasElement.getContext("2d", { willReadFrequently: true })
         draw()
     })
-    
-    function maxGap(points) {
-        let maxdsq = 0
-        let maxid = 0
-        let prev = points[0]
-        for(let i=1; i<points.length; i++) {
-            const dx = points[i][0] - prev[0]
-            const dy = points[i][1] - prev[1]
-            const dsq = dx*dx+dy*dy
-            if (dsq > maxdsq) {
-                maxdsq = dsq
-                maxid = i
-            }
-            prev = points[i]
-        }
-        const maxd = Math.sqrt(maxdsq)
-        const maxAngle = 360 * (maxid / (points.length-1)) - 1
-        console.log(`Max perimeter point gap at ${degStep} degree increments `
-            + `is ${maxd.toFixed(2)} at angle ${maxAngle.toFixed(2)} (index ${maxid}).`)
-    }
 
     function runpause() {
         if (running) window.cancelAnimationFrame(animId)
@@ -149,18 +139,47 @@
         ellipse.lwr.set(lwr)
         ellipse.time.set(elapsed)
         ellipse.updateAll()
+        sizeMod = ellipse.size.get()
+        perimeterMod = ellipse.perimeter.get()
+
+        // Some size and perimeter comparison stats
+        if (showScanLineStats) {
+            const fireEllipseScanLines = new FireEllipseScanLines(ignEast, ignNorth,
+                ellipse.length.dist.get(), ellipse.width.dist.get(), bearing,
+                ellipse.center.east.get(), ellipse.center.north.get(), 1, 'ft')
+            sizeScan = fireEllipseScanLines.size
+            perimeterScan = fireEllipseScanLines.perimeter
+            rasterScan = fireEllipseScanLines.rasterSize
+        }
         // Generate perimeter points for the ellipse
         const gen = new FirePerimeterGenerator(lwr, headRos, bearing, elapsed, degStep, ignEast, ignNorth)
-        // maxGap(gen.points)
+        gap = gen.maxGap()
         points = gen.points
         burnMap = new BurnMap(width, height)
         initializeBurnMap(burnMap)
         overlayEllipse(burnMap, points)
+        if(showBurnCounts) counts = burnMap.getCounts()
+        if (showBurnGaps) burnGaps = burnMap.getGaps()
     }
 </script>
     
 <div class='mt-4 ml-4 px-4 border'>
     <div class='ml-4 text-2xl'>Fire Ellipse Collision Detection via Ray Cast</div>
+    <div class='ml-4 text-lg'>FireEllipseMod Size {sizeMod.toFixed(2)}, Perim {perimeterMod.toFixed(2)}</div>
+    
+    {#if showScanLineStats}
+        <div class='ml-4 text-lg'>Scan lines Size {sizeScan.toFixed(2)} raster {rasterScan}, Perim {perimeterScan.toFixed(2)}</div>
+    {/if}
+
+    {#if showBurnCounts}
+        <div class='ml-4 text-lg'>BurnMap Burning {counts[BurnMap.burning]}</div>
+    {/if}
+
+    {#if showBurnGaps}
+        <div class='ml-4 text-lg'>BurnMap Burning has {burnGaps} gaps</div>
+    {/if}
+
+    <div class='ml-4 text-lg'>Degree increment={degStep}, max gap={gap.distance.toFixed(4)} at angle {gap.angle.toFixed(2)}.</div>
     <div class='ml-4 text-lg'>Elapsed time {msec} milliseconds</div>
     <div class='ml-4 text-lg'>
         <button class='border rounded' onclick={runpause}>{running?'Pause':'Animate'}</button>

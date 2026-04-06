@@ -12,17 +12,48 @@ export class BurnMap {
 
     get(col, row) { return this.data[col + row * this.width]}
 
+    getCounts() {
+        const counts = [0,0,0,0]
+        for(let d of this.data) counts[d]++
+        return counts
+    }
+
+    getGaps() {
+        const lines = []
+        for(let row=0; row<this.height; row++) {
+            let first = 0
+            let last = 0
+            for(let col=0; col<this.width; col++) {
+                if (this.get(col,row) === BurnMap.burning) {
+                    if (first===0) first=col
+                    last = col
+                }
+            }
+            lines.push([first,last])
+        }
+        let gaps = 0
+        for(let row=0; row<this.height; row++) {
+            const [first,last] = lines[row]
+            if (first && last) {
+                for(let col=first; col<=last; col++) {
+                    if (this.get(col,row) !== BurnMap.burning) gaps++
+                }
+            }
+        }
+        return gaps
+    }
+
     set(col, row, value, n=1) {
         const idx = col + row * this.width
         this.data.fill(value, idx, idx+n)
     }
- 
+
     setRect(col, row, width, height, value=BurnMap.unburnable) {
         for(let i=0; i<height; i++) {
             this.set(col, row+i, value, width)
         }
     }
-    
+
     raycast(x1, y1, x2, y2) {
         // Define differences and direction steps
         const dx = Math.abs(x2 - x1)
@@ -33,15 +64,26 @@ export class BurnMap {
 
         while (true) {
             // Exit the loop if the cell is not passable
-            const state = this.get(x1, y1)
+            let state = this.get(x1, y1)
             if (state === BurnMap.unburnable || state === BurnMap.burned) break
-
             this.set(x1, y1, BurnMap.burning)
 
             // Exit the loop if the end point is reached
             if (x1 === x2 && y1 === y2) break
 
             const e2 = 2 * err
+            // Check for supercover: horizontal and vertical steps
+            if (e2 > -dy && e2 < dx) {
+                // When both steps happen, we are at a diagonal transition
+                // We must add the intermediate cell to "cover" the line
+                state = this.get(x1+sx, y1)
+                if (state !== BurnMap.unburnable && state === BurnMap.unburned)
+                    this.set(x1+sx, y1, BurnMap.burning)
+                state = this.get(x1, y1+sy)
+                if (state !== BurnMap.unburnable && state === BurnMap.unburned)
+                    this.set(x1, y1+sy, BurnMap.burning)
+            }
+
             if (e2 > -dy) {
                 err -= dy
                 x1 += sx

@@ -14,18 +14,34 @@ export class FireEllipseScanLines {
         this.ignIdx = 0
         // Array of scanline rows where aach row is a 3-element array [y, x1, x2]
         this.lines = this.scanEllipse()
-        this.bbox = this.boundingBox()
+        this.calcStats()
     }
 
-    boundingBox() {
+    // Calculates size, perimeter, and bounding box
+    calcStats() {
         let [y, x1, x2] = this.lines[0]
+        let prev = this.lines[0]
         this.bbox = {xmin: x1, xmax: x2, ymin: y, ymax: y}
+        this.size = x2 - x1
+        this.rasterSize = 0
+        this.perimeter = 0
+        this.maxGap = 0
         for(let i=1; i<this.lines.length; i++) {
-        let [y, x1, x2] = this.lines[i]
+            let [y, x1, x2] = this.lines[i]
+            this.size += (x2 - x1)
+            this.rasterSize += 1 + Math.round(x2) - Math.round(x1)
             this.bbox.xmin = Math.min(this.bbox.xmin, x1)
             this.bbox.xmax = Math.max(this.bbox.xmax, x2)
             this.bbox.ymin = Math.min(this.bbox.ymin, y)
             this.bbox.ymax = Math.max(this.bbox.ymax, y)
+            const dx1 = x1 - prev[1]
+            const dx2 = x2 - prev[2]
+            const dy = this.scanWidth
+            const dist1 = Math.sqrt(dx1*dx1 + dy*dy)
+            const dist2 = Math.sqrt(dx2*dx2 + dy*dy)
+            this.maxGap = Math.max(this.maxGap, dist1, dist2)
+            this.perimeter += (dist1 + dist2)
+            prev = this.lines[i]
         }
     }
 

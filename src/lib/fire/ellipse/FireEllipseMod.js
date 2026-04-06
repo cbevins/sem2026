@@ -86,7 +86,7 @@ export class FireEllipseMod extends DagModule {
             // Vector from ellipse center point to ellipse perimeter at some angle from ellipse head
             new FireVectorMod('theta'),
         )
-        const str = (configVector==='head') ? 'fire head' : 'north'
+        // const str = (configVector==='head') ? 'fire head' : 'north'
         // console.log(`FireEllipseMod beta, psi, and theta angles are input as degrees clockwise from ${str}.`)
         this.assignUpdaters(configVector)
     }

@@ -50,4 +50,25 @@ export class FirePerimeterGenerator {
         }
         return pts
     }
+    
+    // Returns maximum distance between neighboring perimeter point pairs
+    // as a {distance, angle, index} object
+    maxGap() {
+        let maxdsq = 0
+        let index = 0
+        let prev = this.points[0]
+        for(let i=1; i<this.points.length; i++) {
+            const dx = this.points[i][0] - prev[0]
+            const dy = this.points[i][1] - prev[1]
+            const dsq = dx*dx+dy*dy
+            if (dsq > maxdsq) {
+                maxdsq = dsq
+                index = i
+            }
+            prev = this.points[i]
+        }
+        const distance = Math.sqrt(maxdsq)
+        const angle = 360 * (index / (this.points.length-1)) - 1
+        return {distance, angle, index}
+    }
 }

@@ -22,7 +22,6 @@ export function drawCentralAxis(ctx, style='black') {
     strokePath(ctx, style, [[0,cx,0], [1,cx,height], [0,0,cy], [1,width,cy]])
 }
 
-
 // Convenience function for drawing ellipse with a bearing
 export function drawEllipse(ctx, cx, cy, rx, ry, bearing, start=0, end=2*Math.PI) {
     const rads = ((90 + bearing) % 360) * Math.PI / 180

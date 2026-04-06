@@ -9,6 +9,16 @@ export function gindex(imageData, col, row) {return 1 + 4 * (col + row * imageDa
 export function bindex(imageData, col, row) {return 2 + 4 * (col + row * imageData.width)}
 export function aindex(imageData, col, row) {return 3 + 4 * (col + row * imageData.width)}
 
+export function fillBackground(imageData) {
+    const d = imageData.data
+    for(let i=0; i<d.length; i+=4) {
+        d[i] = 0
+        d[i+1] = 255
+        d[i+2] = 0
+        d[i+3] = 255
+    }
+}
+
 // The following return just the red, green, blue, or alpha value at [col,row]
 export function getRed(imageData, col, row) {
     return imageData.data[rindex(imageData, col, row)]

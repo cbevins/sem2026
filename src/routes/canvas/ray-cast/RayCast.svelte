@@ -36,7 +36,7 @@
     let ignEast = $state(0)
     let ignNorth = $state(0)
     let lwr     = $state(2)
-    let headRos = $state(250)
+    let headRos = $state(350)
     let bearing = $state(-5)
     let elapsed = $state(1)
     let degStep = $state(0.5)
@@ -113,8 +113,15 @@
     function initializeBurnMap(burnMap) {
         // Unburnable blocks
         burnMap.setRect(280, 220, 10, 10, BurnMap.unburnable)
-        burnMap.setRect(-340, 120, 10, 10, BurnMap.unburnable)
+        burnMap.setRect(120, 120, 10, 10, BurnMap.unburnable)
         burnMap.setRect(100, 350, 100, 10, BurnMap.unburnable)
+        burnMap.setRect(350, 350, 10, 100, BurnMap.unburnable)
+        // West-side '<''
+        burnMap.setLine(100, 256, 150, 206, BurnMap.unburnable)
+        burnMap.setLine(100, 256, 150, 306, BurnMap.unburnable)
+        // East side '>'
+        burnMap.setLine(356, 256, 406, 206, BurnMap.unburnable)
+        burnMap.setLine(356, 256, 406, 306, BurnMap.unburnable)
     }
 
     onMount(() => {

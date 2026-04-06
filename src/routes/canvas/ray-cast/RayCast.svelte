@@ -26,7 +26,7 @@
     let headRos = $state(250)
     let bearing = $state(-5)
     let elapsed = $state(1)
-    let degStep = $state(0.1)
+    let degStep = $state(0.5)
 
     const ellipse = new FireEllipseMod('ellipse', 'north').ready()
     const {back, center, eccent, head, ignition} = ellipse
@@ -46,7 +46,7 @@
     function clicked(e) {
         offsetX = e.offsetX
         offsetY = e.offsetY
-        // draw()
+        draw()
     }
 
     function draw() {
@@ -103,10 +103,11 @@
     function initializeBurnMap(burnMap) {
         // Unburnable blocks
         burnMap.setRect(280, 220, 10, 10, BurnMap.unburnable)
+        burnMap.setRect(-340, 120, 10, 10, BurnMap.unburnable)
+        burnMap.setRect(100, 350, 100, 10, BurnMap.unburnable)
     }
 
     onMount(() => {
-        initializeBurnMap(burnMap)
         ctx = canvasElement.getContext("2d", { willReadFrequently: true })
         draw()
     })
@@ -150,8 +151,10 @@
         ellipse.updateAll()
         // Generate perimeter points for the ellipse
         const gen = new FirePerimeterGenerator(lwr, headRos, bearing, elapsed, degStep, ignEast, ignNorth)
-        maxGap(gen.points)
+        // maxGap(gen.points)
         points = gen.points
+        burnMap = new BurnMap(width, height)
+        initializeBurnMap(burnMap)
         overlayEllipse(burnMap, points)
     }
 </script>

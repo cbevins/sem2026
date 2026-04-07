@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte"
     import { DataSource } from "../DataSource.js"
+    import { FireEllipseModel } from '../FireEllipseModel.js'
     import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
     import { canvasX, canvasY, xmid, ymid, drawCentralAxis } from '../canvasLib.js'
     import { FirePerimeterGenerator } from '$lib/fire/ellipse/FirePerimeterGenerator.js'
@@ -41,21 +42,6 @@
     let bearing = $state(-5)
     let elapsed = $state(1)
     let degStep = $state(0.5)
-
-    const ellipse = new FireEllipseMod('ellipse', 'north').ready()
-    const {back, center, eccent, head, ignition} = ellipse
-    ellipse.length.dist.select()
-    ellipse.width.dist.select()
-    back.dist.select()
-    head.angle.select()
-    head.bearing.select()
-    center.east.select()
-    center.north.select()
-    ignition.east.select()
-    ignition.north.select()
-    eccent.select()
-    ellipse.size.select()
-    ellipse.perimeter.select()
 
     //-----------------------------------------------------------------------------------------
 
@@ -102,38 +88,26 @@
     }
 
     function updateData() {
-        // Update the FireEllipseMod inputs for this location and time
+        // Generate perimeter points for the fire ellipse at the current bearing
         bearing = (bearing + 5)%360
-        ellipse.head.bearing.set(bearing)
-        ignition.east.set(ignEast)
-        ignition.north.set(ignNorth)
-        head.bearing.set(bearing)
-        head.ros.set(headRos)
-        ellipse.lwr.set(lwr)
-        ellipse.time.set(elapsed)
-        ellipse.updateAll()
-        sizeMod = ellipse.size.get()
-        perimeterMod = ellipse.perimeter.get()
-
-        // Some size and perimeter comparison stats
+        const gen = new FireEllipseModel(lwr, headRos, bearing, elapsed, ignEast, ignNorth)
+        points = gen.perimeterPoints(degStep)
+        gap = gen.maxGap(points)
+        sizeMod = gen.size()
+        perimeterMod = gen.perimeter()
+        
+        // Some ScanLine size and perimeters for comparison purposes ...
         if (showScanLineStats) {
             const fireEllipseScanLines = new FireEllipseScanLines(ignEast, ignNorth,
-                ellipse.length.dist.get(), ellipse.width.dist.get(), bearing,
-                ellipse.center.east.get(), ellipse.center.north.get(), 1, 'ft')
+                gen.length(), gen.width(), bearing,
+                gen.centerEasting(), gen.centerNorthing(), 1, 'ft')
             sizeScan = fireEllipseScanLines.size
             perimeterScan = fireEllipseScanLines.perimeter
             rasterScan = fireEllipseScanLines.rasterSize
         }
-
-        // Generate perimeter points for the fire ellipse
-        const gen = new FirePerimeterGenerator(lwr, headRos, bearing, elapsed, degStep, ignEast, ignNorth)
-        gap = gen.maxGap()
-        // Convert perimeter points to BurnMap and canvas raster coordinates
-        // dataSource.burnMap.castBurnLines(ignCol, ignRow, endPoints)
-        points = gen.points
         
         // Because we're just spinning the same FireEllipse,
-        // must start with a fresh BurnMap each frame
+        // each frame must start with a fresh BurnMap
         dataSource = new DataSource(width, height)
         castBurnLines(dataSource, points)
         if(showBurnCounts) counts = dataSource.burnMap.getCounts()

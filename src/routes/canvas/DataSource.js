@@ -15,8 +15,6 @@ export const FeaturePalette = [
 export class DataSource {
     constructor(width, height, featurePalette=FeaturePalette) {
         this.burnMap = new BurnMap(width, height)
-        this.ellipse = new FireEllipseMod('ellipse', 'north').ready()
-
         this.featurePalette = featurePalette
         this.initBurnMap()
     }
@@ -61,43 +59,5 @@ export class DataSource {
         // East side '<'
         this.burnMap.setBurnCodeLine(356, 256, 406, 206, BurnMap.unburnable)
         this.burnMap.setBurnCodeLine(356, 256, 406, 306, BurnMap.unburnable)
-    }
-
-    initFireEllipseMod() {
-        const {back, beta, center, eccent, head, ignition, length, perimeter, psi,
-            size, theta, width} = this.ellipse
-        
-        for(let node of [length.dist, width.dist, back.dist, head.angle, head.bearing,
-            center.east, center.north, ignition.east, ignition.north, eccent, size,  perimeter])
-            node.select()
-
-        // Select required nodes for deriving perimeter points
-        for(let node of [theta.perim.east, theta.perim.north, theta.beta, theta.psi,
-            center.east, center.north, beta, psi])
-            node.select()
-    }
-    
-    updateFireEllipseMod(lwRatio, headRos, bearing, elapsed, ignEast, ignNorth, degStep) {
-        const {head, ignition, lwr, time} = this.ellipse
-        head.bearing.set(bearing)
-        ignition.east.set(ignEast)
-        ignition.north.set(ignNorth)
-        head.bearing.set(bearing)
-        head.ros.set(headRos)
-        lwr.set(lwr)
-        time.set(elapsed)
-        this.ellipse.updateAll()
-        this.degStep = degStep
-        this.perimeterPoints(degStep)
-    }
-    perimeterPoints(degStep) {
-        const vector = this.ellipse.theta
-        const pts = []
-        for(let deg=0; deg<=360; deg+=degStep) {
-            vector.bearing.set(deg)
-            this.ellipse.updateAll()
-            pts.push([vector.perim.east.get(), vector.perim.north.get(), deg])
-        }
-        return pts
     }
 }

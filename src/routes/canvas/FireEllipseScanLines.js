@@ -55,7 +55,6 @@ export class FireEllipseScanLines {
         const major = this.length / 2
         const minor = this.width / 2
         const radians = this.headDeg * Math.PI / 180
-
         // Start with ignition point and go north
         for(let y=this.ignNorth; y<= yMax; y+= this.scanWidth) {
             const xs = this.scanLine(xMin, y, xMax, y, this.centerEast, this.centerNorth, major, minor, radians)

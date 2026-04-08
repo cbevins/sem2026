@@ -70,8 +70,8 @@ export class FireEllipseModel {
 
     centerEasting() { return this.dag.center.east.get() }
     centerNorthing() { return this.dag.center.north.get() }
-    length() { return this.dag.length.get() }
+    length() { return this.dag.length.dist.get() }
     perimeter() { return this.dag.perimeter.get() }
     size() { return this.dag.size.get() }
-    width() { return this.dag.width.get() }
+    width() { return this.dag.width.dist.get() }
 }

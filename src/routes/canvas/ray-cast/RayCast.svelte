@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte"
-    import { DataSource } from "../DataSource.js"
+    import { RaycastDataProvider } from "../DataProvider.js"
     import { FireEllipseModel } from '../FireEllipseModel.js'
     import { canvasX, canvasY, drawCentralAxis } from '../canvasLib.js'
     import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
@@ -12,14 +12,15 @@
         points:[], size:0, perimeter:0,
         gap:{distance:0, angle:0, index:0},
         scan:{size:0, cells:0, perimeter:0}})
-    let fire2 = $state({ignEast:100, ignNorth:100, lwr:2, headRos:250, bearing:-5, elapsed:1,
+    let fire2 = $state({ignEast:100, ignNorth:100, lwr:2, headRos:250, bearing:85, elapsed:1,
         points:[], size:0, perimeter:0,
         gap:{distance:0, angle:0, index:0},
         scan:{size:0, cells:0, perimeter:0}})
     let fires = $derived([fire1, fire2])
     let degStep = $state(0.5)
 
-    let dataSource = $derived(new DataSource(width, height))
+    const dataProvider = new RaycastDataProvider()
+    let burnMap = $derived(dataProvider.getBurnMap(0, height/2, width, height, 1))
     let counts = $derived([0,0,0,0])
     let msec = $state(0)
     let offsetX = $state(0)
@@ -44,10 +45,10 @@
     function draw() {
         const t0 = new Date()
         updateData()
-        dataSource.drawImageData(ctx)
+        burnMap.drawToCanvas(ctx)
         drawCentralAxis(ctx)
         for(let fire of fires)
-            fillCell(canvasX(ctx,fire.ignEast), canvasY(ctx,fire.ignNorth), "yellow")
+            fillCell(canvasX(ctx, fire.ignEast), canvasY(ctx, fire.ignNorth), "yellow")
         msec = new Date() - t0
         if (running) animId = window.requestAnimationFrame(draw)
     }
@@ -58,7 +59,7 @@
         for(let [easting, northing /*, bearing*/] of fire.points) {
             const lastCol = canvasX(ctx, easting)
             const lastRow = canvasY(ctx, northing)
-            dataSource.burnMap.castBurnLine(ignCol, ignRow, lastCol, lastRow)
+            burnMap.castBurnLine(ignCol, ignRow, lastCol, lastRow)
         }
     }
 
@@ -82,7 +83,7 @@
         // Because we're just spinning the same FireEllipses
         // (instead of growing the same fire),
         // each frame must start with a fresh BurnMap
-        dataSource = new DataSource(width, height)
+        burnMap = dataProvider.getBurnMap(0, 0, width, height, 1)
 
         // Generate perimeter points for the fire ellipse at the current bearing
         for(let fire of fires) {
@@ -93,7 +94,7 @@
             if (showBurnGaps) fire.gap = gen.maxGap(fire.points)
             fire.size = gen.size()
             fire.perimeter = gen.perimeter()
-            castBurnLines(dataSource, fire)
+            castBurnLines(burnMap, fire)
             // Some ScanLine size and perimeters for comparison purposes ...
             if (showScanLineStats) {
                 const fireEllipseScanLines = new FireEllipseScanLines(
@@ -105,7 +106,7 @@
                 fire.scan.cells = fireEllipseScanLines.rasterSize
             }
         }
-        if (showBurnCounts) counts = dataSource.burnMap.getCounts()
+        if (showBurnCounts) counts = burnMap.getCounts()
     }
 </script>
 

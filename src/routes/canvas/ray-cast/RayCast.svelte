@@ -2,13 +2,21 @@
     import { onMount } from "svelte"
     import { DataSource } from "../DataSource.js"
     import { FireEllipseModel } from '../FireEllipseModel.js'
-    import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
     import { canvasX, canvasY, xmid, ymid, drawCentralAxis } from '../canvasLib.js'
-    import { FirePerimeterGenerator } from '$lib/fire/ellipse/FirePerimeterGenerator.js'
     import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
 
     let {width=512, height=512} = $props()
-    // let burnMap = $derived(new BurnMap(width, height))
+    
+    let ignEast = $state(-100)
+    let ignNorth = $state(100)
+    let lwr     = $state(2)
+    let headRos = $state(250)
+    let bearing = $state(-5)
+    let elapsed = $state(1)
+    // let fire1 = $state({ignEast:0, ignNorth:0, lwr:2, headRos:250, bearing:-5, elapsed:1})
+    // let fire2 = $state({ignEast:100, ignNorth:0, lwr:2, headRos:250, bearing:-5, elapsed:1})
+    let degStep = $state(0.5)
+
     let dataSource = $derived(new DataSource(width, height))
     let burnGaps = $derived(dataSource.burnMap.getGaps())
     let counts = $derived([0,0,0,0])
@@ -32,18 +40,6 @@
     let canvasElement, ctx, animId
 
     //-----------------------------------------------------------------------------------------
-    // Fire Ellipse
-    //-----------------------------------------------------------------------------------------
-    
-    let ignEast = $state(0)
-    let ignNorth = $state(0)
-    let lwr     = $state(2)
-    let headRos = $state(250)
-    let bearing = $state(-5)
-    let elapsed = $state(1)
-    let degStep = $state(0.5)
-
-    //-----------------------------------------------------------------------------------------
 
     function clicked(e) {
         offsetX = e.offsetX
@@ -56,7 +52,7 @@
         updateData()
         dataSource.drawImageData(ctx)
         drawCentralAxis(ctx)
-        fillCell(xmid(ctx), ymid(ctx), "yellow")
+        fillCell(canvasX(ctx,ignEast), canvasY(ctx,ignNorth), "yellow")
         msec = new Date() - t0
         if (running) animId = window.requestAnimationFrame(draw)
     }

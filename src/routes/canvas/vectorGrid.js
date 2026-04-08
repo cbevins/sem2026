@@ -1,33 +1,34 @@
 export class VectorGrid {
     constructor(gridRadius, cellSize=1) {
-        this.gridRadius
         this.cellSize = cellSize
         this.gridDim = 1 + 2 * gridRadius
         this.gridMid = gridRadius // index of middle x,y
         this.rows = []
-        const a = {x:this.gridMid, y:0}             // Point A is top center
-        const b = {x:this.gridMid, y:this.gridMid}  // Point B is grid center
+        // Angle derivation point 'A' is top center
+        const a = {x:this.gridMid, y:0}
+        // Angle derivation point 'B' is grid center
+        const b = {x:this.gridMid, y:this.gridMid}
         for(let row=0; row<this.gridDim; row++) {
-            const dy = row - this.gridMid
-            const y = dy * this.cellSize
-            console.log(`Row ${row} dy=${dy} y=${y}`)
+            const dy = row - this.gridMid           // row offset from center row
+            const y = dy * this.cellSize            // row distance to center row
+            // console.log(`Row ${row} dy=${dy} y=${y}`)
             this.rows.push({dy,y,cols:[]})
             for(let col=0; col<this.gridDim; col++) {
-                const dx = col - this.gridMid
-                const x = dx * this.cellSize
-                const dist = Math.sqrt((dy*dy)+(dx*dx))
-                const c = {x:dx, y:dy}
+                const dx = col - this.gridMid       // col offset to middle col
+                const x = dx * this.cellSize        // col distance to middle col
+                const dist = Math.sqrt((dy*dy)+(dx*dx)) // cell distance to center cell
+                const c = {x:dx, y:dy}              // point 'C' for angle derivation
                 const radians = angle(a, b, c)
                 const deg = radians * 180 / Math.PI
                 const int = gridIntersections(0, 0, x, y, this.cellSize, this.cellSize)
-                this.rows[row].cols.push({dx,x,dist,deg,int})
+                this.rows[row].cols.push({dx, x, dist, deg, int})
             }
         }
     }
 }
 
-// Returns angle between 3 points A, B, and C,
-// where each point is an object with {x, y}
+// Returns angle (radians) between 3 points A, B, and C,
+// where each point is an object with cordinate properties {x, y}
 export function angle(A, B, C) {
     // Vectors AB and BC
     var AB = { x: A.x - B.x, y: A.y - B.y }
@@ -115,34 +116,58 @@ function gridIntersections(x1, y1, x2, y2, gridWidth, gridHeight) {
     return intersections
 }
 
-function junctions(intersections, epsilon=1.0e-9) {
-    let prev = intersections[0]
-    for(let i=1; i<intersections.length; i++) {
-        const current = intersections[i]
-        if (Math.abs(prev.dist-current.dist) < epsilon) {
-
-        }
-        prev = current
-    }
-}
-
 // ------------------------------------------------------------------------------
+console.log(new Date())
+// const grid = new VectorGrid(3,1)
+// // Display in a table
+// const data = []
+// for(let r=0; r<grid.rows.length; r++) {
+//     const {dy, y, cols} = grid.rows[r]
+//     for (let c=0; c<cols.length; c++) {
+//         const {dx, x, dist, deg, int} = grid.rows[r].cols[c]
+//         data.push({x, y, dist: dist.toFixed(2), deg:deg.toFixed(2), cells: int.length})
+//     }
+// }
+// console.log('7x7 VectorGrid')
+// console.table(data)
 
-const grid = new VectorGrid(3,2)
-// Display in a table
-const data = []
-for(let r=0; r<grid.rows.length; r++) {
-    const {dy, y, cols} = grid.rows[r]
-    for (let c=0; c<cols.length; c++) {
-        const {dx, x, dist, deg, int} = grid.rows[r].cols[c]
-        data.push({x, y, dist: dist.toFixed(2), deg:deg.toFixed(2), int})
-    }
+// console.log('Diagonal from [-3,-3] to [0,0]')
+// const row = grid.rows[0]
+// console.log(row.dy, row.y, row.cols[3])
+// const v = {x1: 0, y1: 0, x2: 1, y2: 20, w: 1, h: 1}
+// const points = gridIntersections(v.x1, v.y1, v.x2, v.y2, v.w, v.h)
+// const a = degrees(angle( {x:v.x2, y:v.y2},{x:v.x1, y:v.y1},{x:v.x1, y:v.y1+10}))
+// console.table(points)
+// console.log(`There are ${points.length} intersection points between [${v.x1},${v.y1}] and [${v.x2},${v.y2}] at angle ${a.toFixed(2)}`)
+
+function getAngle(x1, y1, x2, y2) {
+    const dy = y2-y1
+    const dx = x2-x1
+    const rad = Math.atan2(dy, dx)
+    const deg = degrees(rad).toFixed(2).padStart(7)
+    const bearing = ((450-deg)%360).toFixed(2).padStart(7)
+    let slope = (dy/dx).toFixed(2).padStart(7)
+    return {x1,y1,dx,x2,y2,dy,deg,bearing,slope}
 }
+const data = []
+data.push(getAngle(0,0,0,3))
+data.push(getAngle(0,0,1,3))
+data.push(getAngle(0,0,2,3))
+data.push(getAngle(0,0,3,3))
+data.push(getAngle(0,0,3,0))
+data.push(getAngle(0,0,3,-1))
+data.push(getAngle(0,0,3,-2))
+data.push(getAngle(0,0,3,-3))
+data.push(getAngle(0,0,2,-3))
+data.push(getAngle(0,0,1,-3))
+data.push(getAngle(0,0,0,-3))
+data.push(getAngle(0,0,-1,-3))
+data.push(getAngle(0,0,-2,-3))
+data.push(getAngle(0,0,-3,-3))
+data.push(getAngle(0,0,-3,-2))
+data.push(getAngle(0,0,-3,-1))
+data.push(getAngle(0,0,-3,0))
+data.push(getAngle(0,0,-3,1))
+data.push(getAngle(0,0,-3,2))
+data.push(getAngle(0,0,-3,3))
 console.table(data)
-const row = grid.rows[0]
-console.log(row.dy, row.y, row.cols[3])
-const v = {x1: 0, y1: 0, x2: 1, y2: 20, w: 1, h: 1}
-const points = gridIntersections(v.x1, v.y1, v.x2, v.y2, v.w, v.h)
-const a = degrees(angle( {x:v.x2, y:v.y2},{x:v.x1, y:v.y1},{x:v.x1, y:v.y1+10}))
-console.table(points)
-console.log(`There are ${points.length} intersection points between [${v.x1},${v.y1}] and [${v.x2},${v.y2}] at angle ${a.toFixed(2)}`)

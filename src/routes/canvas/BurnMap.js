@@ -23,6 +23,13 @@ export class BurnMap {
         return byteValue & 3; // 3 in binary is '00000011
     }
 
+    getCodes(col, row) {
+        const byteValue = this.get(col, row)
+        const burnCode = byteValue & 3; // 3 in binary is '00000011
+        const featureCode = byteValue >> 2
+        return {featureCode, burnCode}
+    }
+
     getCounts() {
         const counts = [0,0,0,0]
         for(let d of this.data) counts[d]++
@@ -119,9 +126,14 @@ export class BurnMap {
         }
     }
 
+    setCodes(col, row, newValue6Bits, newValue2Bits, n=1) {
+        this.setBurnCode(col, row, newValue2Bits, n)
+        this.setFeatureCode(col, row, newValue6Bits, n)
+    }
+
     setFeatureCode(col, row, newValue6Bits, n=1) {
         if (newValue6Bits<0 || newValue6Bits > 63)
-            throw new Error('BurnMap.setClassCode() attempt to set code outside range[0,63].')
+            throw new Error('BurnMap.setFeatureCode() attempt to set code outside range[0,63].')
         const idx = col + row * this.width
         const end = Math.min(idx+n, this.width*(row+1))
         for(let i=idx; i<end; i++) {

@@ -1,40 +1,29 @@
 <script>
     import { onMount } from "svelte"
-    import { RaycastDataProvider } from "../DataProvider.js"
-    import { FireEllipseModel } from '../FireEllipseModel.js'
+    import { RayCastModel } from "./RayCastModel.js"
     import { canvasX, canvasY, drawCentralAxis } from '../canvasLib.js'
-    import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
 	import { BurnMap } from "../BurnMap.js";
 
     let {width=512, height=512} = $props()
-    
-    let fire1 = $state({ignEast:0, ignNorth:0, lwr:2, headRos:250, bearing:-5, elapsed:1,
-        points:[], size:0, perimeter:0,
-        gap:{distance:0, angle:0, index:0},
-        scan:{size:0, cells:0, perimeter:0}})
-    let fire2 = $state({ignEast:100, ignNorth:100, lwr:2, headRos:250, bearing:85, elapsed:1,
-        points:[], size:0, perimeter:0,
-        gap:{distance:0, angle:0, index:0},
-        scan:{size:0, cells:0, perimeter:0}})
-    let fires = $derived([fire1, fire2])
     let degStep = $state(0.5)
-
-    const dataProvider = new RaycastDataProvider()
-    let burnMap = $derived(dataProvider.getBurnMap(0, height/2, width, height, 1))
-    let counts = $derived([0,0,0,0])
-    let msec = $state(0)
-    let offsetX = $state(0)
-    let offsetY = $state(0)
-    let running = $state(false)
 
     let showBurnCounts = $state(true)
     let showBurnGaps = $state(true)
     let showScanLineStats = $state(true)
 
+    let dataModel = $derived(new RayCastModel(width, height, degStep,
+        showBurnCounts, showBurnGaps, showScanLineStats))
+    let counts = $derived(dataModel.counts)
+    let msec = $state(0)
+    let offsetX = $state(0)
+    let offsetY = $state(0)
+    let running = $state(false)
+    let frames = $state(1)
+    let totalMsec = $state(0)
+    let meanMsec = $derived((totalMsec/frames).toFixed(2))
+
     // Bind this variable to the canvas element
     let canvasElement, ctx, animId
-
-    //-----------------------------------------------------------------------------------------
 
     function clicked(e) {
         offsetX = e.offsetX
@@ -44,23 +33,19 @@
 
     function draw() {
         const t0 = new Date()
-        updateData()
-        burnMap.drawToCanvas(ctx)
+        // First draw the BurnMap
+        dataModel = new RayCastModel(width, height, degStep,
+            showBurnCounts, showBurnGaps, showScanLineStats)
+        dataModel.burnMap.drawToCanvas(ctx)
+        // Then add any additional elements like axis, text, etc.
         drawCentralAxis(ctx)
-        for(let fire of fires)
+        for(let fire of dataModel.fires)
             fillCell(canvasX(ctx, fire.ignEast), canvasY(ctx, fire.ignNorth), "yellow")
         msec = new Date() - t0
+        totalMsec += msec
+        meanMsec = (totalMsec / frames).toFixed(2)
+        frames++
         if (running) animId = window.requestAnimationFrame(draw)
-    }
-
-    function castBurnLines(dataSource, fire) {
-        const ignCol = canvasX(ctx, fire.ignEast)
-        const ignRow = canvasY(ctx, fire.ignNorth)
-        for(let [easting, northing /*, bearing*/] of fire.points) {
-            const lastCol = canvasX(ctx, easting)
-            const lastRow = canvasY(ctx, northing)
-            burnMap.castBurnLine(ignCol, ignRow, lastCol, lastRow)
-        }
     }
 
     function fillCell(col, row, color="rgba(255, 255, 255, 255)") {
@@ -77,36 +62,6 @@
         if (running) window.cancelAnimationFrame(animId)
         else animId = window.requestAnimationFrame(draw)
         running = ! running
-    }
-
-    function updateData() {
-        // Because we're just spinning the same FireEllipses
-        // (instead of growing the same fire),
-        // each frame must start with a fresh BurnMap
-        burnMap = dataProvider.getBurnMap(0, 0, width, height, 1)
-
-        // Generate perimeter points for the fire ellipse at the current bearing
-        for(let fire of fires) {
-            fire.bearing = (fire.bearing + 5)%360
-            const gen = new FireEllipseModel(fire.lwr, fire.headRos, fire.bearing,
-                fire.elapsed, fire.ignEast, fire.ignNorth)
-            fire.points = gen.perimeterPoints(degStep)
-            if (showBurnGaps) fire.gap = gen.maxGap(fire.points)
-            fire.size = gen.size()
-            fire.perimeter = gen.perimeter()
-            castBurnLines(burnMap, fire)
-            // Some ScanLine size and perimeters for comparison purposes ...
-            if (showScanLineStats) {
-                const fireEllipseScanLines = new FireEllipseScanLines(
-                    fire.ignEast, fire.ignNorth,
-                    gen.length(), gen.width(), fire.bearing,
-                    gen.centerEasting(), gen.centerNorthing(), 1, 'ft')
-                fire.scan.size = fireEllipseScanLines.size
-                fire.scan.perimeter = fireEllipseScanLines.perimeter
-                fire.scan.cells = fireEllipseScanLines.rasterSize
-            }
-        }
-        if (showBurnCounts) counts = burnMap.getBurnCounts()
     }
 </script>
 
@@ -175,7 +130,7 @@
 <div class='mt-4 ml-4 px-4 border'>
     <div class='ml-4 text-2xl'>Fire Ellipse Collision Detection via Ray Casting</div>
 
-    {@render fireEllipseTable(fires)}
+    {@render fireEllipseTable(dataModel.fires)}
 
     {#if showBurnCounts}
         {@render burnCountsTable(counts)}
@@ -183,7 +138,10 @@
 
     <div class='ml-4 mt-2 text-lg'>
         <button class='border rounded' onclick={runpause}>{running?'Pause':'Animate'}</button>
-        <span class='px-1 text-sm'>Elapsed time {msec} milliseconds</span>
+        <span class='px-1 text-sm'>{frames} Frames,
+            Run Msec {totalMsec}, Avg Frame Msec {meanMsec}
+            ({(1000/meanMsec).toFixed(2)} fps)
+        </span>
     </div>
 
     <canvas class='mt-4 ml-4 border' 

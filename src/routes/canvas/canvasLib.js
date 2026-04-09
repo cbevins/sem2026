@@ -3,7 +3,6 @@
  * All functions take a canvas context reference, and not an imageData
  */
 
-
 export function xmid(ctx) { return Math.trunc(ctx.canvas.width/2) }
 export function ymid(ctx) { return Math.trunc(ctx.canvas.height/2) }
 

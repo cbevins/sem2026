@@ -20,9 +20,15 @@ export class BurnMap {
         this.raster = {
             cols: Math.trunc((0.5+pcsWidth)/scale),
             rows: Math.trunc((0.5+pcsHeight)/scale),
-        } 
+        }
         this.data = new Uint8ClampedArray(this.raster.rows*this.raster.cols).fill(BurnMap.unburned)
     }
+
+    // These convert PCS easting/northing to BurnMap col/row
+    col(easting) { return Math.round(easting) + this.midCol() }
+    row(northing) { return this.midRow() - Math.round(northing) }
+    midCol() { return Math.trunc(this.raster.cols/2) }
+    midRow() { return Math.trunc(this.raster.rows/2) }
 
     // Casts a line of BurnMap.burning from cell [x1,y1] thru cell [x2,y2]
     // unless/until an unburnable or burned cell blocks its path

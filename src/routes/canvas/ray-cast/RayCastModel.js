@@ -1,21 +1,7 @@
 import { RayCastDataProvider } from "./RayCastDataProvider.js"
+import { RayCastFeaturePalette } from "./RayCastFeaturePalette.js"
 import { FireEllipseModel } from '../FireEllipseModel.js'
 import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
-import { BurnMap } from "../BurnMap.js"
-
-const _gap = {distance:0, angle:0, index:0}
-const _scan = {size:0, cells:0, perimeter:0}
-
-const xfires = [   
-    {ignEast:0, ignNorth:0, lwr:2, headRos:250, bearing:-5, elapsed:1,
-        points:[], size:0, perimeter:0,
-        gap:{distance:0, angle:0, index:0},
-        scan:{size:0, cells:0, perimeter:0}},
-    {ignEast:100, ignNorth:100, lwr:2, headRos:250, bearing:85, elapsed:1,
-        points:[], size:0, perimeter:0,
-        gap:{distance:0, angle:0, index:0},
-        scan:{size:0, cells:0, perimeter:0}}
-]
 
 export class RayCastModel {
     constructor(width, height, degStep,
@@ -27,9 +13,14 @@ export class RayCastModel {
         this.getBurnCounts = getBurnCounts
         this.getBurnGaps = getBurnGaps
         this.getScanLineStats = getScanLineStats
-        this.fires = xfires
+        this.fires = this.dataProvider.getFires()
         this.counts = [0, 0, 0, 0]
+        this.palette = RayCastFeaturePalette
         this.update()
+    }
+
+    drawToCanvas(ctx) {
+        this.burnMap.drawToCanvas(ctx, this.palette)
     }
 
     update() {

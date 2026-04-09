@@ -2,14 +2,14 @@
     import { onMount } from "svelte"
     import { RayCastModel } from "./RayCastModel.js"
     import { canvasX, canvasY, drawCentralAxis } from '../canvasLib.js'
-	import { BurnMap } from "../BurnMap.js";
+	import { BurnMap } from "../BurnMap.js"     // needed for BurnMap.<codes>
 
     let {width=512, height=512} = $props()
     let degStep = $state(0.5)
 
     let showBurnCounts = $state(true)
-    let showBurnGaps = $state(true)
-    let showScanLineStats = $state(true)
+    let showBurnGaps = $state(false)
+    let showScanLineStats = $state(false)
 
     let dataModel = $derived(new RayCastModel(width, height, degStep,
         showBurnCounts, showBurnGaps, showScanLineStats))
@@ -36,7 +36,8 @@
         // First draw the BurnMap
         dataModel = new RayCastModel(width, height, degStep,
             showBurnCounts, showBurnGaps, showScanLineStats)
-        dataModel.burnMap.drawToCanvas(ctx)
+        dataModel.drawToCanvas(ctx)
+        
         // Then add any additional elements like axis, text, etc.
         drawCentralAxis(ctx)
         for(let fire of dataModel.fires)

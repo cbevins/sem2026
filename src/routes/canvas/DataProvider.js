@@ -56,19 +56,19 @@ export class RaycastDataProvider extends DataProvider {
         
     initBurnMap(burnMap) {
         // Start with grass (featureCode 0) that is unburned (burnCode 0)
-        burnMap.data.fill(BurnMap.unburned)
+        burnMap.fillCodes(1, BurnMap.unburned)
         
         // Add some water features
-        burnMap.setCodesRect(280, 220, 10, 10, 1, BurnMap.unburnable)
-        burnMap.setCodesRect(120, 120, 10, 10, 1, BurnMap.unburnable)
-        burnMap.setCodesRect(100, 350, 100, 10, 1, BurnMap.unburnable)
-        burnMap.setCodesRect(350, 350, 10, 100, 1, BurnMap.unburnable)
+        burnMap.setCodesRect(280, 220, 10, 10, 0, BurnMap.unburnable)
+        burnMap.setCodesRect(120, 120, 10, 10, 0, BurnMap.unburnable)
+        burnMap.setCodesRect(100, 350, 100, 10, 0, BurnMap.unburnable)
+        burnMap.setCodesRect(350, 350, 10, 100, 0, BurnMap.unburnable)
         // West-side '<''
-        burnMap.setCodesLine(100, 256, 150, 206, 1, BurnMap.unburnable)
-        burnMap.setCodesLine(100, 256, 150, 306, 1, BurnMap.unburnable)
+        burnMap.setCodesLine(100, 256, 150, 206, 0, BurnMap.unburnable)
+        burnMap.setCodesLine(100, 256, 150, 306, 0, BurnMap.unburnable)
         // East side '<'
-        burnMap.setCodesLine(356, 256, 406, 206, 1, BurnMap.unburnable)
-        burnMap.setCodesLine(356, 256, 406, 306, 1, BurnMap.unburnable)
+        burnMap.setCodesLine(356, 256, 406, 206, 0, BurnMap.unburnable)
+        burnMap.setCodesLine(356, 256, 406, 306, 0, BurnMap.unburnable)
         return burnMap
     }
 

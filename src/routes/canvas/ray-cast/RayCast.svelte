@@ -106,7 +106,7 @@
                 fire.scan.cells = fireEllipseScanLines.rasterSize
             }
         }
-        if (showBurnCounts) counts = burnMap.getCounts()
+        if (showBurnCounts) counts = burnMap.getBurnCounts()
     }
 </script>
 

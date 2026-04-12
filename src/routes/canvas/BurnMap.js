@@ -29,6 +29,26 @@ export class BurnMap {
     row(northing) { return this.midRow() - Math.round(northing) }
     midCol() { return Math.trunc(this.raster.cols/2) }
     midRow() { return Math.trunc(this.raster.rows/2) }
+    
+    // Splits lowest 2-bits into burnCode and highest 6 bits into featureCode
+    splitCodes(byteValue) {
+        return {
+            featureCode: byteValue >> 2,
+            burnCode: byteValue & 3 // 3 in binary is '00000011
+        }
+    }
+
+    fillCodes(featureCode, burnCode) {
+        const newByte = this.joinedCode(featureCode, burnCode)
+        for(let i=0; i<this.data.length; i++) this.data[i] = newByte
+    }
+
+    // Sets just the perimeter raster cells to BurnMap.burning
+    burnPerimeter(fire) {
+        const raster = this.rasterPerimeter(fire.points)
+        for(let [col, row] of raster)
+            this.setBurnCode(col, row, BurnMap.burning)
+    }
 
     // Casts a line of BurnMap.burning from cell [x1,y1] thru cell [x2,y2]
     // unless/until an unburnable or burned cell blocks its path
@@ -166,18 +186,20 @@ export class BurnMap {
         const newByte = (burnCode & mask) | (featureCode << 2)
         return newByte
     }
-    
-    // Splites lowest 2-bits into burnCode and highest 6 bits into featureCode
-    splitCodes(byteValue) {
-        return {
-            featureCode: byteValue >> 2,
-            burnCode: byteValue & 3 // 3 in binary is '00000011
-        }
-    }
 
-    fillCodes(featureCode, burnCode) {
-        const newByte = this.joinedCode(featureCode, burnCode)
-        for(let i=0; i<this.data.length; i++) this.data[i] = newByte
+    // Returns just the unique perimeter raster cells
+    rasterPerimeter(points) {
+        const raster = []
+        let prevCol = Infinity
+        let prevRow = Infinity
+        for(let [easting, northing] of points) {
+            let col = this.col(easting)
+            let row = this.row(northing)
+            if (prevRow !== row || prevCol !== col)
+                raster.push([col, row])
+            prevCol = col; prevRow = row;
+        }
+        return raster
     }
 
     // These methods set just the burnCode 

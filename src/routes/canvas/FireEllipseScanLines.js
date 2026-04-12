@@ -12,7 +12,7 @@ export class FireEllipseScanLines {
         this.scanWidth = scanWidth
         this.units = units
         this.ignIdx = 0
-        // Array of scanline rows where aach row is a 3-element array [y, x1, x2]
+        // Array of scanline rows where each row is a 3-element array [y, x1, x2]
         this.lines = this.scanEllipse()
         this.calcStats()
     }
@@ -43,6 +43,39 @@ export class FireEllipseScanLines {
             this.perimeter += (dist1 + dist2)
             prev = this.lines[i]
         }
+    }
+
+    // lines is an array of scan line triplets: [y, x1, x2]
+    perimeterPointsDEP(res=1) {
+        const points = []
+        let y0 = this.lines[0][0]
+        let x0 = this.lines[0][1]
+        let d2 = 0
+        for(let i=0; i<this.lines.length; i++) {
+            const [y, x] = this.lines[i]
+            d2 = (y-y0)*(y-y0) + (x-x0)*(x-x0)
+            points.push([x, y, d2])
+            y0 = y
+            x0 = x
+        }
+
+        y0 = this.lines[this.lines.length-1][0]
+        x0 = this.lines[this.lines.length-1][2]
+        for(let i=this.lines.length-2; i>=0; i--) {
+            const [y, x1, x] = this.lines[i]
+            d2 = (y-y0)*(y-y0) + (x-x0)*(x-x0)
+            // if (d2 > 2*res) {
+            //     for(let t=res/d2; t<1; t+=res/d2) {
+            //         let dx = x0 + t * (x-x0)
+            //         let dy = y0 + t * (y-y0)
+            //         points.push([dx, dy])
+            //     }
+            // }
+            points.push([x, y, d2])
+            y0 = y
+            x0 = x
+        }
+        return points
     }
 
     scanEllipse() {

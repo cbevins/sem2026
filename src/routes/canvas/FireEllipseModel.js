@@ -5,22 +5,28 @@ import { FireEllipseMod } from '$lib/fire/ellipse/FireEllipseMod.js'
 // import {activeInputNodesTable, selectedNodesTable} from '$lib/dag/DagTables.js'
 
 export class FireEllipseModel {
-    constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, ignEast=0, ignNorth=0) {
+    constructor(lwRatio=1, headRos=1, bearing=0, elapsed=1, ignEast=0, ignNorth=0,
+            label='Unknown') {
         this.bearing = bearing
         this.elapsed = elapsed
         this.headRos = headRos
         this.ignEast = ignEast
         this.ignNorth = ignNorth
         this.lwRatio = lwRatio
-        let e = new FireEllipseMod('e', 'north').ready()
-
+        this.label = label
+        const e = new FireEllipseMod('e', 'north').ready()
         // Select required nodes to determine perimeter points at regular theta intervals
         // as well as length, width, center point, size, and perimeter
-        for(let node of [e.theta.perim.east, e.theta.perim.north, e.theta.beta, e.theta.psi,
-                e.center.east, e.center.north, e.beta, e.psi, e.size, e.perimeter,
-            e.length.dist, e.width.dist, e.center.east, e.center.north])
-            node.select()
-        
+        for(let node of [
+            // e.theta.beta, e.theta.psi,
+            e.theta.perim.east, e.theta.perim.north,
+            e.beta.perim.east, e.beta.perim.north,
+            e.beta.perim.x, e.beta.perim.y,
+            e.center.y, e.center.x,
+            e.center.east, e.center.north,
+            e.length.dist, e.width.dist,
+            e.size, e.perimeter])
+        node.select()
         // selectedNodesTable(e)
         // activeInputNodesTable(e)
 
@@ -36,15 +42,26 @@ export class FireEllipseModel {
         this.dag = e
     }
 
-    perimeterPoints(degreesIncrement=1) {
-        const vector = this.dag.theta
+    centerEasting() { return this.dag.center.east.get() }
+    centerNorthing() { return this.dag.center.north.get() }
+    length() { return this.dag.length.dist.get() }
+    perimeter() { return this.dag.perimeter.get() }
+    size() { return this.dag.size.get() }
+    width() { return this.dag.width.dist.get() }
+
+    perimeterPoints(degreesIncrement) {
         const pts = []
         for(let degrees=0; degrees<=360; degrees+=degreesIncrement) {
-            vector.bearing.set(degrees)
-            this.dag.updateAll()
-            pts.push([vector.perim.east.get(), vector.perim.north.get(), degrees])
+            pts.push(this.perimeterCoordAtBetaBearing(degrees))
         }
         return pts
+    }
+
+    perimeterCoordAtBetaBearing(beta) {
+        const vector = this.dag.beta
+        vector.bearing.set(beta)
+        return [vector.perim.east.get(), vector.perim.north.get(), beta,
+            vector.perim.x.get(), vector.perim.y.get()]
     }
     
     // Returns maximum distance between neighboring perimeter point pairs
@@ -67,11 +84,4 @@ export class FireEllipseModel {
         const angle = 360 * (index / (points.length-1)) - 1
         return {distance, angle, index}
     }
-
-    centerEasting() { return this.dag.center.east.get() }
-    centerNorthing() { return this.dag.center.north.get() }
-    length() { return this.dag.length.dist.get() }
-    perimeter() { return this.dag.perimeter.get() }
-    size() { return this.dag.size.get() }
-    width() { return this.dag.width.dist.get() }
 }

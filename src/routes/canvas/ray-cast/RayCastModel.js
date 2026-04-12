@@ -2,6 +2,7 @@ import { RayCastDataProvider } from "./RayCastDataProvider.js"
 import { RayCastFeaturePalette } from "./RayCastFeaturePalette.js"
 import { FireEllipseModel } from '../FireEllipseModel.js'
 import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
+import { EllipsePerimResolution } from '../EllipsePerimResolution.js'
 
 export class RayCastModel {
     constructor(width, height, degStep,
@@ -32,37 +33,54 @@ export class RayCastModel {
         // Generate perimeter points for the fire ellipse at the current bearing
         for(let fire of this.fires) {
             fire.bearing = (fire.bearing + 5)%360
+
+            // Find a precision
+            // const epr = new EllipsePerimResolution(fire.lwr, fire.headRos, fire.bearing,
+            //     fire.elapsed, fire.ignEast, fire.ignNorth, fire.label, 1)
+            // let angle = epr.threshholdAngle(0, 1, 1)
+            // if (fire.label==='1') epr.threshholdTable(5, 1, 1)
+            
             // This is currently using BurnMap raster ignEast and ignNorth
             // Should be changed to PCS?
-            const gen = new FireEllipseModel(fire.lwr, fire.headRos, fire.bearing,
-                fire.elapsed, fire.ignEast, fire.ignNorth)
-            fire.points = gen.perimeterPoints(this.degStep)
-            if (this.showBurnGaps) fire.gap = gen.maxGap(fire.points)
-            fire.size = gen.size()
-            fire.perimeter = gen.perimeter()
-            this.castBurnLines(fire)
+            const fem = new FireEllipseModel(fire.lwr, fire.headRos, fire.bearing,
+                fire.elapsed, fire.ignEast, fire.ignNorth, fire.label)
+            fire.size = fem.size()
+            fire.perimeter = fem.perimeter()
+
+            // Using degStep to generate perimeter points at regular theta's
+            fire.points = fem.perimeterPoints(this.degStep)
+            if (this.getBurnGaps) fire.gap = fem.maxGap(fire.points)
+
             // Some ScanLine size and perimeters for comparison purposes ...
             if (this.getScanLineStats) {
                 const fireEllipseScanLines = new FireEllipseScanLines(
                     fire.ignEast, fire.ignNorth,
-                    gen.length(), gen.width(), fire.bearing,
-                    gen.centerEasting(), gen.centerNorthing(), 1, 'ft')
+                    fem.length(), fem.width(), fire.bearing,
+                    fem.centerEasting(), fem.centerNorthing(), 1, 'ft')
                 fire.scan.size = fireEllipseScanLines.size
                 fire.scan.perimeter = fireEllipseScanLines.perimeter
                 fire.scan.cells = fireEllipseScanLines.rasterSize
+                // fire.scan.points = fireEllipseScanLines.perimeterPoints()
+                // console.log(new Date(), fire.label)
+                // console.table(fire.scan.points)
             }
+            this.castBurnLines(fire)
         }
         if (this.getBurnCounts) this.counts = this.burnMap.getBurnCounts()
         return this.fires
     }
 
     castBurnLines(fire) {
+        const raster = this.burnMap.rasterPerimeter(fire.points)
         const ignCol = this.burnMap.col(fire.ignEast)
         const ignRow = this.burnMap.row(fire.ignNorth)
-        for(let [easting, northing /*, bearing*/] of fire.points) {
-            const lastCol = this.burnMap.col(easting)
-            const lastRow = this.burnMap.row(northing)
-            this.burnMap.castBurnLine(ignCol, ignRow, lastCol, lastRow)
+        // const table = []
+        // table.push({col: ignCol, row: ignRow})
+        for(let [perimCol, perimRow] of raster) {
+            this.burnMap.castBurnLine(ignCol, ignRow, perimCol, perimRow)
+            // table.push({col: perimCol, row: perimRow})
         }
+        // console.clear()
+        // console.table(table)
     }
 }

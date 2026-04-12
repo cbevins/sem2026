@@ -3,13 +3,16 @@
     import { RayCastModel } from "./RayCastModel.js"
     import { canvasX, canvasY, drawCentralAxis } from '../canvasLib.js'
 	import { BurnMap } from "../BurnMap.js"     // needed for BurnMap.<codes>
-
+    
     let {width=512, height=512} = $props()
-    let degStep = $state(0.5)
+    let degStep = $state(0.2)
 
     let showBurnCounts = $state(true)
-    let showBurnGaps = $state(false)
-    let showScanLineStats = $state(false)
+    let showBurnGaps = $state(true)
+    let showScanLineStats = $state(true)
+
+    // Bind this variable to the canvas element
+    let canvasElement, ctx, animId
 
     let dataModel = $derived(new RayCastModel(width, height, degStep,
         showBurnCounts, showBurnGaps, showScanLineStats))
@@ -21,9 +24,6 @@
     let frames = $state(1)
     let totalMsec = $state(0)
     let meanMsec = $derived((totalMsec/frames).toFixed(2))
-
-    // Bind this variable to the canvas element
-    let canvasElement, ctx, animId
 
     function clicked(e) {
         offsetX = e.offsetX
@@ -41,7 +41,7 @@
         // Then add any additional elements like axis, text, etc.
         drawCentralAxis(ctx)
         for(let fire of dataModel.fires)
-            fillCell(canvasX(ctx, fire.ignEast), canvasY(ctx, fire.ignNorth), "yellow")
+            fillCell(canvasX(ctx, fire.ignEast), canvasY(ctx, fire.ignNorth), fire.color)
         msec = new Date() - t0
         totalMsec += msec
         meanMsec = (totalMsec / frames).toFixed(2)
@@ -66,9 +66,36 @@
     }
 </script>
 
+<!-- --------------------------------------------------------------------------- -->
+
+<div class='mt-4 ml-4 px-4 border'>
+    <div class='ml-4 text-2xl'>Fire Ellipse Collision Detection via Ray Casting</div>
+
+    {@render fireEllipseTable(dataModel.fires)}
+
+    {#if showBurnCounts}
+        {@render burnCountsTable(counts)}
+    {/if}
+
+    <div class='ml-4 mt-2 text-lg'>
+        <button class='border rounded' onclick={runpause}>{running?'Pause':'Animate'}</button>
+        <span class='px-1 text-sm'>{frames} Frames,
+            Run Msec {totalMsec}, Avg Frame Msec {meanMsec}
+            ({(1000/meanMsec).toFixed(2)} fps) DegStep {degStep}
+        </span>
+    </div>
+
+    <canvas class='mt-4 ml-4 border' 
+        bind:this={canvasElement} onclick={clicked} width={width} height={height}>
+    </canvas>
+</div>
+
+<!-- --------------------------------------------------------------------------- -->
+
 {#snippet item(content)}
     <td class='text-sm px-2 py-1 border border-gray-300'>{content}</td>
 {/snippet}
+
 {#snippet head(content)}
     <th class='text-sm px-2 py-1 border border-gray-300'>{content}</th>
 {/snippet}
@@ -99,6 +126,7 @@
         <tr>
             {@render head('Fire')}{@render head('Bearing')}
             {@render head('Size')}{@render head('Perim')}
+            {@render head('Points')}
             {#if showScanLineStats}
                 {@render head('Scan Size')}{@render head('Scan Perim')}
             {/if}
@@ -112,6 +140,7 @@
                 {@render item(fire.bearing.toFixed(2))}
                 {@render item(fire.size.toFixed(2))}
                 {@render item(fire.perimeter.toFixed(2))}
+                {@render item(fire.points.length)}
                 {#if showScanLineStats}
                     {@render item(fire.scan.size.toFixed(2))}
                     {@render item(fire.scan.perimeter.toFixed(2))}
@@ -125,27 +154,3 @@
         </tbody>
     </table>
 {/snippet}
-
-<!-- --------------------------------------------------------------------------- -->
-
-<div class='mt-4 ml-4 px-4 border'>
-    <div class='ml-4 text-2xl'>Fire Ellipse Collision Detection via Ray Casting</div>
-
-    {@render fireEllipseTable(dataModel.fires)}
-
-    {#if showBurnCounts}
-        {@render burnCountsTable(counts)}
-    {/if}
-
-    <div class='ml-4 mt-2 text-lg'>
-        <button class='border rounded' onclick={runpause}>{running?'Pause':'Animate'}</button>
-        <span class='px-1 text-sm'>{frames} Frames,
-            Run Msec {totalMsec}, Avg Frame Msec {meanMsec}
-            ({(1000/meanMsec).toFixed(2)} fps)
-        </span>
-    </div>
-
-    <canvas class='mt-4 ml-4 border' 
-        bind:this={canvasElement} onclick={clicked} width={width} height={height}>
-    </canvas>
-</div>

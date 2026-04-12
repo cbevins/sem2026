@@ -6,6 +6,10 @@
         title: 'Fire Ellipse Ray-Cast (4/3/2026)',
         brief: 'Attempt at fire ellipse growth using ray-casting techniques.',
     },{
+        route: '/canvas/vector-grid',
+        title: 'Vectors to Visit All Grid Cells (4/9/2026)',
+        brief: 'Attempt to develop vector walking algorithm.',
+    },{
         route: '/canvas/ellipse-scan-lines',
         title: 'Ellipse Scan Lines for HTML Canvas (4/1/2026)',
         brief: 'Demo of rotated fire ellipse scan lines',

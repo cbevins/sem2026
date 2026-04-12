@@ -2,7 +2,6 @@ import { RayCastDataProvider } from "./RayCastDataProvider.js"
 import { RayCastFeaturePalette } from "./RayCastFeaturePalette.js"
 import { FireEllipseModel } from '../FireEllipseModel.js'
 import { FireEllipseScanLines } from '../FireEllipseScanLines.js'
-import { EllipsePerimResolution } from '../EllipsePerimResolution.js'
 
 export class RayCastModel {
     constructor(width, height, degStep,
@@ -33,12 +32,6 @@ export class RayCastModel {
         // Generate perimeter points for the fire ellipse at the current bearing
         for(let fire of this.fires) {
             fire.bearing = (fire.bearing + 5)%360
-
-            // Find a precision
-            // const epr = new EllipsePerimResolution(fire.lwr, fire.headRos, fire.bearing,
-            //     fire.elapsed, fire.ignEast, fire.ignNorth, fire.label, 1)
-            // let angle = epr.threshholdAngle(0, 1, 1)
-            // if (fire.label==='1') epr.threshholdTable(5, 1, 1)
             
             // This is currently using BurnMap raster ignEast and ignNorth
             // Should be changed to PCS?
@@ -49,7 +42,11 @@ export class RayCastModel {
 
             // Using degStep to generate perimeter points at regular theta's
             fire.points = fem.perimeterPoints(this.degStep)
-            if (this.getBurnGaps) fire.gap = fem.maxGap(fire.points)
+            fire.raster = this.burnMap.rasterPerimeter(fire.points)
+            if (this.getBurnGaps) {
+                fire.gap = fem.maxGap(fire.points)
+                fire.gaps = this.burnMap.getGaps()
+            }
 
             // Some ScanLine size and perimeters for comparison purposes ...
             if (this.getScanLineStats) {
@@ -73,8 +70,7 @@ export class RayCastModel {
     castBurnLines(fire) {
         const ignCol = this.burnMap.col(fire.ignEast)
         const ignRow = this.burnMap.row(fire.ignNorth)
-        const raster = this.burnMap.rasterPerimeter(fire.points)
-        for(let [perimCol, perimRow] of raster)
+        for(let [perimCol, perimRow] of fire.raster)
             this.burnMap.castBurnLine(ignCol, ignRow, perimCol, perimRow)
     }
 }

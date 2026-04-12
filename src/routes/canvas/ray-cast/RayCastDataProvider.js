@@ -7,9 +7,10 @@ const _fire = {label: '', ignEast:0, ignNorth:0, lwr:10, headRos:250,
     bearing:80, elapsed:1, points:[], size:0, perimeter:0,
     gap: {..._gap}, scan: {..._scan}, color: 'yellow'}
 
-const Fires = [
-    {..._fire, label: 'lwr-1.01', ignEast: 50, ignNorth: -150, lwr:1.01, headRos:150},
-    {..._fire, label: 'lwr-10', ignEast: -50, ignNorth: 10, lwr:10, headRos:250},
+// Fire behavior parameters used to create FireEllipseModels
+const FireBehavior = [
+    // {..._fire, label: 'lwr-1.01', ignEast: 50, ignNorth: -150, lwr:1.01, headRos:150},
+    {..._fire, label: 'lwr-10', ignEast: 0, ignNorth: 0, lwr:10, headRos:250},
 
     // {..._fire, label: '0', ignEast: -50, ignNorth: 10, lwr:10, headRos:150},
     // {..._fire, label: '1a', ignEast: 50, ignNorth: 50, lwr:10, headRos:150},
@@ -48,9 +49,7 @@ export class RayCastDataProvider extends DataProvider {
         return BurnMap.burnable
     }
         
-    getFires() {
-        return Fires
-    }
+    getFires() { return FireBehavior }
 
     initBurnMap(burnMap) {
         // Start with grass (featureCode 0) that is unburned (burnCode 0)

@@ -8,8 +8,8 @@
     let degStep = $state(0.2)
 
     let showBurnCounts = $state(true)
-    let showBurnGaps = $state(true)
-    let showScanLineStats = $state(true)
+    let showBurnGaps = $state(false)
+    let showScanLineStats = $state(false)
 
     // Bind this variable to the canvas element
     let canvasElement, ctx, animId
@@ -17,6 +17,7 @@
     let dataModel = $derived(new RayCastModel(width, height, degStep,
         showBurnCounts, showBurnGaps, showScanLineStats))
     let counts = $derived(dataModel.counts)
+    let fires = $derived(dataModel.fires)
     let msec = $state(0)
     let offsetX = $state(0)
     let offsetY = $state(0)
@@ -37,7 +38,7 @@
         dataModel = new RayCastModel(width, height, degStep,
             showBurnCounts, showBurnGaps, showScanLineStats)
         dataModel.drawToCanvas(ctx)
-        
+        fires = dataModel.fires
         // Then add any additional elements like axis, text, etc.
         drawCentralAxis(ctx)
         for(let fire of dataModel.fires)
@@ -71,7 +72,7 @@
 <div class='mt-4 ml-4 px-4 border'>
     <div class='ml-4 text-2xl'>Fire Ellipse Collision Detection via Ray Casting</div>
 
-    {@render fireEllipseTable(dataModel.fires)}
+    {@render fireEllipseTable(fires)}
 
     {#if showBurnCounts}
         {@render burnCountsTable(counts)}
@@ -132,6 +133,7 @@
             {/if}
             {#if showBurnGaps}
                 {@render head('Max Gap')}{@render head('Gap Angle')}
+                {@render head('Gaps')}
             {/if}
         </tr>
             {#each firesArray as fire, i}
@@ -140,7 +142,7 @@
                 {@render item(fire.bearing.toFixed(2))}
                 {@render item(fire.size.toFixed(2))}
                 {@render item(fire.perimeter.toFixed(2))}
-                {@render item(fire.points.length)}
+                {@render item(fire.raster.length)}
                 {#if showScanLineStats}
                     {@render item(fire.scan.size.toFixed(2))}
                     {@render item(fire.scan.perimeter.toFixed(2))}
@@ -148,6 +150,7 @@
                 {#if showBurnGaps}
                     {@render item(fire.gap.distance.toFixed(4))}
                     {@render item(fire.gap.angle.toFixed(2))}
+                    {@render item(fire.gaps)}
                 {/if}
             </tr>
             {/each}

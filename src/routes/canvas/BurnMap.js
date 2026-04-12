@@ -8,7 +8,7 @@ export class BurnMap {
     static unburnable = 3
     static outOfBounds = 4
 
-    constructor(pcsWest, pcsNorth, pcsWidth, pcsHeight, scale) {
+    constructor(pcsWest, pcsNorth, pcsWidth, pcsHeight, scale=1) {
         this.pcs = {
             east: pcsWest+pcsWidth,
             west: pcsWest,
@@ -28,6 +28,9 @@ export class BurnMap {
     // These convert PCS easting/northing to BurnMap col/row
     col(easting) { return Math.round(easting) + this.midCol() }
     row(northing) { return this.midRow() - Math.round(northing) }
+    // Returns *center* easting/northing of cell at [col, row]
+    easting(col) { return this.pcs.west + (col+0.5) * this.pcs.scale }
+    northing(row) { return this.pcs.north - (row+0.5) * this.pcs.scale }
     midCol() { return Math.trunc(this.raster.cols/2) }
     midRow() { return Math.trunc(this.raster.rows/2) }
     
@@ -151,28 +154,60 @@ export class BurnMap {
 
     // Used during development to determine sufficiency of the degrees increment
     getGaps() {
+        // first get every row with burning cells
         const lines = []
         for(let row=0; row<this.raster.rows; row++) {
             let first = 0
             let last = 0
             for(let col=0; col<this.raster.cols; col++) {
-                if (this.get(col,row) === BurnMap.burning) {
+                if (this.getBurnCode(col,row) === BurnMap.burning) {
                     if (first===0) first=col
                     last = col
                 }
             }
             lines.push([first,last])
         }
+        // then find holes in each row
         let gaps = 0
         for(let row=0; row<this.raster.rows; row++) {
             const [first,last] = lines[row]
             if (first && last) {
                 for(let col=first; col<=last; col++) {
-                    if (this.get(col,row) !== BurnMap.burning) gaps++
+                    if (this.getBurnCode(col,row) !== BurnMap.burning) gaps++
                 }
             }
         }
         return gaps
+    }
+
+    isFireCell(col, row) {
+        const subject = this.getBurnCode(col,row)
+        return subject === BurnMap.burning || subject === BurnMap.burned
+    }
+
+    // Returns an array of all raster [col,row,easting,northing]
+    // that are on the fire front and therefore a fire front growth cell
+    getFireFront() {
+        const front = []
+        for(let row=1; row<this.raster.rows-1; row++) {
+            for(let col=1; col<=this.raster.cols-1; col++) {
+                if (this.isFireCell(col, row)) {
+                    // Reset any burning cell to burned
+                    this.setBurnCode(col, row, BurnMap.burned)
+                    // Check for any unburned neighbors
+                    if (   this.getBurnCode(col-1, row-1) === BurnMap.unburned
+                        || this.getBurnCode(col-1, row) === BurnMap.unburned
+                        || this.getBurnCode(col-1, row+1) === BurnMap.unburned
+                        || this.getBurnCode(col,   row-1) === BurnMap.unburned
+                        || this.getBurnCode(col,   row+1) === BurnMap.unburned
+                        || this.getBurnCode(col+1, row-1) === BurnMap.unburned
+                        || this.getBurnCode(col+1, row) === BurnMap.unburned
+                        || this.getBurnCode(col+1, row+1) === BurnMap.unburned
+                    ) front.push([col,row, this.easting(col), this.northing(row)])
+                }
+            }
+        }
+        return front
     }
 
     // Combines lowest 6 bits of featureCode and lowest 2-bits of burnCode into an 8-bit byte

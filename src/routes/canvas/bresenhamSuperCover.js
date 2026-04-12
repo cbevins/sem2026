@@ -49,7 +49,6 @@ export function bresenham(x1, y1, x2, y2) {
     while (true) {
         // Store or plot the current point
         points.push([x1,y1])
-
         if (x1 === x2 && y1 === y2) {
             break // Exit the loop if the end point is reached
         }

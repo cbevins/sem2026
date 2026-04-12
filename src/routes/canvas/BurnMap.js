@@ -1,4 +1,5 @@
 import { DefaultFeaturePalette } from "./FeaturePalette"
+import { bresenhamSuperCover } from './bresenhamSuperCover.js'
 
 export class BurnMap {
     static unburned = 0
@@ -187,18 +188,31 @@ export class BurnMap {
         return newByte
     }
 
-    // Returns just the unique perimeter raster cells
     rasterPerimeter(points) {
         const raster = []
-        let prevCol = Infinity
-        let prevRow = Infinity
+        let prevCol = this.col(points[0][0])
+        let prevRow = this.row(points[0][1])
+        let dropped = 0
+        let added = 0
         for(let [easting, northing] of points) {
             let col = this.col(easting)
             let row = this.row(northing)
-            if (prevRow !== row || prevCol !== col)
+            // Skip redundant perimeter points in the same raster cell
+            if (prevRow !== row || prevCol !== col) {
+                // Fill any gaps
+                const fill = bresenhamSuperCover(prevCol, prevRow, col, row)
+                if (fill.length>2) {
+                    for(let i=1; i<fill.length-2; i++)
+                        raster.push([col,row])
+                    added += fill.length-2
+                }
                 raster.push([col, row])
+            } else {
+                dropped++
+            }
             prevCol = col; prevRow = row;
         }
+        // console.log(`Dropped ${dropped} cells, add ${added} from ${points.length} to ${raster.length}.`)
         return raster
     }
 

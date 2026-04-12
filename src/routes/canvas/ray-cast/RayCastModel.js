@@ -71,16 +71,10 @@ export class RayCastModel {
     }
 
     castBurnLines(fire) {
-        const raster = this.burnMap.rasterPerimeter(fire.points)
         const ignCol = this.burnMap.col(fire.ignEast)
         const ignRow = this.burnMap.row(fire.ignNorth)
-        // const table = []
-        // table.push({col: ignCol, row: ignRow})
-        for(let [perimCol, perimRow] of raster) {
+        const raster = this.burnMap.rasterPerimeter(fire.points)
+        for(let [perimCol, perimRow] of raster)
             this.burnMap.castBurnLine(ignCol, ignRow, perimCol, perimRow)
-            // table.push({col: perimCol, row: perimRow})
-        }
-        // console.clear()
-        // console.table(table)
     }
 }

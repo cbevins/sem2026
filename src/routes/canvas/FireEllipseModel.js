@@ -14,6 +14,8 @@ export class FireEllipseModel {
         this.ignNorth = ignNorth
         this.lwRatio = lwRatio
         this.label = label
+        this.effWind = 4 * (lwRatio - 1)
+
         const e = new FireEllipseMod('e', 'north').ready()
         // Select required nodes to determine perimeter points at regular theta intervals
         // as well as length, width, center point, size, and perimeter

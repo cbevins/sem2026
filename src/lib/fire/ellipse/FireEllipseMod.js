@@ -159,7 +159,7 @@ export class FireEllipseMod extends DagModule {
 
         beta.vhr.method(FE.betaVhr, beta.angle, eccent)
         beta.perim.east.method(FE.betaE, beta.angle, beta.dist, head.bearing, ignition.east)
-        beta.perim.north.method(FE.betaN, beta.angle, beta.dist, head.bearing, ignition.east)
+        beta.perim.north.method(FE.betaN, beta.angle, beta.dist, head.bearing, ignition.north)
         beta.perim.x.method(FE.betaX, beta.angle, beta.dist, head.bearing, ignition.x)
         beta.perim.y.method(FE.betaY, beta.angle, beta.dist, head.bearing, ignition.y)
         // psi.angle at perim pt intersected by beta.angle
@@ -200,7 +200,7 @@ export class FireEllipseMod extends DagModule {
         }
         time.input()
 
-        if (configVector==='angle') this.configVectorInputFromHead()
+        if (configVector==='angle'||configVector==='head') this.configVectorInputFromHead()
         else this.configVectorInputFromNorth()
     }
 

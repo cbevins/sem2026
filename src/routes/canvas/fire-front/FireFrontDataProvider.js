@@ -22,7 +22,8 @@ export class FireFrontDataProvider extends DataProvider {
         // if (this.inRect(col, row, 350, 350, 10, 100)) return BurnMap.unburnable
         return BurnMap.burnable
     }
-        
+
+    getFire() { return {...FireBehavior[0]} }
     getFires() { return FireBehavior }
 
     initBurnMap(burnMap) {

@@ -18,8 +18,8 @@ export class FireFrontModel {
     }
 
     drawToCanvas(ctx) {
-        // const burnMap = this.frontalBurnMap
-        const burnMap = this.spinnerBurnMap
+        const burnMap = this.frontalBurnMap
+        // const burnMap = this.spinnerBurnMap
         burnMap.drawToCanvas(ctx, this.palette)
     }
 
@@ -44,14 +44,28 @@ export class FireFrontModel {
     }
 
     updateFrontal() {
+        console.clear()
         const burnMap = this.frontalBurnMap
-        console.log('Frontal BurnCode at 0,0 is', burnMap.getBurnCode(0, 0))
-        const startCounts = burnMap.getBurnCounts()
-        console.log('Frontal start Counts', startCounts)
+        const fire = {label: 'front', ignEast:0, ignNorth:0, lwr:2, headRos:25,
+            bearing:80, elapsed:1, points:[]}
+
+        const table = [burnMap.getBurnCounts()]
         const front = burnMap.getFireFront()
-        console.log('Fire front cells', front)
-        const stopCounts = burnMap.getBurnCounts()
-        console.log('Frontal stop Counts', startCounts)
+        let [row, col, easting, northing] = front
+        fire.ignEast = easting
+        fire.ignNorth = northing
+        const fem = new FireEllipseModel(fire.lwr, fire.headRos, fire.bearing,
+                fire.elapsed, fire.ignEast, fire.ignNorth, fire.label)
+        // Use degStep to generate perimeter points
+        fire.points = fem.perimeterPoints(this.degStep)
+        console.log('Perimeter points', fire.points.length)
+        fire.raster = this.spinnerBurnMap.rasterPerimeter(fire.points)
+        console.log('Raster Perimeter points', fire.raster.length)
+        console.table(fire.raster)
+        // this.castBurnLines(burnMap, fire)
+        console.log('Burn Counts')
+        table.push(burnMap.getBurnCounts())
+        console.table(table)
     }
 
     castBurnLines(burnMap, fire) {

@@ -2,6 +2,10 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     let title = 'SEM2006 Projects'
     let items = [{
+        route: '/geofire',
+        title: 'Geographical Fire Spread (4/13/26)',
+        brief: 'Exploring methods of using HTML Canvas element to simulate fire perimeter growth',
+    },{
         route: '/canvas',
         title: 'Canvas Fire Growth',
         brief: 'Exploring methods of using HTML Canvas element to simulate fire perimeter growth',

@@ -1,6 +1,6 @@
-import { SpriteServer } from './SpriteServer.js'
-
 export class BurnMap {
+    // The BurnMap is populated with the following 1-byte status codes
+    // Byte values 0-240 indicate the time step (i.e., minutes) in which the cell was ignited
     static unburned = 253
     static unburnable = 254
     static outOfBounds = 255
@@ -19,6 +19,7 @@ export class BurnMap {
         this.rows = rows
         this.dim = cellDim
         this.time = 0
+        this.timeCycle = 0
         this.data = new Uint8ClampedArray(cols*rows).fill(BurnMap.unburned)
         this.midCol = Math.trunc(this.cols/2)
         this.midRow = Math.trunc(this.rows/2)
@@ -26,7 +27,6 @@ export class BurnMap {
 
     // Converts PCS easting/northing to BurnMap col/row
     col(easting) { return Math.round((easting-this.pcs.west)/this.dim) }
-    // row(northing) { return this.midRow - Math.round(northing) }
     row(northing) { return Math.round((this.midRow - northing)/this.dim) }
 
     // Returns *center* easting/northing of cell at [col, row]
@@ -35,7 +35,7 @@ export class BurnMap {
 
     // Returns an array of all raster cells [col,row]
     // that are on the fire front and therefore a fire front growth cell
-    getFireFront() {
+    getFireFrontCells() {
         const front = []
         for(let row=0; row<this.rows; row++) {
             for(let col=0; col<this.cols; col++) {
@@ -50,7 +50,8 @@ export class BurnMap {
                         || this.isUnburned(col+1, row-1)
                         || this.isUnburned(col+1, row)
                         || this.isUnburned(col+1, row+1)
-                    ) front.push([col,row])
+                    ) front.push([col, row,
+                        this.centerEasting(col), this.centerNorthing(row)])
                 }
             }
         }
@@ -58,6 +59,7 @@ export class BurnMap {
     }
 
     _toCell(easting, northing) { return [this.col(easting), this.row(northing)] }
+
     getPerimeterCells(scanLines, ignEast, ignNorth) {
         const cells = []
 
@@ -98,6 +100,7 @@ export class BurnMap {
         }
         return cells
     }
+
     getEndPointCells(scanLines, ignEast, ignNorth) {
         const cells = []
         for(let line of scanLines) {
@@ -119,7 +122,7 @@ export class BurnMap {
         return this.isInBounds(col, row) ? this.data[col+row*this.cols] : BurnMap.outOfBounds
     }
 
-    getCounts() {
+    getStatusFreq() {
         const counts = {unburned: 0, unburnable: 0, burning: 0, burned: 0}
         for(let status of this.data) {
             if (status === BurnMap.unburnable) counts.unburnable++

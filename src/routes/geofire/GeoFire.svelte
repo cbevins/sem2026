@@ -12,7 +12,8 @@
     let begStatusFreq = $state({})
     let endStatusFreq = $state({})
     let frontCells = $state([])
-    
+    let stopTime = $state(2)
+
     // Bind this variable to the canvas element
     let canvasElement, ctx//, animId
     let msec = $state(0)
@@ -38,7 +39,7 @@
         console.log('********** Start time', time)
         // 3 - Get starting burn status frequencies
         begStatusFreq = burnMap.getStatusFreq()
-        // log(`Beg Time ${time} Burn Status Frequencies`, begStatusFreq)
+        log(`Beg Time ${time} Burn Status Frequencies`, begStatusFreq)
 
         // 4 - Ignite a Sprite at each fire front cell
         for(let frontCell of frontCells) {
@@ -102,6 +103,7 @@
         burnMap.set(256, 256, 0)
         // begStatusFreq = burnMap.getStatusFreq()
         // log(`onMount Beg Time ${time} Burn Status Frequencies`, begStatusFreq)
+        run()
         run()
     })
 

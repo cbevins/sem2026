@@ -104,7 +104,6 @@
         // begStatusFreq = burnMap.getStatusFreq()
         // log(`onMount Beg Time ${time} Burn Status Frequencies`, begStatusFreq)
         run()
-        run()
     })
 
     function runpause() {

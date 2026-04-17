@@ -1,4 +1,4 @@
-import {DagNode} from '../index.js'
+import {DagNode} from '../dag/DagNode.js'
 import * as U from './Units.js'
 
 export class Bearing extends DagNode {

@@ -1,4 +1,4 @@
-import {DagModule} from '../../index.js'
+import {DagModule} from '../../dag/DagModule.js'
 import * as Node from '../Nodes.js'
 import * as FE from '../lib/FireEllipseLib.js'
 import * as Calc from '../lib/CalcLib.js'

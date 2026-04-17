@@ -1,7 +1,9 @@
 <script>
     import { onMount } from 'svelte'
-    import { setPixel, strokePath } from '../canvasLib.js'
+    import { strokePath } from '../canvasLib.js'
+    import { setPixel } from '../imageDataLib.js'
     import { FirePerimeterGenerator } from '$lib/fire/ellipse/FirePerimeterGenerator.js'
+    import { createEllipseRaster } from './createEllipseRaster.js'
 
     let {width=512, height=512} = $props()
 
@@ -37,6 +39,7 @@
         updateData()
         drawBackground(ctx)
         blastPerimeter(ctx)
+        blastRaster(ctx)
         drawAxis(ctx)
         if (running) animId = window.requestAnimationFrame(draw)
     }
@@ -56,6 +59,18 @@
             const col = canvasX(easting)
             const row = canvasY(northing)
             setPixel(imageData, col, row, 255, 0, 0)
+        }
+        ctx.putImageData(imageData, 0, 0)
+    }
+
+    function blastRaster(ctx) {
+        const raster = createEllipseRaster(width, height, 100, 100, 50, 40, 0)
+        const imageData = ctx.getImageData(0, 0, width, height)
+        for(let row = 0; row<height; row++) {
+            for(let col=0; col<width; col++) {
+                if (raster[row][col])
+                    setPixel(imageData, col, row, 255, 0, 0)
+            }
         }
         ctx.putImageData(imageData, 0, 0)
     }

@@ -4,6 +4,7 @@
     import { setPixel } from '../imageDataLib.js'
     import { FirePerimeterGenerator } from '$lib/fire/ellipse/FirePerimeterGenerator.js'
     import { createEllipseRaster } from './createEllipseRaster.js'
+    import { getPointOnEllipseCodePen } from './getPointOnEllipseCodePen.js'
 
     let {width=512, height=512} = $props()
 

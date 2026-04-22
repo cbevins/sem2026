@@ -1,5 +1,7 @@
 <script>
+    import EllipseExplorer from './EllipseExplorer.svelte'
     import GeoFire from './GeoFire.svelte'
 </script>
 
-<GeoFire width={512} height={512}/>
+<EllipseExplorer/>
+<!-- <GeoFire width={512} height={512}/> -->

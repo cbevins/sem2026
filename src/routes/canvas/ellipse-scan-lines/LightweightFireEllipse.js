@@ -1,11 +1,13 @@
 /**
- * Temporary functions to create and update a fire ellipse object
- * using the local FireEllipseEquations.js function library.
+ * Creates a lightweight fire ellipse object that is sequentially updatable.
  * 
- * Use:
- * 1 fireEllipse() returns a new fire ellipse object.
- * 2 invoke ellipseSize() to update distance properties whenever the elapsed time changes
- * 3 invoke ellipseBeta() to update beta-theta-psi angles and points for a new beta angle
+ * Usage Sequence:
+ * 1 call fireEllipse() to obtain a new fire ellipse object.
+ * 2 call updateBehavior(ellipse, headRos lwr) whenever headRos or lwr changes,
+ *      then call the following:
+ * 3 call updateDistances(ellipse, duration) whenever 'duration' changes,
+ *      then call the following:
+ * 4 call updatePositions(ellipse, ignX, ignY, bearing) whenever the ignition point or bearing changes
  */
 import * as FE from './LightweightFireEllipseEquations.js'
 
@@ -13,18 +15,18 @@ import * as FE from './LightweightFireEllipseEquations.js'
 // FireEllipse construction and update functions
 //------------------------------------------------------------------------------
 
-export function LightweightFireEllipse(headRos=1, lwr=1, ignX=0, ignY=0, headDeg=0,
-        minutes=1, betaDeg=0) {
-    // Initialize all input parameters
-    const e = {headRos, lwr, ignX, ignY, headDeg, minutes, betaDeg}
-    ellipseShape(e)
-    ellipseSize(e, e.minutes)
-    ellipseBeta(e, e.betaDeg)
+export function fireEllipse(headRos=1, lwr=1, duration=1, ignX=0, ignY=0, bearing=0) {
+    const e = {}
+    updateBehavior(e, headRos, lwr)
+    updateDistances(e, duration)
+    updatePositions(e, ignX, ignY, bearing)
     return e
 }
 
-// Adds basic axis & shape properties
-export function ellipseShape(e) {
+// Adds/updates basic axis & shape properties dependent upon headRos, lwr
+export function updateBehavior(e, headRos, lwr) {
+    e.headRos = headRos
+    e.lwr = lwr
     e.eccent = FE.eccent(e.lwr)
     e.backRos = FE.backRos(e.headRos, e.eccent)
     e.majorRos = FE.majorRos(e.headRos, e.backRos)
@@ -35,22 +37,41 @@ export function ellipseShape(e) {
     return e
 }
 
-// Updates all size properties, which depend upon elapsed time
-export function ellipseSize(e, minutes) {
-    e.minutes = minutes
-    e.headDist = FE.distance(e.headRos, e.minutes)
-    e.backDist = FE.distance(e.backRos, e.minutes)
-    e.fDist = FE.distance(e.fRos, e.minutes)
-    e.gDist = FE.distance(e.gRos, e.minutes)
-    e.hDist = FE.distance(e.hRos, e.minutes)
-    e.length = FE.distance(e.majorRos, e.minutes)
-    e.width = FE.distance(e.minorRos, e.minutes)
+// Adds/updates distance and size properties dependent upon duration
+export function updateDistances(e, duration) {
+    e.duration = duration
+    e.headDist = FE.distance(e.headRos, e.duration)
+    e.backDist = FE.distance(e.backRos, e.duration)
+    e.fDist = FE.distance(e.fRos, e.duration)
+    e.gDist = FE.distance(e.gRos, e.duration)
+    e.hDist = FE.distance(e.hRos, e.duration)
+    e.length = FE.distance(e.majorRos, e.duration)
+    e.width = FE.distance(e.minorRos, e.duration)
     e.majorDist = e.length / 2
     e.minorDist = e.width / 2
-    e.perimR = FE.perimeterRamanujan(e.length/2, e.width/2)
-    e.perimS = FE.perimeterSimpleApprox(e.length/2, e.width/2)
-    e.perimN = FE.perimeterNumericalIntegration(e.length/2, e.width/2, 10000)
+    e.perim = FE.perimeterRamanujan(e.majorDist, e.minorDist)
+    e.perimSimple = FE.perimeterSimpleApprox(e.majorDist, e.minorDist)
+    e.perimNumInt = FE.perimeterNumericalIntegration(e.majorDist, e.minorDist, 10000)
     e.area = FE.area(e.length, e.width)
+    return e
+}
+
+// Adds/updates ignition, center, head, and back positions
+// dependent upon ignition point and bearing
+export function updatePositions(e, ignX, ignY, bearing) {
+    e.bearing = bearing
+    e.ignX = ignX
+    e.ignY = ignY
+    e.headDeg = (450-e.bearing ) % 360      // rename to 'rotation' ?
+    const radians = FE.radians(e.headDeg)
+    e.cosRot = Math.cos(radians)
+    e.sinRot = Math.sin(radians)
+    e.cX = e.ignX + e.gDist * e.cosRot
+    e.cY = e.ignY + e.gDist * e.sinRot
+    e.headX = e.ignX + e.headDist * e.cosRot
+    e.headY = e.ignY + e.headDist * e.sinRot
+    e.backX = e.ignX + e.backDist * e.cosRot
+    e.backY = e.ignY + e.backDist * e.sinRot
     return e
 }
 
@@ -99,13 +120,9 @@ export function ellipseHeadDeg(e, headDeg) {
 // Updates spread rates, distances, and perimeter points after an angle change
 function updateAngles(e) {
     e.betaRos = FE.betaRos(e.headRos, e.lwr, e.betaDeg)
-    e.betaDist = FE.distance(e.betaRos, e.minutes)
+    e.betaDist = FE.distance(e.betaRos, e.duration)
     e.psiRos = FE.psiRos(e.psiDeg, e.fRos, e.gRos, e.hRos)
-    e.psiDist = FE.distance(e.psiRos, e.minutes)
-
-    const head = FE.radians(e.headDeg)
-    e.cX = e.ignX + e.gDist * Math.cos(head)
-    e.cY = e.ignY + e.gDist * Math.sin(head)
+    e.psiDist = FE.distance(e.psiRos, e.duration)
 
     let [hx, hy] = FE.betaPerimeterPoint(0, e.headDist, e.ignX, e.ignY, e.headDeg)
     e.headX = hx

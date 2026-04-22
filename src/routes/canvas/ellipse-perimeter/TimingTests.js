@@ -2,6 +2,7 @@ import { FireEllipseMod } from '../../../lib/fire/ellipse/FireEllipseMod.js'
 import { EllipseScanner } from './EllipseScanner.js'
 import { getEllipseRasterGrid } from './getEllipseRasterGrid.js'
 import { getEllipsePerimeterAtThetas } from './getEllipsePerimeterAtThetas.js'
+import { getPerimeterPointsCodePen } from './getPointOnEllipseCodePen.js'
 
 export class TimingTests {
     constructor() {
@@ -45,10 +46,22 @@ export class TimingTests {
         this.ignIdx = 0 // scanlines center row index
     }
 
+    // Uses the CodePen example
+    timeEllipsePerimeterCodePen(degStep) {
+        const ellipseRotation = this.angle
+        const rx = this.length / 2
+        const ry = this.width / 2
+        const pts = getPerimeterPointsCodePen(this.centerEast, this.centerNorth,
+            rx, ry, ellipseRotation, degStep)
+        return pts
+    }
+
     timeEllipseScanner(scanWidth) {
         this.scanner.setEllipse(this.length, this.width, this.bearing,
             this.ignEast, this.ignNorth, this.centerEast, this.centerNorth)
-        return this.scanner.getScanLines(scanWidth)
+        const hlines = this.scanner.getHorizontalScanLines(scanWidth)
+        // const vlines = this.scanner.getVerticalScanLines(scanWidth)
+        return hlines
     }
 
     timeEllipseRasterGrid() {
@@ -79,7 +92,14 @@ for(let lwr of [1, 2, 10]) {
         start = performance.now()
         const points = timer.timeEllipsePerimeterAtThetas(degStep)
         msec = performance.now() - start
-        table.push({lwr, length, width, test: 'Perim at Theta', parm: `degStep ${degStep}`, result: `${points.length} points`, msec: msec.toFixed(2)})
+        table.push({lwr, length, width, test: 'Perim at Theta Points()', parm: `degStep ${degStep}`, result: `${points.length} points`, msec: msec.toFixed(2)})
+    }
+
+    for(let degStep of [1, 0.5, 0.2]) {
+        start = performance.now()
+        const points = timer.timeEllipsePerimeterCodePen(degStep)
+        msec = performance.now() - start
+        table.push({lwr, length, width, test: 'Perim Points CodePen', parm: `degStep ${degStep}`, result: `${points.length} points`, msec: msec.toFixed(2)})
     }
 
     for (let scanWidth of [1, 0.5, 0.2]) {

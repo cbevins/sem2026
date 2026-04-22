@@ -1,3 +1,6 @@
+/**
+ * This *IS* a bare-bones ellipse with a built-in scanner
+ */
 export class EllipseScanner {
     constructor(length=1, width=1, bearing=0, ignEast=0, ignNorth=0, centerEast=0, centerNorth=0) {
         this.setEllipse(length, width, bearing, ignEast, ignNorth, centerEast, centerNorth)
@@ -14,12 +17,12 @@ export class EllipseScanner {
 
         this.rx = this.length / 2
         this.ry = this.width / 2
-        this.angle = (450-bearing) % 360
-        const radians = this.angle * Math.PI / 180
-        this.cosArot = Math.cos(-radians)
-        this.sinArot = Math.sin(-radians)
-        this.cosA = Math.cos(radians)
-        this.sinA = Math.sin(radians)
+        this.rotation = (450-bearing) % 360
+        const radians = this.rotation * Math.PI / 180
+        this.cosUnRot = Math.cos(-radians)
+        this.sinUnRot = Math.sin(-radians)
+        this.cosRot = Math.cos(radians)
+        this.sinRot = Math.sin(radians)
         
         // arbitrary, but sufficient, scanline endpoints
         this.xMin = this.centerEast - this.length
@@ -29,7 +32,8 @@ export class EllipseScanner {
     }
 
     // Determines the ellipse's 2 perimeter points at regular y 'scanWidth' intervals
-    getScanLines(scanWidth=1) {
+    // Returns a 3-element array of [y, x1, x2]
+    getHorizontalScanLines(scanWidth=1) {
         const lines = []
         // Start with ignition point and go north until we get no more points
         for(let y = this.ignNorth; y <= this.yMax; y += scanWidth) {
@@ -38,12 +42,33 @@ export class EllipseScanner {
             lines.push([y, xs[0], xs[1]])
         }
         lines.reverse()
-        this.ignIdx = lines.length - 1
+        this.ignRow = lines.length - 1
         // Start with ignition point and go south
-        for(let y = this.ignNorth - scanWidth; y >= this.yMin; y-= scanWidth) {
+        for(let y = this.ignNorth - scanWidth; y >= this.yMin; y -= scanWidth) {
             const xs = this._scanLine(this.xMin, y, this.xMax, y)
             if (xs.length < 2) break
             lines.push([y, xs[0], xs[1]])
+        }
+        return lines
+    }
+
+    // Determines the ellipse's 2 perimeter points at regular x 'scanWidth' intervals
+    // Returns a 3-element array of [x, y1, y2]
+    getVerticalScanLines(scanWidth=1) {
+        const lines = []
+        // Start with ignition point and go east until we get no more points
+        for(let x = this.ignEast; x <= this.xMax; x += scanWidth) {
+            const ys = this._scanLine(x, this.yMin, x, this.yMax)
+            if (ys.length < 2) break
+            lines.push([x, ys[0], ys[1]])
+        }
+        lines.reverse()
+        this.ignCol = lines.length - 1
+        // Start with ignition point and go south
+        for(let x = this.ignEast - scanWidth; x >= this.xMin; x -= scanWidth) {
+            const ys = this._scanLine(x, this.yMin, x, this.yMax)
+            if (ys.length < 2) break
+            lines.push([x, ys[0], ys[1]])
         }
         return lines
     }
@@ -56,10 +81,10 @@ export class EllipseScanner {
         const tx2 = x2 - this.centerEast
         const ty2 = y2 - this.centerNorth
 
-        const lx1 = tx1 * this.cosArot - ty1 * this.sinArot
-        const ly1 = tx1 * this.sinArot + ty1 * this.cosArot
-        const lx2 = tx2 * this.cosArot - ty2 * this.sinArot
-        const ly2 = tx2 * this.sinArot + ty2 * this.cosArot
+        const lx1 = tx1 * this.cosUnRot - ty1 * this.sinUnRot
+        const ly1 = tx1 * this.sinUnRot + ty1 * this.cosUnRot
+        const lx2 = tx2 * this.cosUnRot - ty2 * this.sinUnRot
+        const ly2 = tx2 * this.sinUnRot + ty2 * this.cosUnRot
 
         // 2. Normalize radii (treat ellipse as unit circle)
         const nlX1 = lx1 / this.rx
@@ -91,9 +116,8 @@ export class EllipseScanner {
                     const intY = nlY1 + t * dy
 
                     // 5. Transform back to original space
-                    const finalX = (intX * this.rx) * this.cosA - (intY * this.ry) * this.sinA + this.cx
-                    // const finalY = (intX * this.rx) * this.sinA + (intY * this.ry) * this.cosA + this.cy
-                    // intersections.push([finalX, finalY])
+                    const finalX = (intX * this.rx) * this.cosRot - (intY * this.ry) * this.sinRot + this.centerEast
+                    // const finalY = (intX * this.rx) * this.sinRot + (intY * this.ry) * this.cosRot + this.centerNorth
                     intersections.push(finalX)
                 }
             })

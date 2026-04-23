@@ -17,14 +17,14 @@ import * as FE from './LightweightFireEllipseEquations.js'
 
 export function fireEllipse(headRos=1, lwr=1, duration=1, ignX=0, ignY=0, bearing=0) {
     const e = {}
-    updateBehavior(e, headRos, lwr)
+    updateBehaviors(e, headRos, lwr)
     updateDistances(e, duration)
     updatePositions(e, ignX, ignY, bearing)
     return e
 }
 
 // Adds/updates basic axis & shape properties dependent upon headRos, lwr
-export function updateBehavior(e, headRos, lwr) {
+export function updateBehaviors(e, headRos, lwr) {
     e.headRos = headRos
     e.lwr = lwr
     e.eccent = FE.eccent(e.lwr)

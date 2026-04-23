@@ -1,8 +1,10 @@
 <script>
     import { onMount } from 'svelte'
 	import { fireEllipse } from './lightweightFireEllipse.js'
-    import { canvasX, canvasY, drawBackground, drawCentralAxis } from '../canvasLib.js'
     import { scanEllipse } from './scanEllipseV1.js'
+    import { getScanLinesPerimeter, getScanLinesPerimeterRaster } from './getScanLinesPerimeter.js'
+    import { drawBackground, drawCentralAxis, drawPerimeterPts, drawScanLines, drawScanLineEndPoints }
+        from './canvasDrawing.js'
 
     let {canvasWidth=512, canvasHeight=512} = $props()
 
@@ -26,8 +28,8 @@
     // The 'ellipse' object uses fire behavior parameters and an ignition point
     // to construct a Cartesian ellipse with a center point
     let ellipse = $derived(fireEllipse(headRos, lwr, duration, ignX, ignY, bearing))
-    let hlines = $state([])
-    let vlines = $state([])
+    let perimPts = $state([])
+    let perimRaster = $state([])
 
     // Bind canvasElement variable to the <canvas> element
     let canvasElement, ctx, animId
@@ -40,8 +42,11 @@
     function draw() {
         updateData()
         drawBackground(ctx)
-        drawScanLines(ctx, hlines, 'red')
-        drawScanLines(ctx, vlines, 'blue')
+        // drawScanLines(ctx, hlines, 'red')
+        // drawScanLines(ctx, vlines, 'blue')
+        // drawScanLineEndPoints(ctx, vlines, 'cyan')  // just segment endpoints
+        // drawPerimeterPts(ctx, perimPts, 'cyan')  // all segment endpoints in clockwise order
+        drawPerimeterPts(ctx, perimRaster, 'red')   // just raster center points in clockwise order
         drawCentralAxis(ctx)
         // collect timing stats
         const now = new Date()  // performance.now()
@@ -51,16 +56,6 @@
         frames++
         prevMsec = now
         if (running) animId = window.requestAnimationFrame(draw)
-    }
-
-    function drawScanLines(ctx, lines, style='red') {
-        ctx.strokeStyle = style
-        ctx.beginPath()
-        for(let [p1, p2] of lines) {
-            ctx.moveTo(canvasX(ctx, p1[0]), canvasY(ctx, p1[1]))
-            ctx.lineTo(canvasX(ctx, p2[0]), canvasY(ctx, p2[1]))
-        }
-        ctx.stroke()
     }
 
     onMount(() => {
@@ -78,10 +73,11 @@
     function updateData() {
         bearing = (bearing + 5) % 360
         ellipse = fireEllipse(headRos, lwr, duration, ignX, ignY, bearing)
-        hlines = scanEllipse(ellipse.length, ellipse.width, ellipse.headDeg, ignX, ignY,
-            ellipse.cX, ellipse.cY, scanWidth, 'h')
-        vlines = scanEllipse(ellipse.length, ellipse.width, ellipse.headDeg, ignX, ignY,
-            ellipse.cX, ellipse.cY, scanWidth, 'v')
+        const {length, width, headDeg, cX, cY} = ellipse
+        const hlines = scanEllipse(length, width, headDeg, ignX, ignY, cX, cY, scanWidth, 'h')
+        const vlines = scanEllipse(length, width, headDeg, ignX, ignY, cX, cY, scanWidth, 'v')
+        perimPts = getScanLinesPerimeter(cX, cY, hlines, vlines)
+        perimRaster = getScanLinesPerimeterRaster(perimPts, 0, 0, scanWidth)
     }
 </script>
 

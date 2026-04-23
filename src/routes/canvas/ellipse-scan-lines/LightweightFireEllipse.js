@@ -63,9 +63,9 @@ export function updatePositions(e, ignX, ignY, bearing) {
     e.ignX = ignX
     e.ignY = ignY
     e.headDeg = (450-e.bearing ) % 360      // rename to 'rotation' ?
-    const radians = FE.radians(e.headDeg)
-    e.cosRot = Math.cos(radians)
-    e.sinRot = Math.sin(radians)
+    e.radRot = FE.radians(e.headDeg)
+    e.cosRot = Math.cos(e.radRot)
+    e.sinRot = Math.sin(e.radRot)
     e.cX = e.ignX + e.gDist * e.cosRot
     e.cY = e.ignY + e.gDist * e.sinRot
     e.headX = e.ignX + e.headDist * e.cosRot

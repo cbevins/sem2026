@@ -17,7 +17,7 @@ let bearing = 90
 const table = []
 let start, msec, n
 
-for(let lwr of [1, 1.1, 2, 10].reverse()) {
+for(let lwr of [2]) {
     let ellipse = fireEllipse(headRos, lwr, duration, ignX, ignY, bearing)
     const {length, width, cX, cY, majorDist, minorDist, headDeg, radRot} = ellipse
     

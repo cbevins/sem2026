@@ -1,19 +1,28 @@
-import { fireEllipse } from './lightweightFireEllipse.js'
-
-export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, step) {
+/**
+ * 
+ * @param {number} cx Ellipse center x-coordinate in Projected Coordinate System
+ * @param {number} cy Ellipse center y-coordinate in Projected Coordinate System
+ * @param {number} rx Ellipse major semi-axis (radius) in PCS units
+ * @param {number} ry Ellipse minor semi-axis (radius) in PCS units
+ * @param {number} rotationDegrees Ellipse rotation counter clockwise from Cartesian x-axis
+ * @param {number} cellSize raster cell size in PCS units.
+ *  For example, if PCS eastings/northings  are in feet, then 1, 10, or 100-ft cell size might be appropriate.
+ *  But if the PCS is in decimal degrees latitude/longitude, then a cell size of 0.00001 (3.6 ft) is better.
+ * @param {number} sigma Tolerance for determining if current point is back at the starting point.
+ * @returns 
+ */
+export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, cellSize, sigma=0.000001) {
     const rotRad = rotationDegrees * Math.PI / 180
     const cells = new Set()
-    cx = Math.round(cx)
-    cy = Math.round(cy)
 
     // Travel north until we reach beyong the perimeter
-    // Note that if the ellipse is smaller than step, there will only be 1 perimeter cell
+    // Note that if the ellipse is smaller than cellSize, there will only be 1 perimeter cell
     let px = cx
     let py = cy
     while (insideEllipse(px, py+1, cx, cy, rx, ry, rotRad)) {
-        py += step
+        py += cellSize
     }
-    let cell = [px, py, 'O']
+    let cell = [px, py]
     cells.add(cell)
     // console.log(cells.size, cell)
     const x0 = px
@@ -29,14 +38,14 @@ export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, step) {
         if (travel === 'north') {   // test sequence is north -> northeast -> east
             if (insideEllipse(px, py+1, cx, cy, rx, ry, rotRad)) {    // check to the north
                 py = py + 1
-                cell =[px, py, 'N']
+                cell = [px, py]
             } else if (insideEllipse(px+1, py+1, cx, cy, rx, ry, rotRad)) {    // check to the north-east
                 px = px + 1
                 py = py + 1
-                cell =[px, py, 'NE']
+                cell = [px, py]
             } else if (insideEllipse(px+1, py, cx, cy, rx, ry, rotRad)) { // check to the east
                 px = px + 1
-                cell = [px, py, 'E']
+                cell = [px, py]
             } else {
                 travel = 'east'
             }
@@ -44,14 +53,14 @@ export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, step) {
         else if (travel === 'east') {   // test sequence is east -> southeast -> south
             if (insideEllipse(px+1, py, cx, cy, rx, ry, rotRad)) { // check to the east (redundant of coming from north)
                 px = px + 1
-                cell = [px, py, 'E']
+                cell = [px, py]
             } else if (insideEllipse(px+1, py-1, cx, cy, rx, ry, rotRad)) { // check to the south-east
                 px = px + 1
                 py = py - 1
-                cell =  [px, py, 'SE']
+                cell = [px, py]
             } else if (insideEllipse(px, py-1, cx, cy, rx, ry, rotRad)) { // check to the south
                 py = py - 1
-                cell = [px, py, 'S']
+                cell = [px, py]
             } else {
                 travel = 'south'
             }
@@ -59,14 +68,14 @@ export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, step) {
         else if (travel === 'south') {  // test sequence is south -> southwest -> west
             if (insideEllipse(px, py-1, cx, cy, rx, ry, rotRad)) { // check to the south (may be redundant)
                 py = py - 1
-                cell = [px, py, 'S']
+                cell = [px, py]
             } else if (insideEllipse(px-1, py-1, cx, cy, rx, ry, rotRad)) { // check to the south-west
                 px = px - 1
                 py = py - 1
-                cell = [px, py, 'SW']
+                cell = [px, py]
             } else if (insideEllipse(px-1, py, cx, cy, rx, ry, rotRad)) { // check to the west
                 px = px - 1
-                cell = [px, py, 'W']
+                cell = [px, py]
             } else {
                 travel = 'west'
             }
@@ -74,20 +83,20 @@ export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, step) {
         else if (travel === 'west') {   // test sequence is west -> northwest -> north
             if (insideEllipse(px-1, py, cx, cy, rx, ry, rotRad)) { // check to the west (redundant when coming from the south)
                 px = px - 1
-                cell = [px, py, 'W']
+                cell = [px, py]
             } else if (insideEllipse(px-1, py+1, cx, cy, rx, ry, rotRad)) { // check to the north-west
                 px = px - 1
                 py = py + 1
-                cell = [px, py, 'NW']
+                cell = [px, py]
             } else if (insideEllipse(px, py+1, cx, cy, rx, ry, rotRad)) { // check to the north
                 py = py + 1
-                cell = [px, py, 'N']
+                cell = [px, py]
             } else {
                 travel = 'north'
             }
         }
         if (cell.length) {
-            if (px === x0 && py === y0) {
+            if (Math.abs(px - x0) < sigma && Math.abs(py - y0) < sigma) {
                 done = true
             } else {
                 cells.add(cell)
@@ -97,7 +106,6 @@ export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, step) {
         if (++n > limit) {
             done = true
             console.log('Exceeded limit of', limit)
-            console.log(`cx=${cx}, cy=${cy}, rx=${rx}, ry=${ry}, rot=${rotationDegrees}, step=${step}`)
         }
     }
     return [...cells]
@@ -115,39 +123,18 @@ export function perimeterWalker(cx, cy, rx, ry, rotationDegrees, step) {
  */
 function insideEllipse(px, py, cx, cy, rx, ry, rotation) {
     // 1. Translate point to origin relative to ellipse center
-    const dx = px - cx;
-    const dy = py - cy;
+    const dx = px - cx
+    const dy = py - cy
 
     // 2. Rotate point back by the negative rotation angle (counter-clockwise)
     // to align it with the ellipse's local axis
-    const cosA = Math.cos(-rotation);
-    const sinA = Math.sin(-rotation);
+    const cosA = Math.cos(-rotation)
+    const sinA = Math.sin(-rotation)
 
-    const xLocal = dx * cosA - dy * sinA;
-    const yLocal = dx * sinA + dy * cosA;
+    const xLocal = dx * cosA - dy * sinA
+    const yLocal = dx * sinA + dy * cosA
 
     // 3. Apply the standard axis-aligned ellipse formula to get normalized distance
-    // Use multiplication instead of Math.pow for better performance
-    const ndist = (xLocal * xLocal) / (rx * rx) + (yLocal * yLocal) / (ry * ry);
-    return ndist <= 1.0;
+    const ndist = (xLocal * xLocal) / (rx * rx) + (yLocal * yLocal) / (ry * ry)
+    return ndist <= 1.0
 }
-
-function example() {
-    // parameters
-    let lwr = 1.1   // 1.1 fails, but 1.4 is ok
-    let headRos = 100
-
-    // constants
-    let duration = 1
-    let ignX = 0
-    let ignY = 0
-    let bearing = 90
-
-    let ellipse = fireEllipse(headRos, lwr, duration, ignX, ignY, bearing)
-    const {length, width, cX, cY, majorDist, minorDist, headDeg, radRot} = ellipse
-
-    const step = 1
-    const cells = perimeterWalker(cX, cY, majorDist, minorDist, headDeg, step)
-    console.log(cells)
-}
-example()

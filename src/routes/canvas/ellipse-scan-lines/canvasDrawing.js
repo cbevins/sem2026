@@ -19,7 +19,7 @@ export function drawPerimeterPts(ctx, points, style='red') {
     const r = 1
     for(let [east, north] of points) {
         ctx.arc(canvasX(ctx, east), canvasY(ctx, north), r,  0, 2 * Math.PI)
-        ctx.arc(canvasX(ctx, east), canvasY(ctx, north), r, 0, 2 * Math.PI)
+        // ctx.arc(canvasX(ctx, east), canvasY(ctx, north), r, 0, 2 * Math.PI)
     }
     ctx.stroke()
 }

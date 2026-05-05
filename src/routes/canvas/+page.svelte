@@ -2,6 +2,10 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     const title = 'Canvas Fire Growth Demos'
     const items = [{
+        route: '/canvas/fire-ellipse',
+        title: 'Fire Ellipse Growth (5/5/2026)',
+        brief: 'Uses a FireEllipse wavelet to expand a fire front.',
+    },{
         route: '/canvas/ray-cast',
         title: 'Fire Ellipse Ray-Cast (4/3/2026)',
         brief: 'Attempt at fire ellipse growth using ray-casting techniques.',

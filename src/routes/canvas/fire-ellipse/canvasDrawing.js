@@ -1,3 +1,5 @@
+import { BurnMap } from './BurnMap.js'
+
 // Returns canvas x coordinate (where left is at 0 and right is at 'width')
 // and easting is at -width/2 at the left edge and at width/2 at the right edge.
 export function canvasX(ctx, easting) {
@@ -21,20 +23,50 @@ export function drawCentralAxis(ctx, style='black') {
     const {height, width} = ctx.canvas
     strokePath(ctx, style, [[0,cx,0], [1,cx,height], [0,0,cy], [1,width,cy]])
 }
-    
+
+export function drawBurnMap(ctx, burnMap) {
+    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
+    const d = imageData.data
+    for(let i=0; i<burnMap.data.length; i++) {
+        const status = burnMap.data[i]
+        const j = i*4
+        if (status === BurnMap.unburned) {      // unburned is green
+            d[j+1] = 255
+        }
+        else if (status === BurnMap.ignited) {  // ignited is red
+            d[j] = 255
+        }
+        else if (status === BurnMap.burned) {   // burned is brown
+            d[j] = 150
+            d[j+1] = 75
+        }
+        else if (status === 3) {                // unburnable is black
+            d[j] = 0
+            d[j+1] = 0
+            d[j+2] = 0
+        }
+        else {                                  // anything else is white (error)
+            d[j] = 255
+            d[j+1] = 255
+            d[j+2] = 255
+        }
+    }
+    ctx.putImageData(imageData, 0, 0)
+}
+
 // 'points' is an array of x and y offsets from the ignition point
-// such as returned by getEllipseRasterPerimeterOffsets()
+// such as returned by getFireletPerimeter()
 export function drawPerimeterCells(ctx, points, style='red') {
     const cx = xmid(ctx)
     const cy = ymid(ctx)
     ctx.strokeStyle = style
     ctx.beginPath()
     let [x0,y0] = points[0]
-    ctx.moveTo(cx+x0, cy-y0)
+    ctx.moveTo(cx+x0, cy+y0)
     for(let [x, y] of points) {
-        ctx.lineTo(cx+x, cy-y)
+        ctx.lineTo(cx+x, cy+y)
     }
-    ctx.lineTo(cx+x0, cy-y0)
+    ctx.lineTo(cx+x0, cy+y0)
     ctx.stroke()
 }
 

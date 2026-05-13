@@ -1,9 +1,13 @@
+// TO DO - optimize by passing cos(rotation) and sin(rotation) to insideELlipse() instead of recomputing each time
 /**
  * This function rasterizes a fire ellipse perimeter into a continguous clockwise sequence
- * of cell offsets relative to the fir eignition point at [0,0].
+ * of cell offsets relative to the fire ignition point at [0,0].
  *
- * Pavlidi's contour tracing algorithm is adapted specifically for simulating wildland fire spread
- * using Huygen's Principle on an HTML (raster) canvas.
+ * While the fire ellipse parameters are in the client's Projected Coordinate System (PCS),
+ * the returned array contains Raster Coordinate System *offsets* from the fire ignition point at [0,0]
+ * as [col, row] pairs where 'row' indices increase from north to south.
+ * 
+ * Pavlidi's contour tracing algorithm is adapted specifically clockwise winding of a convex polygon.
  * 
  * Consider a lattice of points with equadistance spacing on a Cartesian plane.
  * The lattice contains a (possibly) rotated fire ellipse whose ignition point is at [0,0]
@@ -26,16 +30,18 @@
  * NOTE 1: The returned array contains spacing *offsets* from the origin, NOT PCS coordinates.
  * NOTE 2: the array is NOT explicitly closed.
  */
-export function getEllipseRasterPerimeterOffsets(cx, cy, rx, ry, rotationDegrees, spacing, limit=10000) {
+export function getFireletPerimeter(cx, cy, rx, ry, rotationDegrees, spacing, limit=10000) {
     const points = new Set()
     function store(pt) {
-        points.add([Math.trunc(pt[0] / spacing), Math.trunc(pt[1] / spacing)])
+        // Store in Raster Coordinate System, not the Projected Coordinate System
+        // i.e., y-coordinate should be a row offset from north, not a northing offset 
+        points.add([Math.trunc(pt[0] / spacing), -Math.trunc(pt[1] / spacing)])
     }
 
     const rotRad = rotationDegrees * Math.PI / 180
     const s = spacing
     const sigma = spacing / 10
-    // Travel north until we reach beyong the perimeter
+    // Travel north until we reach beyond the perimeter
     // Note that if the ellipse is smaller than spacing, there will only be 1 perimeter point
     let px = cx // + ry
     let py = cy // + ry
@@ -124,7 +130,7 @@ export function getEllipseRasterPerimeterOffsets(cx, cy, rx, ry, rotationDegrees
         }
         if (++n > limit) {
             done = true
-            console.log('Exceeded limit of', limit)
+            throw new Error(`Exceeded limit of ${limit}`)
         }
     }
     return [...points]

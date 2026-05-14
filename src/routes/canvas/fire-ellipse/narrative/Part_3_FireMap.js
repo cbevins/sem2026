@@ -31,7 +31,8 @@ export function Part_3_FireMap() {
     // Step 3  -loop through time periods
     const table = []
     t = performance.now()
-    let periods = 5
+    let periods = 200
+    let lastPeriod = 1
     for(let period=1; period<=periods; period++) {
         const t0 = performance.now()
         // get the current fire front cells for period 1
@@ -41,16 +42,16 @@ export function Part_3_FireMap() {
         let torched = 0
         for(let {col, row} of fireFrontCells) {
             const firelet = getFirelet(col, row)        // get appropriate Firelet
-            torched += fireMap.igniteFirelet2(firelet, col, row)
-            // torched += fireMap.igniteVectors(firelet, col, row)
+            torched += fireMap.igniteFirelet(firelet, col, row)
         }
         const {unburned, ignited, burned, unburnable} = fireMap.freq()
         const msec = Math.round((performance.now() - t0)*100)/100
         table.push({period, frontal, torched, unburned, ignited, burned, unburnable, msec})
+        lastPeriod = period
         if (! frontal || ! unburned) break
     }
     console.table(table)
-    console.log(`Step 3.3 - simulating ${periods} time periods ${elapsed(t)}`)
+    console.log(`Step 3.3 - simulated ${lastPeriod} time periods ${elapsed(t)}`)
 
     console.log('Part 3 elapsed time of', (performance.now() - started).toFixed(2), 'msec includes logging')
 }

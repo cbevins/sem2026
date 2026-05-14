@@ -3,7 +3,7 @@
     const title = 'Canvas Fire Growth Demos'
     const items = [{
         route: '/canvas/fire-ellipse',
-        title: 'Fire Ellipse Growth (5/5/2026)',
+        title: 'Fire Ellipse Growth (5/5/2026) [CURRENT PROJECT]',
         brief: 'Uses a FireEllipse wavelet to expand a fire front.',
     },{
         route: '/canvas/ray-cast',

@@ -59,7 +59,6 @@ export class FireMap {
         ignited += this._igniteFirelet(firelet.start, ignCol, ignRow)
         return ignited
     }
-    
     _igniteFirelet(node, ignCol, ignRow) {
         this.visits++
         let ignited = 0
@@ -67,12 +66,38 @@ export class FireMap {
             const col = ignCol + next.col
             const row = ignRow + next.row
             const status = this.get(col, row)
+            // if(status === FireMap.unburnable) {
+            //     console.log(`[${col}, ${row}] = ${status}`)
+            // }
             if (status === FireMap.ignited || status === FireMap.unburned) {
                 if (status === FireMap.unburned) {
                     this.set(col, row, FireMap.ignited)
                     ignited++
                 }
                 ignited += this._igniteFirelet(next, ignCol, ignRow)
+            }
+        }
+        return ignited
+    }
+
+    igniteFirelet2(firelet, ignCol, ignRow) {
+        this.visits = 0
+        let ignited = 0
+        for(let next of firelet.start.cells)
+            ignited += this._igniteFirelet2(next, ignCol, ignRow)
+        return ignited
+    }
+    
+    _igniteFirelet2(node, ignCol, ignRow) {
+        let ignited = 0
+        const status = this.get(node.col + ignCol, node.row + ignRow)
+        if (status === FireMap.ignited || status === FireMap.unburned) {
+            if (status === FireMap.unburned) {
+                this.set(node.col, node.row, FireMap.ignited)
+                ignited++
+            }
+            for(let next of node.cells) {
+                ignited += this._igniteFirelet2(next, ignCol, ignRow)
             }
         }
         return ignited
@@ -91,5 +116,23 @@ export class FireMap {
             this.data[i] = status
         }
         return this
+    }
+
+    igniteVectors(firelet, ignCol, ignRow) {
+        let ignited = 0
+        for(let vector of firelet.vectors) {
+            for(let [colOffset, rowOffset] of vector) {
+                const col = ignCol + colOffset
+                const row = ignRow + rowOffset
+                const status = this.get(col, row)
+                if (status !== FireMap.ignited && status !== FireMap.unburned)
+                    break
+                if (status === FireMap.unburned) {
+                    this.set(col, row, FireMap.ignited)
+                    ignited++
+                }
+            }
+        }
+        return ignited
     }
 }

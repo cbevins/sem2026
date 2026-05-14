@@ -1,4 +1,4 @@
-import { FireMap } from './narrative/FireMap'
+import { BurnMap } from './BurnMap.js'
 
 // Returns canvas x coordinate (where left is at 0 and right is at 'width')
 // and easting is at -width/2 at the left edge and at width/2 at the right edge.
@@ -24,20 +24,19 @@ export function drawCentralAxis(ctx, style='black') {
     strokePath(ctx, style, [[0,cx,0], [1,cx,height], [0,0,cy], [1,width,cy]])
 }
 
-export function drawFireMap(ctx, fireMap) {
+export function drawBurnMap(ctx, burnMap) {
     const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
     const d = imageData.data
-
-    for(let i=0; i<fireMap.data.length; i++) {
-        const status = fireMap.data[i]
+    for(let i=0; i<burnMap.data.length; i++) {
+        const status = burnMap.data[i]
         const j = i*4
-        if (status === FireMap.unburned) {      // unburned is green
+        if (status === BurnMap.unburned) {      // unburned is green
             d[j+1] = 255
         }
-        else if (status === FireMap.ignited) {  // ignited is red
+        else if (status === BurnMap.ignited) {  // ignited is red
             d[j] = 255
         }
-        else if (status === FireMap.burned) {   // burned is brown
+        else if (status === BurnMap.burned) {   // burned is brown
             d[j] = 150
             d[j+1] = 75
         }
@@ -55,19 +54,19 @@ export function drawFireMap(ctx, fireMap) {
     ctx.putImageData(imageData, 0, 0)
 }
 
-// 'perimeterOffsets' is an array of objects {col, row} offsets from the
-// the ignition point as returned by getFireletPerimeterCells()
-export function drawFireletPerimeterCells(ctx, perimeterOffsets, style='red') {
+// 'points' is an array of x and y offsets from the ignition point
+// such as returned by getFireletPerimeter()
+export function drawPerimeterCells(ctx, points, style='red') {
     const cx = xmid(ctx)
     const cy = ymid(ctx)
     ctx.strokeStyle = style
     ctx.beginPath()
-    let {col:col0, row:row0} = perimeterOffsets[0]
-    ctx.moveTo(cx+col0, cy+row0)
-    for(let {col, row} of perimeterOffsets) {
-        ctx.lineTo(cx+col, cy+row)
+    let [x0,y0] = points[0]
+    ctx.moveTo(cx+x0, cy+y0)
+    for(let [x, y] of points) {
+        ctx.lineTo(cx+x, cy+y)
     }
-    ctx.lineTo(cx+col0, cy+row0)
+    ctx.lineTo(cx+x0, cy+y0)
     ctx.stroke()
 }
 

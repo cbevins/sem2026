@@ -6,7 +6,7 @@ function elapsed(started) {
 }
 
 // new Firelet(headRos=1, lwr=1, duration=1, bearing=0)
-const firelet1 = new Firelet(100, 2, 1, 45) // cells: 224 perim, 4430 raster, 180177 path, 28406 tree
+const firelet1 = new Firelet(50, 2, 1, 45) // cells: 224 perim, 4430 raster, 180177 path, 28406 tree
 function getFirelet(/*col, row, time*/) {
     return firelet1
 }
@@ -31,7 +31,7 @@ export function Part_3_FireMap() {
     // Step 3  -loop through time periods
     const table = []
     t = performance.now()
-    let periods = 60
+    let periods = 5
     for(let period=1; period<=periods; period++) {
         const t0 = performance.now()
         // get the current fire front cells for period 1
@@ -41,7 +41,8 @@ export function Part_3_FireMap() {
         let torched = 0
         for(let {col, row} of fireFrontCells) {
             const firelet = getFirelet(col, row)        // get appropriate Firelet
-            torched += fireMap.igniteFirelet(firelet, col, row)
+            torched += fireMap.igniteFirelet2(firelet, col, row)
+            // torched += fireMap.igniteVectors(firelet, col, row)
         }
         const {unburned, ignited, burned, unburnable} = fireMap.freq()
         const msec = Math.round((performance.now() - t0)*100)/100

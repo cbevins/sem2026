@@ -35,7 +35,7 @@ export function getFireletPerimeterCells(cx, cy, rx, ry, rotationDegrees, spacin
     function store(pt) {
         // Store in Raster Coordinate System, not the Projected Coordinate System
         // i.e., y-coordinate should be a row offset from north, not a northing offset 
-        points.add({col: Math.trunc(pt[0] / spacing), row: Math.trunc(pt[1] / spacing)})
+        points.add({col: Math.trunc(pt[0] / spacing), row: -Math.trunc(pt[1] / spacing)})
     }
 
     const rotRad = rotationDegrees * Math.PI / 180

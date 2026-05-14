@@ -1,7 +1,11 @@
 <script>
-    import RotatingFirelets from './RotatingFirelets.svelte'
-    import RotatingPerimeters from './RotatingPerimeters.svelte'
+    import FireCanvas from './FireCanvas.svelte'
+    import { MapperFireletSpread } from './MapperFireletSpread.js'
+    import { MapperRotatingFireletPerimeter } from './MapperRotatingFireletPerimeter.js'
+    let width = $state(512)
+    let height = $state(512)
+    // const mapper = $derived(new MapperRotatingFireletPerimeter(width, height))
+    const mapper = $derived(new MapperFireletSpread(width, height, 50, 2, 45))
 </script>
 
-<RotatingFirelets/>
-<!-- <RotatingPerimeters/> -->
+<FireCanvas {mapper} {width} {height}/>

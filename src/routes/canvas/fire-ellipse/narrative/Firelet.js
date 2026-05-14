@@ -10,7 +10,7 @@ export class Firelet {
         const {centerEast: cx, centerNorth: cy, majorDist: rx, minorDist: ry, degRot} = ellipse
         const perimCells = getFireletPerimeterCells(cx, cy, rx, ry, degRot, spacing)
         const scanLines = getFireletScanLines(perimCells)
-        const vectors = getFireletVectors(scanLines)
-        this.start = getFireletTree(vectors)
+        this.vectors = getFireletVectors(scanLines)
+        this.start = getFireletTree(this.vectors)
     }
 }

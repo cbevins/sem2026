@@ -2,8 +2,12 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     let title = 'SEM2006 Projects'
     let items = [{
+        route: '/raster-fire-map',
+        title: 'Raster Fire Map [CURRENT PROJECT] (5/14/26)',
+        brief: 'Fire front expansion on a FireMap that displays onto a HTML Canvas',
+    },{
         route: '/canvas',
-        title: 'Canvas Fire Growth [CURRENT PROJECT]',
+        title: 'Canvas Fire Growth',
         brief: 'Exploring methods of using HTML Canvas element to simulate fire perimeter growth',
     },{
         route: '/geofire',

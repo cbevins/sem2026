@@ -1,8 +1,7 @@
-import { Firelet } from './narrative/Firelet.js'
-import { FireMap } from './narrative/FireMap.js'
+import { Firelet, FireMap } from './index.js'
 
 const firelet1 = new Firelet(50, 2, 1, 45)
-function getFirelet(col, row) {
+function getFirelet() {
     return firelet1
 }
 
@@ -52,7 +51,7 @@ export class MapperFireletSpread {
         }
         this.fireFrontCellCount = fireFrontCells.length
         for(let cell of fireFrontCells) {
-            const firelet = getFirelet(cell.col, cell.row)
+            const firelet = getFirelet(/*cell.col, cell.row, period*/)
             this.fireMap.igniteFirelet(firelet, cell.col, cell.row)
         }
         const f = this.fireMap.freq()

@@ -5,7 +5,7 @@
 export function getFireletPathArrayFromPerimeter(cells) {
     const paths = []
     for(let cell of cells) {
-        const path = bresenhamPath(cell[0], cell[1])
+        const path = getFireletPathTreePath(cell[0], cell[1])
         path.shift()        // remove origin cell
         paths.push(path)
     }

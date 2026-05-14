@@ -5,9 +5,9 @@
     import { drawBackground, drawCentralAxis, drawFireMap } from './canvasDrawing.js'
 
     // 'mapper' is a class with the following methods:
-    //  - narrative = mapper.getTitle()
-    //  - title = mapper.getNarrative()
-    //  - fireMap = mapper.refreshFireMap()
+    //      narrative = mapper.getTitle()
+    //      title = mapper.getNarrative()
+    //      fireMap = mapper.refreshFireMap()
     let {mapper, width=512, height=512} = $props()
     let first = $state(true)
     let clickPos = $state({x:0, y:0})
@@ -33,6 +33,8 @@
         times = {updates, msec, ups}
     }
 
+    // draw() is called with each animation frame, and it in turn calls
+    // mapper.refreshFireMap() and mapper.getNarrative() to update the display
     function draw() {
         const started = new Date()
         const result = (first) ? fireMap : mapper.refreshFireMap()

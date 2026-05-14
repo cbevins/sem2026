@@ -66,9 +66,6 @@ export class FireMap {
             const col = ignCol + next.col
             const row = ignRow + next.row
             const status = this.get(col, row)
-            // if(status === FireMap.unburnable) {
-            //     console.log(`[${col}, ${row}] = ${status}`)
-            // }
             if (status === FireMap.ignited || status === FireMap.unburned) {
                 if (status === FireMap.unburned) {
                     this.set(col, row, FireMap.ignited)
@@ -80,59 +77,15 @@ export class FireMap {
         return ignited
     }
 
-    igniteFirelet2(firelet, ignCol, ignRow) {
-        this.visits = 0
-        let ignited = 0
-        for(let next of firelet.start.cells)
-            ignited += this._igniteFirelet2(next, ignCol, ignRow)
-        return ignited
-    }
-    
-    _igniteFirelet2(node, ignCol, ignRow) {
-        let ignited = 0
-        const status = this.get(node.col + ignCol, node.row + ignRow)
-        if (status === FireMap.ignited || status === FireMap.unburned) {
-            if (status === FireMap.unburned) {
-                this.set(node.col, node.row, FireMap.ignited)
-                ignited++
-            }
-            for(let next of node.cells) {
-                ignited += this._igniteFirelet2(next, ignCol, ignRow)
-            }
-        }
-        return ignited
-    }
-
     set(col, row, status, n=1) {
-        if (status<0 || status>3) {
-            throw new Error(`FireMap.set(${col}, ${row}, ${status}) attempts to set code outside range[0,3].`)
-        }
-        if (col<0 || col>this.cols || row<0 || row>this.rows) {
-            return
-        }
+        if (status<0 || status>3)
+            throw new Error(`FireMap.set(${col}, ${row}, ${status}) attempts to set status outside range[0,3].`)
+        col = Math.min(Math.max(0,col), this.cols-1)
+        row = Math.min(Math.max(0, row), this.rows-1)
         const idx = col + row * this.cols
-        const end = Math.min(idx+n, this.cols*(row+1))
-        for(let i=idx; i<end; i++) {
+        const end = Math.min(idx+n, (row + 1)*this.cols)
+        for(let i=idx; i<end; i++)
             this.data[i] = status
-        }
         return this
-    }
-
-    igniteVectors(firelet, ignCol, ignRow) {
-        let ignited = 0
-        for(let vector of firelet.vectors) {
-            for(let [colOffset, rowOffset] of vector) {
-                const col = ignCol + colOffset
-                const row = ignRow + rowOffset
-                const status = this.get(col, row)
-                if (status !== FireMap.ignited && status !== FireMap.unburned)
-                    break
-                if (status === FireMap.unburned) {
-                    this.set(col, row, FireMap.ignited)
-                    ignited++
-                }
-            }
-        }
-        return ignited
     }
 }

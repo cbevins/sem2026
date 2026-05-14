@@ -1,19 +1,7 @@
+import { polygonFill } from '../index.js'
+
 export class FireMapDraw {
     constructor() {}
-    
-    static rect(fireMap, col, row, width, height, status) {
-        const begCol = Math.max(0, col)
-        const endCol = Math.min(fireMap.cols, begCol + width)
-        const begRow = Math.max(0, row)
-        const endRow = Math.min(fireMap.rows, begRow + height)
-        for(let row=begRow; row<endRow; row++) {
-            let idx = begCol + row*fireMap.cols
-            for(let col=begCol; col<endCol; col++) {
-                fireMap.data[idx++] = status
-            }
-        }
-        return this
-    }
 
     // Uses Bresenham algorithm to set a line of fire status codes
     static line(fireMap, x1, y1, x2, y2, status, superCover=true) {
@@ -51,4 +39,21 @@ export class FireMapDraw {
         return this
     }
 
+    static polygon(fireMap, points, status) {
+        polygonFill(fireMap, points, status)
+    }
+
+    static rect(fireMap, col, row, width, height, status) {
+        const begCol = Math.max(0, col)
+        const endCol = Math.min(fireMap.cols-1, begCol + width)
+        const begRow = Math.max(0, row)
+        const endRow = Math.min(fireMap.rows-1, begRow + height)
+        for(let row=begRow; row<endRow; row++) {
+            let idx = begCol + row*fireMap.cols
+            for(let col=begCol; col<endCol; col++) {
+                fireMap.data[idx++] = status
+            }
+        }
+        return this
+    }
 }

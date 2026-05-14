@@ -2,7 +2,7 @@
 export { FireEllipse } from './lib/FireEllipse.js'
 export { Firelet } from './lib/Firelet.js'
 export { FireMap } from './lib/FireMap.js'
-// export { FireMapDraw } from './lib/FireMapDraw.js'
+export { FireMapDraw } from './lib/FireMapDraw.js'
 
 // Functions
 export { degrees, radians } from './lib/FireEllipseEquations.js'

@@ -1,10 +1,20 @@
-import { Firelet, FireMap } from './index.js'
+import { Firelet, FireMap, FireMapDraw as Draw } from './index.js'
 
 const firelet1 = new Firelet(50, 2, 1, 45)
 function getFirelet() {
     return firelet1
 }
 
+const starTemplate = [
+    [25, 2], [30, 18], [47, 18], [34, 28], [39, 44],
+    [25, 34], [11, 44], [16, 28], [3, 18], [20, 18]
+]
+let colOffset = 100
+let rowOffset = 350
+const star5= []
+for(let [col, row] of starTemplate) {
+    star5.push([col+colOffset, row+rowOffset])
+}
 // We want the Firelet perimeter to rotate around [ignEast, ignNorth]
 export class MapperFireletSpread {
     constructor(cols, rows, headRos=50, lwr=2, bearing=0) {
@@ -31,8 +41,9 @@ export class MapperFireletSpread {
         // Create the FireMap
         this.fireMap = new FireMap(this.cols, this.rows)
         this.fireMap.set(50, 500, FireMap.ignited)
-        this.fireMap.set(200, 240, FireMap.unburnable, 112)
-
+        Draw.rect(this.fireMap, 200, 220, 100, 20, FireMap.unburnable)
+        // this.fireMap.set(200, 240, FireMap.unburnable, 112)
+        Draw.polygon(this.fireMap, star5, FireMap.unburnable)
         // Create the Firelet
         // this.firelet = new Firelet(this.headRos, this.lwr, this.duration, this.bearing, this.spacing)
         this.firelet = firelet1

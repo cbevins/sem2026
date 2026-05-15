@@ -1,17 +1,17 @@
 <script>
-    // FireCanvas component simply loops to get and display an updated fireMap from some 'mapper'
-    // It knows NOTHING about the FireMap except how to draw it onto the <canvas>
+    // FireCanvas component simply loops to get and display an updated fireRaster from some 'mapper'
+    // It knows NOTHING about the FireRaster except how to draw it onto the <canvas>
     import { onMount } from 'svelte'
-    import { drawBackground, drawCentralAxis, drawFireMap } from './index.js'
+    import { drawBackground, drawCentralAxis, drawFireRaster } from './index.js'
 
     // 'mapper' is a class with the following methods:
     //  - narrative = mapper.getTitle()
     //  - title = mapper.getNarrative()
-    //  - fireMap = mapper.refreshFireMap()
+    //  - fireRaster = mapper.refreshFireRaster()
     let {mapper, width=512, height=512} = $props()
     let first = $state(true)
     let clickPos = $state({x:0, y:0})
-    let fireMap = $derived(mapper.fireMap)
+    let fireRaster = $derived(mapper.fireRaster)
     let narrative = $derived(mapper.getNarrative())
 
     // timing stats
@@ -35,15 +35,15 @@
 
     function draw() {
         const started = new Date()
-        const result = (first) ? fireMap : mapper.refreshFireMap()
+        const result = (first) ? fireRaster : mapper.refreshFireRaster()
         narrative = mapper.getNarrative()
         if (! result) { // if no more cells to burn
             running = false
         } else {
-            fireMap = result
+            fireRaster = result
         }
         drawBackground(ctx)
-        drawFireMap(ctx, fireMap)
+        drawFireRaster(ctx, fireRaster)
         drawCentralAxis(ctx)
         if (running) animId = window.requestAnimationFrame(draw)
         if (!first) collectTimes(started)
@@ -56,7 +56,7 @@
     })
 
     function reset() {
-        fireMap = mapper.init()
+        fireRaster = mapper.init()
         first = true
         times = {updates: 0, msec: 0, ups: 0}
         draw()

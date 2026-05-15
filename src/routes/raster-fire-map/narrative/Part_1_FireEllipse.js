@@ -1,10 +1,11 @@
 import { FireEllipse } from '../index.js'
 
-function elapsed(from, thru) { return `in ${(thru-from).toFixed(2)} msec.` }
-
 export function Part_1_FireEllipse() {
-    console.log('\nPart 1 - The "FireEllipse" Fire Shape Geometry Model')
-    const timer0 = performance.now()
+    let part = 1
+    let step = 0
+    let text = 'The "FireEllipse" Fire Shape Geometry Model'
+    let from = performance.now(), thru
+    const stats = [{part, step, text, msec: from}]
 
     /*
     The FireEllipse class provides the geometric model behind the fundamental shape
@@ -29,11 +30,14 @@ export function Part_1_FireEllipse() {
     on a Cartesian plane where easting increases left-to-right and
     northing increases botton-to-top.
     */
+    from = performance.now()
     let fireEllipse = new FireEllipse(headRos, lwr, duration, ignEast, ignNorth, bearing)
-    const timer1 = performance.now()
-    console.log(`Step 1.1 - created FireEllipse(headRos=${headRos}, lwr=${lwr}, bearing=${bearing}) with`
-        + ` length=${fireEllipse.length.toFixed(2)}, width=${fireEllipse.width.toFixed(2)} ${elapsed(timer0, timer1)}`)
-    // console.log(fireEllipse)
-    
-    console.log('Part 1 elapsed time of', (performance.now() - timer0).toFixed(2), 'msec includes logging')
+    thru = performance.now()
+    step = 1
+    text = `created FireEllipse(headRos=${headRos}, lwr=${lwr}, bearing=${bearing}) with`
+    + ` length=${fireEllipse.length.toFixed(2)}, width=${fireEllipse.width.toFixed(2)}`
+    stats.push({part, step, text, msec: thru-from})
+
+    stats[0].msec = performance.now() - stats[0].msec
+    return stats
 }

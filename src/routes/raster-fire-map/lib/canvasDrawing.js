@@ -1,4 +1,4 @@
-import { FireMap } from './FireMap.js'
+import { FireRaster } from './FireRaster.js'
 
 // Returns canvas x coordinate (where left is at 0 and right is at 'width')
 // and easting is at -width/2 at the left edge and at width/2 at the right edge.
@@ -24,20 +24,20 @@ export function drawCentralAxis(ctx, style='black') {
     strokePath(ctx, style, [[0,cx,0], [1,cx,height], [0,0,cy], [1,width,cy]])
 }
 
-export function drawFireMap(ctx, fireMap) {
+export function drawFireRaster(ctx, fireRaster) {
     const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
     const d = imageData.data
 
-    for(let i=0; i<fireMap.data.length; i++) {
-        const status = fireMap.data[i]
+    for(let i=0; i<fireRaster.data.length; i++) {
+        const status = fireRaster.data[i]
         const j = i*4
-        if (status === FireMap.unburned) {      // unburned is green
+        if (status === FireRaster.unburned) {      // unburned is green
             d[j+1] = 255
         }
-        else if (status === FireMap.ignited) {  // ignited is red
+        else if (status === FireRaster.ignited) {  // ignited is red
             d[j] = 255
         }
-        else if (status === FireMap.burned) {   // burned is brown
+        else if (status === FireRaster.burned) {   // burned is brown
             d[j] = 150
             d[j+1] = 75
         }

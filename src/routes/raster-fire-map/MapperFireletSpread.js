@@ -1,4 +1,4 @@
-import { Firelet, FireMap, FireMapDraw as Draw } from './index.js'
+import { Firelet, FireRaster } from './index.js'
 
 const firelet1 = new Firelet(50, 2, 1, 45)
 function getFirelet() {
@@ -11,10 +11,12 @@ const starTemplate = [
 ]
 let colOffset = 100
 let rowOffset = 350
+let scale = 2
 const star5= []
 for(let [col, row] of starTemplate) {
-    star5.push([col+colOffset, row+rowOffset])
+    star5.push([scale*col + colOffset, scale*row + rowOffset])
 }
+
 // We want the Firelet perimeter to rotate around [ignEast, ignNorth]
 export class MapperFireletSpread {
     constructor(cols, rows, headRos=50, lwr=2, bearing=0) {
@@ -38,12 +40,12 @@ export class MapperFireletSpread {
     }
 
     init() {
-        // Create the FireMap
-        this.fireMap = new FireMap(this.cols, this.rows)
-        this.fireMap.set(50, 500, FireMap.ignited)
-        Draw.rect(this.fireMap, 200, 220, 100, 20, FireMap.unburnable)
-        // this.fireMap.set(200, 240, FireMap.unburnable, 112)
-        Draw.polygon(this.fireMap, star5, FireMap.unburnable)
+        // Create the FireRaster
+        this.fireRaster = new FireRaster(this.cols, this.rows)
+        this.fireRaster.set(50, 500, FireRaster.ignited)
+        this.fireRaster.setRect(200, 220, 100, 5, FireRaster.unburnable)
+        this.fireRaster.setPolygon(star5, FireRaster.unburnable)
+
         // Create the Firelet
         // this.firelet = new Firelet(this.headRos, this.lwr, this.duration, this.bearing, this.spacing)
         this.firelet = firelet1
@@ -51,22 +53,22 @@ export class MapperFireletSpread {
         // Status
         this.period = 0
         this.freq = `Unburned: 0, Ignited: 0, Burned: 0, Unburnable: 0`
-        return this.fireMap
+        return this.fireRaster
     }
 
-    refreshFireMap() {
+    refreshFireRaster() {
         this.period++
-        const fireFrontCells = this.fireMap.getFireFrontCells()
+        const fireFrontCells = this.fireRaster.getFireFrontCells()
         if (! fireFrontCells.length) {
             return null
         }
         this.fireFrontCellCount = fireFrontCells.length
         for(let cell of fireFrontCells) {
             const firelet = getFirelet(/*cell.col, cell.row, period*/)
-            this.fireMap.igniteFirelet(firelet, cell.col, cell.row)
+            this.fireRaster.igniteFirelet(firelet, cell.col, cell.row)
         }
-        const f = this.fireMap.freq()
+        const f = this.fireRaster.freq()
         this.freq = `Unburned: ${f.unburned}, Ignited: ${f.ignited}, Burned: ${f.burned}, Unburnable: ${f.unburnable}`
-        return this.fireMap
+        return this.fireRaster
     }
 }

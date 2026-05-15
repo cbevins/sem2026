@@ -5,13 +5,12 @@ import { FireEllipse,
     getFireletTree, getFireletTreeCellCount,
     getFireletVectors, getFireletVectorsCellCount } from '../index.js'
 
-function elapsed(from, thru) {
-    return `in ${(thru-from).toFixed(2)} msec.`
-}
-
 export function Part_2_Firelet() {
-    console.log('\nPart 2 - The "Firelet" Fire Growth Pathways Data Structure')
-    const timer0 = performance.now()
+    let part = 2
+    let step = 0
+    let text = 'The "Firelet" Fire Growth Pathways Data Structure'
+    let from = performance.now(), thru
+    const stats = [{part, step, text, msec: from}]
 
     /* -------------------------------------------------------------------------
     Simulating fire growth using Huygen's Principle requires starting numerous
@@ -39,6 +38,8 @@ export function Part_2_Firelet() {
 
     // Step 1 - create a FireEllipse with ignition point [0,0] so we can determine the
     // Firelet's center point, major and minor radii, and rotation:
+    step = 1
+    from = performance.now()
     let lwr = 2         // a length-to-width ratio
     let headRos = 100    // a head fire spread rate
     let duration = 1    // elapsed time since ignition
@@ -46,44 +47,54 @@ export function Part_2_Firelet() {
     let ignEast = 0     // the ignition point false easting
     let ignNorth = 0    // the ignition point false northing
     const fireEllipse = new FireEllipse(headRos, lwr, duration, ignEast, ignNorth, bearing)
-    const timer1 = performance.now()
-    console.log(`Step 2.1 - created FireEllipse(headRos=${headRos}, lwr=${lwr}, bearing=${bearing}) with`
-        + ` length=${fireEllipse.length.toFixed(2)}, width=${fireEllipse.width.toFixed(2)} ${elapsed(timer0, timer1)}`)
+    thru = performance.now()
+    text = `created FireEllipse(headRos=${headRos}, lwr=${lwr}, bearing=${bearing}) with`
+    + ` length=${fireEllipse.length.toFixed(2)}, width=${fireEllipse.width.toFixed(2)}`
+    stats.push({part, step, text, msec: thru-from})
 
     // Step 2 - determine the contiguous sequence of perimeter raster cells for this Firelet
+
     const spacing = 1
     const {centerEast: cx, centerNorth: cy, majorDist: rx, minorDist: ry, degRot} = fireEllipse
     const fireletPerimCells = getFireletPerimeterCells(cx, cy, rx, ry, degRot, spacing)
-    const timer2 = performance.now()
-    console.log(`Step 2.2 - derived ${fireletPerimCells.length} Firelet perimeter cells ${elapsed(timer1, timer2)}`)
+    thru = performance.now()
+    text = `derived ${fireletPerimCells.length} Firelet perimeter cells`
     // console.table(fireletPerimCells)
+    stats.push({part, step, text, msec: thru-from})
 
     // Note: we can optionally get the Firelet raster bounds as follows:
     // const fireletBounds = getFirletBounds(fireletPerimCells)
     // console.log ('\nFirelet Bounds:', fireletBounds)
 
     // Step 3 - identify all the raster cells within the Firelet perimeter using a compact scan line format
+    step = 3
+    from = performance.now()
     const fireletScanLines = getFireletScanLines(fireletPerimCells)
     const fireletScanLineCells = getFireletScanLineCellCount(fireletScanLines)
-    const timer3 = performance.now()
-    console.log(`Step 2.3 - derived ${fireletScanLines.length} Firelet scan lines with ${fireletScanLineCells} cells `
-        + elapsed(timer2, timer3))
+    thru = performance.now()
+    text = `derived ${fireletScanLines.length} Firelet scan lines with ${fireletScanLineCells} cells`
     // console.table(fireletScanLines)
+    stats.push({part, step, text, msec: thru-from})
 
     // Step 4 - determine spread vectors from center cell to every other cell using Bresenham algoithm
+    step = 4
+    from = performance.now()
     const fireletVectors = getFireletVectors(fireletScanLines)
     const fireletVectorCells = getFireletVectorsCellCount(fireletVectors)
-    const timer4 = performance.now()
-    console.log(`Step 2.4 - derived ${fireletVectors.length} Firelet Bresenham vectors with ${fireletVectorCells} cells `
-        + elapsed(timer3, timer4))
+    thru = performance.now()
+    text = `derived ${fireletVectors.length} Firelet Bresenham vectors with ${fireletVectorCells} cells`
     // console.table(vectors)
+    stats.push({part, step, text, msec: thru-from})
 
     // Step 5 - pack the Bresenham vectors into a hierarchical cell path network tree
+    step = 5
+    from = performance.now()
     const fireletTreeRoot = getFireletTree(fireletVectors)
     const fireletTreeCells = getFireletTreeCellCount(fireletTreeRoot)
-    const timer5 = performance.now()
-    console.log(`Step 2.5 - packed Firelet vector cells into a tree with ${fireletTreeCells} tree cells `
-        + elapsed(timer4, timer5))
+    thru = performance.now()
+    text = `packed Firelet vector cells into a tree with ${fireletTreeCells} tree cells`
+    stats.push({part, step, text, msec: thru-from})
 
-    console.log('Part 2 elapsed time of', (performance.now() - timer0).toFixed(2), 'msec includes logging')
+    stats[0].msec = performance.now() - stats[0].msec
+    return stats
 }

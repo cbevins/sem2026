@@ -1,4 +1,4 @@
-function rounding() {
+function roundingExamples() {
     const values = [1.4, 1.5, 1.6, -1.4, -1.5, -1.6]
     const results = []
     for (let v of values) {
@@ -11,4 +11,5 @@ function rounding() {
     }
     console.table(results)
 }
-rounding()
+console.log('Math Rounding Examples')
+roundingExamples()

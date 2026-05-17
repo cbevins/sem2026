@@ -1,5 +1,5 @@
 /**
- * @param {array} perim  An array as returned by getFireletPerimeterCells()
+ * @param {array} perim  An array as returned by getEllipsePerimeterCells()
  * @returns An array of Firelet ellipse scanline objects with propeties {row, from, thru}
  */
 

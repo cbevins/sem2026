@@ -56,7 +56,7 @@ export function drawFireRaster(ctx, fireRaster) {
 }
 
 // 'perimeterOffsets' is an array of objects {col, row} offsets from the
-// the ignition point as returned by getFireletPerimeterCells()
+// the ignition point as returned by getEllipsePerimeterCells()
 export function drawFireletPerimeterCells(ctx, perimeterOffsets, style='red') {
     const cx = xmid(ctx)
     const cy = ymid(ctx)

@@ -5,16 +5,15 @@ function getFirelet() {
     return firelet1
 }
 
-const starTemplate = [
-    [25, 2], [30, 18], [47, 18], [34, 28], [39, 44],
-    [25, 34], [11, 44], [16, 28], [3, 18], [20, 18]
-]
-let colOffset = 100
-let rowOffset = 350
-let scale = 2
-const star5= []
-for(let [col, row] of starTemplate) {
-    star5.push([scale*col + colOffset, scale*row + rowOffset])
+function makeStar(colOffset, rowOffset, scale) {
+    const template = [
+        [25, 2], [30, 18], [47, 18], [34, 28], [39, 44],
+        [25, 34], [11, 44], [16, 28], [3, 18], [20, 18], [25,2]]
+
+    const star5= []
+    for(let [col, row] of template)
+        star5.push([scale*col + colOffset, scale*row + rowOffset])
+    return star5
 }
 
 // We want the Firelet perimeter to rotate around [ignEast, ignNorth]
@@ -43,9 +42,12 @@ export class MapperFireletSpread {
         // Create the FireRaster
         this.fireRaster = new FireRaster(this.cols, this.rows)
         this.fireRaster.set(50, 500, FireRaster.ignited)
-        this.fireRaster.setRect(200, 220, 100, 5, FireRaster.unburnable)
-        this.fireRaster.setPolygon(star5, FireRaster.unburnable)
-
+        this.fireRaster.fillRect(200, 220, 100, 5, FireRaster.unburnable)
+        this.fireRaster.fillPolygon(makeStar(100, 300, 2), FireRaster.unburnable)
+        this.fireRaster.strokePath(makeStar(300, 100, 2), FireRaster.unburnable, true)
+        this.fireRaster.fillCircle(400, 400, 40, FireRaster.unburnable)
+        this.fireRaster.strokeEllipse(400, 300, 50, 20, 45, FireRaster.unburnable)
+        this.fireRaster.fillEllipse(400, 200, 50, 20, 45, FireRaster.unburnable)
         // Create the Firelet
         // this.firelet = new Firelet(this.headRos, this.lwr, this.duration, this.bearing, this.spacing)
         this.firelet = firelet1

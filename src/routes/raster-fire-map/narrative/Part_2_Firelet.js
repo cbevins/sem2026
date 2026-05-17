@@ -1,6 +1,6 @@
 import { FireEllipse,
 // getFirletBounds,
-    getFireletPerimeterCells,
+    getEllipsePerimeterCells,
     getFireletScanLines, getFireletScanLineCellCount,
     getFireletTree, getFireletTreeCellCount,
     getFireletVectors, getFireletVectorsCellCount } from '../index.js'
@@ -56,7 +56,7 @@ export function Part_2_Firelet() {
 
     const spacing = 1
     const {centerEast: cx, centerNorth: cy, majorDist: rx, minorDist: ry, degRot} = fireEllipse
-    const fireletPerimCells = getFireletPerimeterCells(cx, cy, rx, ry, degRot, spacing)
+    const fireletPerimCells = getEllipsePerimeterCells(cx, cy, rx, ry, degRot, spacing)
     thru = performance.now()
     text = `derived ${fireletPerimCells.length} Firelet perimeter cells`
     // console.table(fireletPerimCells)

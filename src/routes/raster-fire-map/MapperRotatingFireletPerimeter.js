@@ -1,4 +1,4 @@
-import { FireEllipse, FireMap, getFireletPerimeterCells } from './index.js'
+import { FireEllipse, FireRaster, getEllipsePerimeterCells } from './index.js'
 
 // We want the Firelet perimeter to rotate around [ignEast, ignNorth]
 export class MapperRotatingFireletPerimeter {
@@ -12,7 +12,7 @@ export class MapperRotatingFireletPerimeter {
         this.bearing = 0
         this.duration = 1
         this.spacing = 1
-        this.fireMap = new FireMap(cols, rows)
+        this.fireRaster = new FireRaster(cols, rows)
     }
 
     getNarrative() {
@@ -27,27 +27,27 @@ export class MapperRotatingFireletPerimeter {
 
     init() {
         this.bearing = 0
-        this.refreshFireMap()
-        return this.fireMap
+        this.refreshFireRaster()
+        return this.fireRaster
     }
 
-    refreshFireMap() {
-        // Start with a clean FireMap
-        this.fireMap.data.fill(FireMap.unburned)
+    refreshFireRaster() {
+        // Start with a clean FireRaster
+        this.fireRaster.data.fill(FireRaster.unburned)
 
         // Get the perimeter cells at the next bearing stpe
         this.bearing = (this.bearing + 5) % 360
         const ellipse = new FireEllipse(this.headRos, this.lwr, this.duration, 0, 0, this.bearing)
         const {majorDist: rx, minorDist: ry, degRot, centerEast: cx, centerNorth: cy} = ellipse
-        const perimCells = getFireletPerimeterCells(cx, cy, rx, ry, degRot, this.spacing)
+        const perimCells = getEllipsePerimeterCells(cx, cy, rx, ry, degRot, this.spacing)
 
-        // We want [east, north] of [0,0] PCS to be located over the FireMap center cell
+        // We want [east, north] of [0,0] PCS to be located over the FireRaster center cell
         // at [cols/2, rows/2] RCS, so translate ignEast and ignNorth to that point
         const c0 = Math.trunc(this.cols/2) + this.ignEast
         const r0 = Math.trunc(this.rows/2) - this.ignNorth
         for(let {col, row} of perimCells) {
-            this.fireMap.set(c0 + col + this.ignEast, r0 + row , FireMap.ignited)
+            this.fireRaster.set(c0 + col + this.ignEast, r0 + row , FireRaster.ignited)
         }
-        return this.fireMap
+        return this.fireRaster
     }
 }

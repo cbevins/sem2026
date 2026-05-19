@@ -164,7 +164,7 @@ export class Raster {
     // x1, y1, x2, and y2 must be integer coordinst, either negative or positive
     // client should set each using [Math.round(x), Math.round(y)]
     // Works in all 4 quadrants so negative coords are ok
-    strokeLine(x1, y1, x2, y2, value, cover=false) {
+    strokeLine(x1, y1, x2, y2, value, cover=true) {
         let x = x1
         let y = y1
         const dx = Math.abs(x2 - x1)
@@ -191,10 +191,10 @@ export class Raster {
         return this
     }
 
-    strokePath(points, value=1, cover=false, pad=0) {
+    strokePath(points, value=1, cover=true) {
         for(let i=1; i<points.length; i++) {
             this.strokeLine(points[i-1][0], points[i-1][1], points[i][0], points[i][1],
-                value, cover, pad)
+                value, cover)
         }
         return this
     }

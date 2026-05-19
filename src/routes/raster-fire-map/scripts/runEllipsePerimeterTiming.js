@@ -1,5 +1,4 @@
 import { FireEllipse } from "../lib/FireEllipse.js"
-import { _getEllipsePerimeterCells } from "../lib/getFireletPerimeterCells.js"
 import { getEllipsePerimeterCellsV1 } from "./getEllipsePerimeterCellsV1.js"
 import { getEllipsePerimeterCellsV2 } from "./getEllipsePerimeterCellsV2.js"
 
@@ -19,12 +18,6 @@ function ellipsePerimeterTiming() {
     const results = []
     let cells, cellsv1, cellsv2
     let from = performance.now(), thru
-
-    for(let i=0; i<reps; i++) {
-        cells = _getFireletPerimeterCells(cx, cy, rx, ry, degRot, spacing)
-    }
-    thru = performance.now()
-    results.push({func: '_getFireletPerimeterCells', cells: cells.length, msec: (thru-from)})
 
     // -----------------------------------------------------------------------
     from = performance.now()

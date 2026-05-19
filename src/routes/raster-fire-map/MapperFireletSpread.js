@@ -41,13 +41,8 @@ export class MapperFireletSpread {
     init() {
         // Create the FireRaster
         this.fireRaster = new FireRaster(this.cols, this.rows)
-        this.fireRaster.set(50, 500, FireRaster.ignited)
-        this.fireRaster.fillRect(200, 220, 100, 5, FireRaster.unburnable)
-        this.fireRaster.fillPolygon(makeStar(100, 300, 2), FireRaster.unburnable)
-        this.fireRaster.strokePath(makeStar(300, 100, 2), FireRaster.unburnable, true)
-        this.fireRaster.fillCircle(400, 400, 40, FireRaster.unburnable)
-        this.fireRaster.strokeEllipse(400, 300, 50, 20, 45, FireRaster.unburnable)
-        this.fireRaster.fillEllipse(400, 200, 50, 20, 45, FireRaster.unburnable)
+        this.addPattern4()
+
         // Create the Firelet
         // this.firelet = new Firelet(this.headRos, this.lwr, this.duration, this.bearing, this.spacing)
         this.firelet = firelet1
@@ -72,5 +67,43 @@ export class MapperFireletSpread {
         const f = this.fireRaster.freq()
         this.freq = `Unburned: ${f.unburned}, Ignited: ${f.ignited}, Burned: ${f.burned}, Unburnable: ${f.unburnable}`
         return this.fireRaster
+    }
+
+    addPattern1() {
+        const raster = this.fireRaster
+        raster.set(50, 500, FireRaster.ignited)
+        raster.fillRect(200, 220, 100, 5, FireRaster.unburnable)
+        raster.fillPolygon(makeStar(100, 300, 2), FireRaster.unburnable)
+        raster.strokePath(makeStar(300, 100, 2), FireRaster.unburnable, true)
+        raster.fillCircle(400, 400, 40, FireRaster.unburnable)
+        raster.strokeEllipse(400, 300, 50, 20, 45, FireRaster.unburnable)
+        raster.fillEllipse(400, 200, 50, 20, 45, FireRaster.unburnable)
+    }
+    addPattern2() {
+        const raster = this.fireRaster
+        raster.set(35, 455, FireRaster.ignited)
+        for(let row=50; row<this.rows; row+=50) {
+            for(let col=50; col<this.cols; col+=100) {
+                raster.fillRect(col, row, 50, 5, FireRaster.unburnable)
+            }
+        }
+    }
+    addPattern3() {
+        const raster = this.fireRaster
+        raster.set(35, 455, FireRaster.ignited)
+        raster.fillRect(100, 50, 10, 400, FireRaster.unburnable)
+        raster.fillRect(100, 450, 300, 10, FireRaster.unburnable)
+    }
+    addPattern4() {
+        const raster = this.fireRaster
+        raster.set(35, 455, FireRaster.ignited)
+        raster.strokePath([
+            [50,400], [50,50], [500,50], [500,500],
+            [100, 500], [100,100], [450,100], [450,450],
+            [150,450], [150,150], [400,150], [400,400],
+            [200,400], [200,200], [350,200], [350,350],
+            [250,350],[250,250], [300,250], [300,300]
+            ], FireRaster.unburnable
+        )
     }
 }

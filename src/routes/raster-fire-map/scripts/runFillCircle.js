@@ -1,4 +1,4 @@
-function fillCircle1(centerCol, centerRow, r, value) {
+function fillCircle1(centerCol, centerRow, r) {
     const points = []
     const colMin = Math.floor(centerCol - r)
     const colMax = Math.ceil(centerCol + r)
@@ -18,7 +18,7 @@ function fillCircle1(centerCol, centerRow, r, value) {
     return points
 }
 
-function fillCircle2(centerCol, centerRow, r, value) {
+function fillCircle2(centerCol, centerRow, r) {
     const points = []
     const colMin = Math.floor(centerCol - r)
     const colMax = Math.ceil(centerCol + r)
@@ -40,7 +40,7 @@ function fillCircle2(centerCol, centerRow, r, value) {
     return points
 }
 
-function strokeCircle(cx, cy, radius, value) {
+function strokeCircle(cx, cy, radius) {
     let x = radius
     let y = 0
     let err = 0
@@ -63,8 +63,8 @@ function strokeCircle(cx, cy, radius, value) {
     return cells
 }
 
-function strokeScanCircle(cx, cy, radius, value) {
-    const cells = strokeCircle(cx, cy, radius, value)
+function strokeScanCircle(cx, cy, radius) {
+    const cells = strokeCircle(cx, cy, radius)
     cells.sort((a, b) => { // sort first by row, then by column
         return (a.row === b.row) ? a.col - b.col : a.row - b.row
     })
@@ -86,8 +86,8 @@ function strokeScanCircle(cx, cy, radius, value) {
     return lines
 }
 
-function strokeScanFillCircle(cx, cy, radius, value) {
-    const lines = strokeScanCircle(cx, cy, radius, value)
+function strokeScanFillCircle(cx, cy, radius) {
+    const lines = strokeScanCircle(cx, cy, radius)
     const points = []
     for(let {row, from, thru} of lines) {
         for(let col=from; col<=thru; col++)
@@ -99,40 +99,42 @@ function strokeScanFillCircle(cx, cy, radius, value) {
 const reps = 1000
 let from, thru, points1, points2, cells, lines, points3
 const results = []
+function meanTime(msec) { return Math.trunc(100*msec/reps)/100 }
+console.log(`Circle(r=101) filling algorithm times over ${reps} repitions:`)
 // ---------------------------------------------------
 from = performance.now()
 for(let i=0; i<reps; i++) {
-    points1 = fillCircle1(0, 0, 101, 1)
+    points1 = fillCircle1(0, 0, 101)
 }
 thru = performance.now()
-results.push({name: 'fillCircle1()', items: points1.length, msec: thru-from} )
+results.push({name: 'fillCircle1()', items: points1.length, msec: meanTime(thru-from)} )
 
 from = performance.now()
 for(let i=0; i<reps; i++) {
-    points2 = fillCircle2(0, 0, 101, 1)
+    points2 = fillCircle2(0, 0, 101)
 }
 thru = performance.now()
-results.push({name: 'fillCircle2()', items: points2.length, msec: thru-from} )
+results.push({name: 'fillCircle2()', items: points2.length, msec: meanTime(thru-from)} )
 
 from = performance.now()
 for(let i=0; i<reps; i++) {
-    cells = strokeCircle(0, 0, 101, 1)
+    cells = strokeCircle(0, 0, 101)
 }
 thru = performance.now()
-results.push({name: 'strokeCircle()', items: cells.length, msec: thru-from} )
+results.push({name: 'strokeCircle()', items: cells.length, msec: meanTime(thru-from)} )
 
 from = performance.now()
 for(let i=0; i<reps; i++) {
-    lines = strokeScanCircle(0, 0, 101, 1)
+    lines = strokeScanCircle(0, 0, 101)
 }
 thru = performance.now()
-results.push({name: 'strokeScanCircle()', items: lines.length, msec: thru-from} )
+results.push({name: 'strokeScanCircle()', items: lines.length, msec: meanTime(thru-from)} )
 
 from = performance.now()
 for(let i=0; i<reps; i++) {
-    points3 = strokeScanFillCircle(0, 0, 101, 1)
+    points3 = strokeScanFillCircle(0, 0, 101)
 }
 thru = performance.now()
-results.push({name: 'strokeScanFillCircle()', items: points3.length, msec: thru-from} )
+results.push({name: 'strokeScanFillCircle()', items: points3.length, msec: meanTime(thru-from)} )
 
 console.table(results)

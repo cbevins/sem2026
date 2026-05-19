@@ -1,6 +1,6 @@
-export function polygonFill(fireMap, points, fillValue=1) {
+export function polygonFill(raster, points, fillValue=1) {
     if (points.length < 3)
-        return fireMap
+        return raster
 
     // 1 create a list of edges, ignoring hoizontal ones
     const edges = []
@@ -19,7 +19,7 @@ export function polygonFill(fireMap, points, fillValue=1) {
             slopeInv: (p2[0] - p1[0]) / (p2[1] - p1[1])})
     }
     // 2 iterate through each scanline (row)
-    for(let row=0; row<fireMap.rows; row++) {
+    for(let row=0; row<raster.rows; row++) {
         let intersections = []
         // find all edges that intersect
         for (const edge of edges) {
@@ -36,12 +36,12 @@ export function polygonFill(fireMap, points, fillValue=1) {
         for(let i=0; i<intersections.length; i+=2) {
             if (i+1 < intersections.length) {
                 let startX = Math.max(0, Math.ceil(intersections[i]))
-                let endX = Math.min(fireMap.cols-1, Math.floor(intersections[i+1]))
+                let endX = Math.min(raster.cols-1, Math.floor(intersections[i+1]))
                 for(let col=startX; col <=endX; col++) {
-                    fireMap.set(col, row, fillValue)
+                    raster.set(col, row, fillValue)
                 }
             }
         }
     }
-    return fireMap
+    return raster
 }

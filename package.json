@@ -42,6 +42,7 @@
 	"dependencies": {
 		"@velipso/polybool": "^2.0.11",
 		"d3": "^7.9.0",
+		"gdal3.js": "^2.8.1",
 		"paper": "^0.12.18"
 	}
 }

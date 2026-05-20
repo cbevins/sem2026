@@ -233,9 +233,8 @@ export class FuelBed {
         for(let life of ['dead', 'live'])
             this[life].surfaceAreaWtg = (this.surfaceArea > 0) ? this[life].surfaceArea / this.surfaceArea : 0
 
-        // Fuel bed weighted properties
-        for(let prop of ['savr', 'qig'])
-            this[prop] = this.dead[prop] * this.dead.surfaceAreaWtg + this.live[prop] * this.live.surfaceAreaWtg
+        // Fuel bed savr
+        this.savr = this.dead.savr * this.dead.surfaceAreaWtg + this.live.savr * this.live.surfaceAreaWtg
 
         // Fuel bed calculated properties
         this.bulkDensity = (this.depth > 0) ? this.ovendryLoad / this.depth : 0
@@ -278,9 +277,6 @@ export class FuelBed {
         for(let life of ['dead', 'live'])
             this[life].reactionIntensityDry = this.reactionVelocityOpt * this[life].netLoad * this[life].heat * this[life].mineralDamping
 
-        // Fire spread heat sink (BTU/ft3)
-        this.heatSink = this.bulkDensity *  this.qig
-
         // The live fuel moisture content of extinction factor represents the ratio
         // of dead-to-live fuel mass that must be raised to ignition.  It is constant
         // within a fuel bed, and applies ONLY to the LIVE fuel bed life category.
@@ -289,12 +285,61 @@ export class FuelBed {
         // 'effective heating number' to determine the ratio of fine dead to fine live fuels.
         // See Rothermel (1972) eq 88 on page 35.
         this.liveMextFactor = 2.9 * (this.dead.fineFuelLoad / this.live.fineFuelLoad)
+
+        
+        // Fuel bed slope coeffient `phiS` slope factor.
+        // This factor is an intermediate parameter that is constant for a fuel bed,
+        // and used to determine the fire spread slope coefficient `phiS`.
+        // See Rothermel (1972) eq 51 (p 24, 26) and eq 80 (p 33).
+        this.slopeK = (this.packingRatio > 0) ? 5.275 * this.packingRatio**-0.3 : 0
+
+        // Fuel bed wind coefficient `phiW` correlation factor `B`.
+        // This factor is an intermediate parameter that is constant for a fuel bed,
+        // and is used to derive the fire spread wind coefficient `phiW`.
+        // * See Rothermel (1972) eq 49 (p 23, 26) and eq 83 (p 33).
+        this.windB = (this.savr > 0) ? 0.02526 * this.savr**0.54 : 0
+
+        // Calculate the fuel bed wind coefficient `phiW` correlation factor `C`.
+        // This factor is an intermediate parameter that is constant for a fuel bed,
+        // and is used to derive the fire spread wind coefficient `phiW`.
+        // See Rothermel (1972) eq 48 (p 23, 26) and eq 82 (p 33).
+        this.windC = (this.savr > 0) ? 7.47 * Math.exp(-0.133 * this.savr**0.55) : 0
+
+        // Calculate the fuel bed wind coefficient `phiW` correlation factor `E`.
+        // This factor is an intermediate parameter that is constant for a fuel bed,
+        // and is used to derive the fire spread wind coefficient `phiW`.
+        // See Rothermel (1972) eq 50 (p 23, 26) and eq 82 (p 33).
+        this.windE = (this.savr > 0) ? 0.715 * Math.exp(-0.000359 * this.savr) : 0
+
+        // Calculate the fuel bed wind coeffient `phiW` inverse K wind factor.
+        // This factor is an intermediate parameter that is constant for a fuel bed,
+        // and used to determine the fire spread wind coefficient `phiW`.
+        // It is the inverse of the wind factor 'K', and is used to re-derive
+        // effective wind speeds within the BEHAVE fire spread computations.
+        // See Rothermel (1972) eq 47 (p 23, 26) and eq 79 (p 33).
+        this.windI = (this.packingRatioRatio > 0 && this.windC > 0) ?
+            this.packingRatioRatio ** this.windE / this.windC : 0
+
+        // Calculate the fuel bed wind coeffient `phiW` wind K factor.
+        // This factor is an intermediate parameter that is constant for a fuel bed,
+        // and used to determine the fire spread wind coefficient `phiW`.
+        // See Rothermel (1972) eq 47 (p 23, 26) and eq 79 (p 33).
+        //
+        // @param {float} betr Fuel bed packing ratio (ratio).
+        // @param {float} wnde The fuel bed wind coefficient `phiW` correlation factor `E`.
+        // @param {float} wndc The fuel bed wind coefficient `phiW` correlation factor `C`.
+        // @return float Factor used to derive the wind coefficient `phiW' (ratio).
+        this.windK = (this.packingRatioRatio > 0 && this.windE > 0) ?
+            this.windC * this.packingRatioRatio**-this.windE : 0
     }
 
     // mois is an object with properties {dead1h, dead10h, dead100h, herb, stem}
     updateMoisture(mois) {
         this.dead.updateMoistureContent(mois)
         this.live.updateMoistureContent(mois)
+
+        // Fuel bed weighted heat of preignition
+        this.qig = this.dead.qig * this.dead.surfaceAreaWtg + this.live.qig * this.live.surfaceAreaWtg
 
         // Live fuel moisture content of extinction
         const dry = 1 - this.dead.fineMois / this.dead.mext
@@ -313,6 +358,17 @@ export class FuelBed {
 
         // Fuel bed reaction intensity under current moisture conditions (BTU/ft2/min)
         this.reactionIntensity = this.dead.reactionIntensity + this.live.reactionIntensity
+        
+        // Fire spread heat sink (BTU/ft3)
+        this.heatSink = this.bulkDensity *  this.qig
+
+        // Fire spread heat source (BTU/ft2/min)
+        // Product of the total fire reaction intensity (btu+1 ft-2 min-1)
+        // and the fuel bed propagating flux ratio (ratio).
+        this.heatSource = this.reactionIntensity * this.propagatingFluxRatio
+
+        // No-wind, no-slope fire spread rate
+        this.ros0 = (this.heatSink > 0) ? this.heatSource / this.heatSink : 0
         return this
     }
 }

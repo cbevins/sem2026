@@ -16,15 +16,22 @@ const fm010 = new FuelBed(catalog.get(10), curedObj).updateMoisture(moisObj)
 const fm124 = new FuelBed(catalog.get(124), curedObj).updateMoisture(moisObj)
 
 const Expected010 = {
+    heatSink: 412.34037227937284,
     liveMextFactor: 6.908948234294801,
     ovendryLoad: 0.552,
     packingRatio: 0.01725,
     packingRatioOpt: 0.0073478593798598172,
     packingRatioRatio: 2.3476224990480286,
     propagatingFluxRatio: 0.048317062998571636,
+    qig: 746.993428042342,
+    reactionIntensity: 5794.6954002291168,
     reactionVelocityExp: 0.35878365060452616,
     reactionVelocityMax: 15.13331887756658,
     reactionVelocityOpt: 12.674359628667819,
+    ros0: 0.67900860922904482,
+    savr: 1764.3319812126388,
+    savr15: 74108.915800396862,
+    surfaceArea: 13.4665,
     dead: {
         fineFuelLoad: 0.15704963842638839,
         fineMois: 0.05389207884883955,
@@ -63,14 +70,20 @@ errors = compareObjects(Expected010, fm010, 1)
 console.log(`Found ${errors} errors while validating fm010------------------------`)
 
 const Expected124 = {
-        liveMextFactor: 2.1558023634049093,
+    heatSink: 319.21640437931171,
+    liveMextFactor: 2.1558023634049093,
     packingRatio: 0.0087454632909178334,
     packingRatioOpt: 0.0078357185983373434,
     packingRatioRatio: 1.11610226696675,
     propagatingFluxRatio: 0.035258653482453904,
+    qig: 319.21640437931171 / 0.27985482530937067,
+    reactionIntensity: 12976.692888496578,
     reactionVelocityExp:  0.38177694461561407,
     reactionVelocityMax: 14.944549319976806,
     reactionVelocityOpt: 14.908876941781589,
+    ros0: 1.4333245773924823,
+    savr: 1631.1287341340956,
+    surfaceArea: 29.062930440771346,
     dead: {
         fineMois: 0.050405399380187531,
         fineWaterLoad: 0.0098866289779641001,

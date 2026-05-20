@@ -1,57 +1,811 @@
+// ----------------------------------------------------------------------------
+// Standard Fire Behavior Fuel Models
+// as defined by Albini, Anderson, Scott & Burgan,
+// and used in BehavePlus, LANDFIRE, FARSITE, FlamMap.
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// Part 1: FuelModelParticle Class Definition
+// ----------------------------------------------------------------------------
+// Every fuel model has one or more types of FuelModelParticle with the following properties:
+
+const FuelModelParticle = {
+    type: "",       // "dead 1-h", "dead-10h", "dead-100h", "herb", "stem", "duff", "litter"
+    dead: 1,        // fraction of the fuel particle load that is dead [0-1]
+    load: 0,        // ovendry fuel load (lb/ft2)  [where lb/ft2 = 0.004591368227731864 * ton/ac]
+    savr: 1,        // surface-area-to-volume ratio (ft2/ft3)
+    heat: 8000,     // low heat content, heat of combustion (BTU/lb)
+    dens: 32,       // ovendry density (lb/ft3)
+    stot: 0.0555,   // fuel particle total minerl content (lb minerals / lb ovendry fuel)
+    seff: 0.01,     // fuel particle effective mineral content (lb silica-free minerals / lb ovendry wood)
+    fmcc: "dead1"}  // fuel moisture content class key
+
+// The heat-of-combustion, density, and two mineral content properties do not vary
+// significantly across plant-based fuels and are generally treated as constants.
+// The base FuelParticle defined above is specialized into "dead" and "live" categories.
+// The "type" property may be used as a key to assign fuel moisture and percent dead values
+// to each particle by the fire model inputs.
+
+// ----------------------------------------------------------------------------
+// Part 1.1 Dead Category FuelParticles
+// ----------------------------------------------------------------------------
+
+// Dead category fuels are classified based upon their fuel moisture time-lag classes
+// (1-, 10, or 100-h) indicating their response time to changes in ambient temperature
+// humidity, solar radiation, and precipitation.  The time-lag, in turn, depends
+// primarily upon dead particle size as expressed by its surface-area-to-volume ratio.
+// All dead fuels have a "dead" fraction property of 1.
+
+// Dead 1-h fuel moisture time-lag class particles have a surface area-to-volume ratio
+// less than 192 1/ft (equivalent to a 0.25-in diameter cylinder), and the standard fuel model
+// surface-area-to-volume ratios range from 750 to 3500 1/ft (0.064 to 0.0137 inch diameter).
+const Dead1 = {...FuelModelParticle, type: "dead 1-h", dead: 1, fmcc: "dead1"}
+
+// Dead 10-h fuel moisture time-lag class particles have a surface area-to-volume ratio
+// between 48 and 192 1/ft (1 to 0.25 inch diameter).  The standard fire behavior fuel models
+// use a fixed surface-area-to-volume ratio of 109 1/ft (0.44-in diameter).
+const Dead10 = {...FuelModelParticle, type: "dead 10-h", dead: 1, savr: 109, fmcc: "dead10"}
+
+// Dead 100-h fuel moisture time-lag class particles have a surface areato-volume ratio
+// between 192 and 16 1/ft (1 to 3 inch diameter).  The standard fire behavior fuel models
+// use a fixed surface-area-to-volume ratio of 30 (1.6-in diameter).
+const Dead100 = {...FuelModelParticle, type: "dead 100-h", dead: 1, savr: 30, fmcc: "dead100"}
+
+// ----------------------------------------------------------------------------
+// Part 1.2 Live Category FuelParticles
+// ----------------------------------------------------------------------------
+
+// Live category fuels are able to regulate their moisture content more or less
+// independently of synoptic ambient weather conditions.
+
+// "Stem" fuels refer to the living, above-ground woody branches, twigs, and
+// stems of shrubs and trees. While their moisture contents may range seasonally
+// from 50% to 300%, they generally do not cure or die out during the season.
+// Standard fire behavior fuel model surface area-to-volume ratios for stems range from
+// 750 to 2000 1/ft (0.064 to 0.024 inch diameter).
+const Stem = {...FuelModelParticle, type: "stem", dead: 0, fmcc: "stem"}
+
+// "Herb" fuels include grasses, forbs, and ferns that may cure during the season.
+// Herbs are usually fully live when their moisture content exceeds 120%, and are
+// fully cured when it drops below 30%.
+// Standard fire behavior fuel model surface area-to-volume ratios for herbs range from
+// range from 1300 to 2000 1/ft (0.369 to 0.024 inches).
+// Herb dead fraction is usually a fire model input parameter.
+const Herb = {...FuelModelParticle, type: "herb", dead: 0, fmcc: "herb"}
+
+// ----------------------------------------------------------------------------
+// Part 2 FuelModel Call Definition
+// ----------------------------------------------------------------------------
+
+// Standard fuel models are differentiated by their fuel bed depth (ft), dead fuel
+// moisture content of extinction, and FuelParticle types and quantities.
+
+// eslint-disable-next-line no-unused-vars
+const FuelModel = {
+    number: 101,    // a standard, assigned fuel model number, used as a lookup key
+    code: "gr1",    // a standard, assigned fuel model code, also used as a lookup key
+    label: "Short, sparse, dry climate grass",  // a brief label
+    desc: "",       // a more detailed description
+    depth: 0.4,     // fuel bed depth (ft)
+    deadMext: 0.15, // dead fuel "moisture content of extinction" (lb water / lb ovendry fuel)
+    particles: [],  // array of FuelParticle objects
+}
+
+// ----------------------------------------------------------------------------
+// 3 The Standard FuelModels
+// ----------------------------------------------------------------------------
+
 export const StandardFuelModels = [
-        [0, "none", "No Fuel", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, "1", "Short grass", 1, 0.12, 0.034, 0, 0, 0, 0, 3500, 1500, 1500, 8000, 8000],
-        [2, "2", "Timber grass and understory", 1, 0.15, 0.092, 0.046, 0.023, 0.023, 0, 3000, 1500, 1500, 8000, 8000],
-        [3, "3", "Tall grass", 2.5, 0.25, 0.138, 0, 0, 0, 0, 1500, 1500, 1500, 8000, 8000],
-        [4, "4", "Chaparral", 6, 0.2, 0.23, 0.184, 0.092, 0, 0.23, 2000, 1500, 1500, 8000, 8000],
-        [5, "5", "Brush", 2, 0.2, 0.046, 0.023, 0, 0, 0.092, 2000, 1500, 1500, 8000, 8000],
-        [6, "6", "Dormant brush, hardwood slash", 2.5, 0.25, 0.069, 0.115, 0.092, 0, 0, 1750, 1500, 1500, 8000, 8000],
-        [7, "7", "Southern rough", 2.5, 0.4, 0.052, 0.086, 0.069, 0, 0.017, 1750, 1500, 1500, 8000, 8000],
-        [8, "8", "Short needle litter", 0.2, 0.3, 0.069, 0.046, 0.115, 0, 0, 2000, 1500, 1500, 8000, 8000],
-        [9, "9", "Long needle or hardwood litter", 0.2, 0.25, 0.134, 0.019, 0.007, 0, 0, 2500, 1500, 1500, 8000, 8000],
-        [10, "10", "Timber litter & understory", 1, 0.25, 0.138, 0.092, 0.23, 0, 0.092, 2000, 1500, 1500, 8000, 8000],
-        [11, "11", "Light logging slash", 1, 0.15, 0.069, 0.207, 0.253, 0, 0, 1500, 1500, 1500, 8000, 8000],
-        [12, "12", "Medium logging slash", 2.3, 0.2, 0.184, 0.644, 0.759, 0, 0, 1500, 1500, 1500, 8000, 8000],
-        [13, "13", "Heavy logging slash", 3, 0.25, 0.322, 1.058, 1.288, 0, 0, 1500, 1500, 1500, 8000, 8000],
-        [101, "gr1", "Short, sparse, dry climate grass", 0.4, 0.15, 0.004591368227731864, 0, 0, 0.013774104683195591, 0, 2200, 2000, 1500, 8000, 8000],
-        [102, "gr2", "Low load, dry climate grass", 1, 0.15, 0.004591368227731864, 0, 0, 0.04591368227731864, 0, 2000, 1800, 1500, 8000, 8000],
-        [103, "gr3", "Low load, very coarse, humid climate grass", 2, 0.3, 0.004591368227731864, 0.018365472910927456, 0, 0.06887052341597796, 0, 1500, 1300, 1500, 8000, 8000],
-        [104, "gr4", "Moderate load, dry climate grass", 2, 0.15, 0.01147842056932966, 0, 0, 0.0872359963269054, 0, 2000, 1800, 1500, 8000, 8000],
-        [105, "gr5", "Low load, humid climate grass", 1.5, 0.4, 0.018365472910927456, 0, 0, 0.11478420569329659, 0, 1800, 1600, 1500, 8000, 8000],
-        [106, "gr6", "Moderate load, humid climate grass", 1.5, 0.4, 0.004591368227731864, 0, 0, 0.15610651974288337, 0, 2200, 2000, 1500, 9000, 9000],
-        [107, "gr7", "High load, dry climate grass", 3, 0.15, 0.04591368227731864, 0, 0, 0.24793388429752067, 0, 2000, 1800, 1500, 8000, 8000],
-        [108, "gr8", "High load, very coarse, humid climate grass", 4, 0.3, 0.02295684113865932, 0.0459139, 0, 0.33516988062442604, 0, 1500, 1300, 1500, 8000, 8000],
-        [109, "gr9", "Very high load, humid climate grass", 5, 0.4, 0.04591368227731864, 0.04591368227731864, 0, 0.4132231404958677, 0, 1800, 1600, 1500, 8000, 8000],
-        [121, "gs1", "Low load, dry climate grass-shrub", 0.9, 0.15, 0.009182736455463728, 0, 0, 0.02295684113865932, 0.02984403, 2000, 1800, 1800, 8000, 8000],
-        [122, "gs2", "Moderate load, dry climate grass-shrub", 1.5, 0.15, 0.02295684113865932, 0.02295684113865932, 0, 0.027548209366391182, 0.04591368227731864, 2000, 1800, 1800, 8000, 8000],
-        [123, "gs3", "Moderate load, humid climate grass-shrub", 1.8, 0.4, 0.013774104683195591, 0.01147842056932966, 0, 0.06657483930211203, 0.057392102846648294, 1800, 1600, 1600, 8000, 8000],
-        [124, "gs4", "High load, humid climate grass-shrub", 2.1, 0.4, 0.0872359963269054, 0.013774104683195591, 0.004591368227731864, 0.15610651974288337, 0.3259871441689623, 1800, 1600, 1600, 8000, 8000],
-        [141, "sh1", "Low load, dry climate shrub", 1, 0.15, 0.01147842056932966, 0.01147842056932966, 0, 0.0068870523415977955, 0.05968778696051423, 2000, 1800, 1600, 8000, 8000],
-        [142, "sh2", "Moderate load, dry climate shrub", 1, 0.15, 0.06198347107438017, 0.11019283746556473, 0.03443526170798898, 0, 0.17676767676767677, 2000, 1800, 1600, 8000, 8000],
-        [143, "sh3", "Moderate load, humid climate shrub", 2.4, 0.4, 0.02066115702479339, 0.13774104683195593, 0, 0, 0.28466483011937554, 1600, 1800, 1400, 8000, 8000],
-        [144, "sh4", "Low load, humid climate timber-shrub", 3, 0.3, 0.03902662993572084, 0.05280073461891643, 0.009182736455463728, 0, 0.11707988980716252, 2000, 1800, 1600, 8000, 8000],
-        [145, "sh5", "High load, dry climate shrub", 6, 0.15, 0.1652892561983471, 0.09641873278236915, 0, 0, 0.13314967860422405, 750, 1800, 1600, 8000, 8000],
-        [146, "sh6", "Low load, humid climate shrub", 2, 0.3, 0.13314967860422405, 0.06657483930211203, 0, 0, 0.06427915518824609, 750, 1800, 1600, 8000, 8000],
-        [147, "sh7", "Very high load, dry climate shrub", 6, 0.15, 0.16069788797061524, 0.24334251606978877, 0.10101010101010101, 0, 0.15610651974288337, 750, 1800, 1600, 8000, 8000],
-        [148, "sh8", "High load, humid climate shrub", 3, 0.4, 0.0941230486685032, 0.15610651974288337, 0.03902662993572084, 0, 0.19972451790633605, 750, 1800, 1600, 8000, 8000],
-        [149, "sh9", "Very high load, humid climate shrub", 4.4, 0.4, 0.20661157024793386, 0.11248852157943066, 0, 0.07116620752984389, 0.3213957759412305, 750, 1800, 1500, 8000, 8000],
-        [161, "tu1", "Light load, dry climate timber-grass-shrub", 0.6, 0.2, 0.009182736455463728, 0.04132231404958678, 0.06887052341597796, 0.009182736455463728, 0.04132231404958678, 2000, 1800, 1600, 8000, 8000],
-        [162, "tu2", "Moderate load, humid climate timber-shrub", 1, 0.3, 0.0436179981634527, 0.08264462809917356, 0.057392102846648294, 0, 0.009182736455463728, 2000, 1800, 1600, 8000, 8000],
-        [163, "tu3", "Moderate load, humid climate timber-grass-shrub", 1.3, 0.3, 0.050505050505050504, 0.0068870523415977955, 0.01147842056932966, 0.029843893480257115, 0.050505050505050504, 1800, 1600, 1400, 8000, 8000],
-        [164, "tu4", "Dwarf conifer understory", 0.5, 0.12, 0.20661157024793386, 0, 0, 0, 0.09182736455463728, 2300, 1800, 2000, 8000, 8000],
-        [165, "tu5", "Very high load, dry climate timber-shrub", 1, 0.25, 0.18365472910927455, 0.18365472910927455, 0.13774104683195593, 0, 0.13774104683195593, 1500, 1800, 750, 8000, 8000],
-        [181, "tl1", "Low load, compact conifer litter", 0.2, 0.3, 0.04591368227731864, 0.10101010101010101, 0.1652892561983471, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [182, "tl2", "Low load broadleaf litter", 0.2, 0.25, 0.06427915518824609, 0.10560146923783285, 0.10101010101010101, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [183, "tl3", "Moderate load conifer litter", 0.3, 0.2, 0.02295684113865932, 0.10101010101010101, 0.12855831037649218, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [184, "tl4", "Small downed logs", 0.4, 0.25, 0.02295684113865932, 0.06887052341597796, 0.1928374655647383, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [185, "tl5", "High load conifer litter", 0.6, 0.25, 0.05280073461891643, 0.11478420569329659, 0.20202020202020202, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [186, "tl6", "High load broadleaf litter", 0.3, 0.25, 0.11019283746556473, 0.055096418732782364, 0.055096418732782364, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [187, "tl7", "Large downed logs", 0.4, 0.25, 0.013774104683195591, 0.06427915518824609, 0.371900826446281, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [188, "tl8", "Long-needle litter", 0.3, 0.35, 0.2662993572084481, 0.06427915518824609, 0.050505050505050504, 0, 0, 1800, 1800, 1600, 8000, 8000],
-        [189, "tl9", "Very high load broadleaf litter", 0.6, 0.35, 0.305325987144169, 0.1515151515151515, 0.19054178145087236, 0, 0, 1800, 1800, 1600, 8000, 8000],
-        [201, "sb1", "Low load activity fuel", 1, 0.25, 0.06887052341597796, 0.13774104683195593, 0.505050505050505, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [202, "sb2", "Moderate load activity or low load blowdown", 1, 0.25, 0.20661157024793386, 0.1951331496786042, 0.18365472910927455, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [203, "sb3", "High load activity fuel or moderate load blowdown", 1.2, 0.25, 0.2525252525252525, 0.12626262626262624, 0.13774104683195593, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [204, "sb4", "High load blowdown", 2.7, 0.25, 0.24104683195592286, 0.16069788797061524, 0.24104683195592286, 0, 0, 2000, 1800, 1600, 8000, 8000],
-        [301, "crown", "Crown canopy fuel", 1, 0.25, 0.138, 0.092, 0.23, 0, 0.092, 2000, 1500, 1500, 8000, 8000],
-    ]
+    { number: 0,
+        code: "none",
+        label: "No Fuel",
+        desc: "undefined",
+        depth: 0,
+        deadMext: 0,
+        particles: [
+        ],
+    },
+    { number: 1,
+        code: "1",
+        label: "Short grass",
+        desc: "Surface fires that burn fine herbaceous fuels, cured and curing fuels, little shrub or timber present, primarily grasslands and savanna",
+        depth: 1,
+        deadMext: 0.12,
+        particles: [
+            {...Dead1, load: 0.034, savr: 3500, heat: 8000},
+        ],
+    },
+    { number: 2,
+        code: "2",
+        label: "Timber grass and understory",
+        desc: "Burns fine, herbaceous fuels, stand is curing or dead, may produce fire brands on oak or pine stands",
+        depth: 1,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.092, savr: 3000, heat: 8000},
+            {...Dead10, load: 0.046, heat: 8000},
+            {...Dead100, load: 0.023, heat: 8000},
+            {...Herb, load: 0.023, savr: 1500, heat: 8000},
+        ],
+    },
+    { number: 3,
+        code: "3",
+        label: "Tall grass",
+        desc: "Most intense fire of grass group, spreads quickly with wind, one third of stand dead or cured, stands average 3 ft tall",
+        depth: 2.5,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.138, savr: 1500, heat: 8000},
+        ],
+    },
+    { number: 4,
+        code: "4",
+        label: "Chaparral",
+        desc: "Fast spreading fire, continuous overstory, flammable foliage and dead woody material, deep litter layer can inhibit suppression",
+        depth: 6,
+        deadMext: 0.2,
+        particles: [
+            {...Dead1, load: 0.23, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.184, heat: 8000},
+            {...Dead100, load: 0.092, heat: 8000},
+            {...Stem, load: 0.23, savr: 1500, heat: 8000}
+        ],
+    },
+    { number: 5,
+        code: "5",
+        label: "Brush",
+        desc: "Low intensity fires, young, green shrubs with little dead material, fuels consist of litter from understory",
+        depth: 2,
+        deadMext: 0.2,
+        particles: [
+            {...Dead1, load: 0.046, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.023, heat: 8000},
+            {...Stem, load: 0.092, savr: 1500, heat: 8000}
+        ],
+    },
+    { number: 6,
+        code: "6",
+        label: "Dormant brush, hardwood slash",
+        desc: "Broad range of shrubs, fire requires moderate winds to maintain flame at shrub height, or will drop to the ground with low winds",
+        depth: 2.5,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.069, savr: 1750, heat: 8000},
+            {...Dead10, load: 0.115, heat: 8000},
+            {...Dead100, load: 0.092, heat: 8000},
+        ],
+    },
+    { number: 7,
+        code: "7",
+        label: "Southern rough",
+        desc: "Foliage highly flammable, allowing fire to reach shrub strata levels, shrubs generally 2 to 6 feet high",
+        depth: 2.5,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.052, savr: 1750, heat: 8000},
+            {...Dead10, load: 0.086, heat: 8000},
+            {...Dead100, load: 0.069, heat: 8000},
+            {...Stem, load: 0.017, savr: 1500, heat: 8000}
+        ],
+    },
+    { number: 8,
+        code: "8",
+        label: "Short needle litter",
+        desc: "Slow, ground burning fires, closed canopy stands with short needle conifers or hardwoods, litter consist mainly of needles and leaves, with little undergrowth, occasional flares with concentrated fuels",
+        depth: 0.2,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.069, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.046, heat: 8000},
+            {...Dead100, load: 0.115, heat: 8000},
+        ],
+    },
+    { number: 9,
+        code: "9",
+        label: "Long needle or hardwood litter",
+        desc: "Longer flames, quicker surface fires, closed canopy stands of long-needles or hardwoods, rolling leaves in fall can cause spotting, dead-down material can cause occasional crowning",
+        depth: 0.2,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.134, savr: 2500, heat: 8000},
+            {...Dead10, load: 0.019, heat: 8000},
+            {...Dead100, load: 0.007, heat: 8000},
+        ],
+    },
+    { number: 10,
+        code: "10",
+        label: "Timber litter & understory",
+        desc: "Surface and ground fire more intense, dead-down fuels more abundant, frequent crowning and spotting causing fire control to be more difficult",
+        depth: 1,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.138, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.092, heat: 8000},
+            {...Dead100, load: 0.23, heat: 8000},
+            {...Stem, load: 0.092, savr: 1500, heat: 8000}
+        ],
+    },
+    { number: 11,
+        code: "11",
+        label: "Light logging slash",
+        desc: "Fairly active fire, fuels consist of slash and herbaceous materials, slash originates from light partial cuts or thinning projects, fire is limited by spacing of fuel load and shade from overstory",
+        depth: 1,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.069, savr: 1500, heat: 8000},
+            {...Dead10, load: 0.207, heat: 8000},
+            {...Dead100, load: 0.253, heat: 8000},
+        ],
+    },
+    { number: 12,
+        code: "12",
+        label: "Medium logging slash",
+        desc: "Rapid spreading and high intensity fires, dominated by slash resulting from heavy thinning projects and clearcuts, slash is mostly 3 inches or less",
+        depth: 2.3,
+        deadMext: 0.2,
+        particles: [
+            {...Dead1, load: 0.184, savr: 1500, heat: 8000},
+            {...Dead10, load: 0.644, heat: 8000},
+            {...Dead100, load: 0.759, heat: 8000},
+        ],
+    },
+    { number: 13,
+        code: "13",
+        label: "Heavy logging slash",
+        desc: "Fire spreads quickly through smaller material and intensity builds slowly as large material ignites, continuous layer of slash larger than 3 inches in diameter predominates, resulting from clearcuts and heavy partial cuts, active flames sustained for long periods of time, fire is susceptible to spotting and weather conditions",
+        depth: 3,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.322, savr: 1500, heat: 8000},
+            {...Dead10, load: 1.058, heat: 8000},
+            {...Dead100, load: 1.288, heat: 8000},
+        ],
+    },
+    { number: 91,
+        code: "nb1",
+        label: "Urban / Developed",
+        desc: "Urban/Developed",
+        depth: 0,
+        deadMext: 0,
+        particles: [
+        ],
+    },
+    { number: 92,
+        code: "nb2",
+        label: "Snow / Ice",
+        desc: "Snow/Ice",
+        depth: 0,
+        deadMext: 0,
+        particles: [
+        ],
+    },
+    { number: 93,
+        code: "nb3",
+        label: "Agriculture",
+        desc: "Agricultural",
+        depth: 0,
+        deadMext: 0,
+        particles: [
+        ],
+    },
+    { number: 98,
+        code: "nb8",
+        label: "Open Water",
+        desc: "Open Water",
+        depth: 0,
+        deadMext: 0,
+        particles: [
+        ],
+    },
+    { number: 99,
+        code: "nb9",
+        label: "Barren",
+        desc: "Barren",
+        depth: 0,
+        deadMext: 0,
+        particles: [
+        ],
+    },
+    { number: 101,
+        code: "gr1",
+        label: "Short, sparse, dry climate grass",
+        desc: "Short, sparse dry climate grass is short, naturally or heavy grazing, predicted rate of fire spread and flame length low ",
+        depth: 0.4,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.004591368227731864, savr: 2200, heat: 8000},
+            {...Herb, load: 0.013774104683195591, savr: 2000, heat: 8000},
+        ],
+    },
+    { number: 102,
+        code: "gr2",
+        label: "Low load, dry climate grass",
+        desc: "Low load, dry climate grass primarily grass with some small amounts of fine, dead fuel, any shrubs do not affect fire behavior",
+        depth: 1,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.004591368227731864, savr: 2000, heat: 8000},
+            {...Herb, load: 0.04591368227731864, savr: 1800, heat: 8000},
+        ],
+    },
+    { number: 103,
+        code: "gr3",
+        label: "Low load, very coarse, humid climate grass",
+        desc: "Low load, very coarse, humid climate grass continuous, coarse humid climate grass, any shrubs do not affect fire behavior",
+        depth: 2,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.004591368227731864, savr: 1500, heat: 8000},
+            {...Dead10, load: 0.018365472910927456, heat: 8000},
+            {...Herb, load: 0.06887052341597796, savr: 1300, heat: 8000},
+        ],
+    },
+    { number: 104,
+        code: "gr4",
+        label: "Moderate load, dry climate grass",
+        desc: "Moderate load, dry climate grass, continuous, dry climate grass, fuelbed depth about 2 feet",
+        depth: 2,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.01147842056932966, savr: 2000, heat: 8000},
+            {...Herb, load: 0.0872359963269054, savr: 1800, heat: 8000},
+        ],
+    },
+    { number: 105,
+        code: "gr5",
+        label: "Low load, humid climate grass",
+        desc: "Low load, humid climate grass, fuelbed depth is about 1-2 feet",
+        depth: 1.5,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.018365472910927456, savr: 1800, heat: 8000},
+            {...Herb, load: 0.11478420569329659, savr: 1600, heat: 8000},
+        ],
+    },
+    { number: 106,
+        code: "gr6",
+        label: "Moderate load, humid climate grass",
+        desc: "Moderate load, continuous humid climate grass, not so coarse as GR5",
+        depth: 1.5,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.004591368227731864, savr: 2200, heat: 9000},
+            {...Herb, load: 0.15610651974288337, savr: 2000, heat: 9000},
+        ],
+    },
+    { number: 107,
+        code: "gr7",
+        label: "High load, dry climate grass",
+        desc: "High load, continuous dry climate grass, grass is about 3 feet high",
+        depth: 3,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.04591368227731864, savr: 2000, heat: 8000},
+            {...Herb, load: 0.24793388429752067, savr: 1800, heat: 8000},
+        ],
+    },
+    { number: 108,
+        code: "gr8",
+        label: "High load, very coarse, humid climate grass",
+        desc: "High load, very coarse, continuous, humid climate grass, spread rate and flame length may be extreme if grass is fully cured",
+        depth: 4,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.02295684113865932, savr: 1500, heat: 8000},
+            {...Dead10, load: 0.0459139, heat: 8000},
+            {...Herb, load: 0.33516988062442604, savr: 1300, heat: 8000},
+        ],
+    },
+    { number: 109,
+        code: "gr9",
+        label: "Very high load, humid climate grass",
+        desc: "Very high load, dense, tall, humid climate grass, about 6 feet tall, spread rate and flame length can be extreme if grass is fully cured",
+        depth: 5,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.04591368227731864, savr: 1800, heat: 8000},
+            {...Dead10, load: 0.04591368227731864, heat: 8000},
+            {...Herb, load: 0.4132231404958677, savr: 1600, heat: 8000},
+        ],
+    },
+    { number: 121,
+        code: "gs1",
+        label: "Low load, dry climate grass-shrub",
+        desc: "Low load, dry climate grass-shrub shrub about 1 foot high, grass load low, spread rate moderate and flame length low",
+        depth: 0.9,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.009182736455463728, savr: 2000, heat: 8000},
+            {...Herb, load: 0.02295684113865932, savr: 1800, heat: 8000},
+            {...Stem, load: 0.02984403, savr: 1800, heat: 8000}
+        ],
+    },
+    { number: 122,
+        code: "gs2",
+        label: "Moderate load, dry climate grass-shrub",
+        desc: "Moderate load, dry climate grass-shrub, shrubs are 1-3 feet high, grass load moderate, spread rate high, and flame length is moderate",
+        depth: 1.5,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.02295684113865932, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.02295684113865932, heat: 8000},
+            {...Herb, load: 0.027548209366391182, savr: 1800, heat: 8000},
+            {...Stem, load: 0.04591368227731864, savr: 1800, heat: 8000}
+        ],
+    },
+    { number: 123,
+        code: "gs3",
+        label: "Moderate load, humid climate grass-shrub",
+        desc: "Moderate load, humid climate grass-shrub, moderate grass/shrub load, grass/shrub depth is less than 2 feet, spread rate is high and flame length is moderate",
+        depth: 1.8,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.013774104683195591, savr: 1800, heat: 8000},
+            {...Dead10, load: 0.01147842056932966, heat: 8000},
+            {...Herb, load: 0.06657483930211203, savr: 1600, heat: 8000},
+            {...Stem, load: 0.057392102846648294, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 124,
+        code: "gs4",
+        label: "High load, humid climate grass-shrub",
+        desc: "High load, humid climate grass-shrub, heavy grass/shrub load, depth is greater than 2 feet, spread rate is high and flame length very high",
+        depth: 2.1,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.0872359963269054, savr: 1800, heat: 8000},
+            {...Dead10, load: 0.013774104683195591, heat: 8000},
+            {...Dead100, load: 0.004591368227731864, heat: 8000},
+            {...Herb, load: 0.15610651974288337, savr: 1600, heat: 8000},
+            {...Stem, load: 0.3259871441689623, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 141,
+        code: "sh1",
+        label: "Low load, dry climate shrub",
+        desc: "Low load dry climate shrub, woody shrubs and shrub litter, fuelbed depth about 1 foot, may be some grass, spread rate and flame low",
+        depth: 1,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.01147842056932966, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.01147842056932966, heat: 8000},
+            {...Herb, load: 0.0068870523415977955, savr: 1800, heat: 8000},
+            {...Stem, load: 0.05968778696051423, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 142,
+        code: "sh2",
+        label: "Moderate load, dry climate shrub",
+        desc: "Moderate load dry climate shrub, woody shrubs and shrub litter, fuelbed depth about 1 foot, no grass, spread rate and flame low",
+        depth: 1,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.06198347107438017, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.11019283746556473, heat: 8000},
+            {...Dead100, load: 0.03443526170798898, heat: 8000},
+            {...Stem, load: 0.17676767676767677, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 143,
+        code: "sh3",
+        label: "Moderate load, humid climate shrub",
+        desc: "Moderate load, humid climate shrub, woody shrubs and shrub litter, possible pine overstory, fuelbed depth 2-3 feet, spread rate and flame low",
+        depth: 2.4,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.02066115702479339, savr: 1600, heat: 8000},
+            {...Dead10, load: 0.13774104683195593, heat: 8000},
+            {...Stem, load: 0.28466483011937554, savr: 1400, heat: 8000}
+        ],
+    },
+    { number: 144,
+        code: "sh4",
+        label: "Low load, humid climate timber-shrub",
+        desc: "Low load, humid climate timber shrub, woody shrubs and shrub litter, low to moderate load, possible pine overstory, fuelbed depth about 3 feet, spread rate high and flame moderate",
+        depth: 3,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.03902662993572084, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.05280073461891643, heat: 8000},
+            {...Dead100, load: 0.009182736455463728, heat: 8000},
+            {...Stem, load: 0.11707988980716252, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 145,
+        code: "sh5",
+        label: "High load, dry climate shrub",
+        desc: "High load, dry climate shrub litter and woody shrubs, heavy load with depth 4-6 feet, spread rate and flame very high, moisture extinction high",
+        depth: 6,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.1652892561983471, savr: 750, heat: 8000},
+            {...Dead10, load: 0.09641873278236915, heat: 8000},
+            {...Stem, load: 0.13314967860422405, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 146,
+        code: "sh6",
+        label: "Low load, humid climate shrub",
+        desc: "Low load, humid climate shrub, woody shrubs and shrub litter, dense shrubs, little or no herbaceous fuel, depth about 2 feet, spread rate and flame high",
+        depth: 2,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.13314967860422405, savr: 750, heat: 8000},
+            {...Dead10, load: 0.06657483930211203, heat: 8000},
+            {...Stem, load: 0.06427915518824609, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 147,
+        code: "sh7",
+        label: "Very high load, dry climate shrub",
+        desc: "Very high load, dry climate shrub, woody shrubs and shrub litter, very heavy shrub load, depth 4-6 feet, spread rate somewhat lower than SH6 and flame very high",
+        depth: 6,
+        deadMext: 0.15,
+        particles: [
+            {...Dead1, load: 0.16069788797061524, savr: 750, heat: 8000},
+            {...Dead10, load: 0.24334251606978877, heat: 8000},
+            {...Dead100, load: 0.10101010101010101, heat: 8000},
+            {...Stem, load: 0.15610651974288337, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 148,
+        code: "sh8",
+        label: "High load, humid climate shrub",
+        desc: "High load, humid climate shrub, woody shrubs and shrub litter, dense shrubs, little or no herbaceous fuel, depth about 3 feet, spread rate and flame high",
+        depth: 3,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.0941230486685032, savr: 750, heat: 8000},
+            {...Dead10, load: 0.15610651974288337, heat: 8000},
+            {...Dead100, load: 0.03902662993572084, heat: 8000},
+            {...Stem, load: 0.19972451790633605, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 149,
+        code: "sh9",
+        label: "Very high load, humid climate shrub",
+        desc: "Very high load, humid climate shrub, woody shrubs and shrub litter, dense finely branched shrubs with fine dead fuel, 4-6 feet tall, herbaceous may be present, spread rate and flame high",
+        depth: 4.4,
+        deadMext: 0.4,
+        particles: [
+            {...Dead1, load: 0.20661157024793386, savr: 750, heat: 8000},
+            {...Dead10, load: 0.11248852157943066, heat: 8000},
+            {...Herb, load: 0.07116620752984389, savr: 1800, heat: 8000},
+            {...Stem, load: 0.3213957759412305, savr: 1500, heat: 8000}
+        ],
+    },
+    { number: 161,
+        code: "tu1",
+        label: "Light load, dry climate timber-grass-shrub",
+        desc: "Low load dry climate timber grass shrub, low load of grass and/or shrub with litter, spread rate and flame low",
+        depth: 0.6,
+        deadMext: 0.2,
+        particles: [
+            {...Dead1, load: 0.009182736455463728, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.04132231404958678, heat: 8000},
+            {...Dead100, load: 0.06887052341597796, heat: 8000},
+            {...Herb, load: 0.009182736455463728, savr: 1800, heat: 8000},
+            {...Stem, load: 0.04132231404958678, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 162,
+        code: "tu2",
+        label: "Moderate load, humid climate timber-shrub",
+        desc: "Moderate load, humid climate timber-shrub, moderate litter load with some shrub, spread rate moderate and flame low",
+        depth: 1,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.0436179981634527, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.08264462809917356, heat: 8000},
+            {...Dead100, load: 0.057392102846648294, heat: 8000},
+            {...Stem, load: 0.009182736455463728, savr: 1600, heat: 8000}
+        ],
+    },
+    { number: 163,
+        code: "tu3",
+        label: "Moderate load, humid climate timber-grass-shrub",
+        desc: "Moderate load, humid climate timber grass shrub, moderate forest litter with some grass and shrub, spread rate high and flame moderate",
+        depth: 1.3,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.050505050505050504, savr: 1800, heat: 8000},
+            {...Dead10, load: 0.0068870523415977955, heat: 8000},
+            {...Dead100, load: 0.01147842056932966, heat: 8000},
+            {...Herb, load: 0.029843893480257115, savr: 1600, heat: 8000},
+            {...Stem, load: 0.050505050505050504, savr: 1400, heat: 8000}
+        ],
+    },
+    { number: 164,
+        code: "tu4",
+        label: "Dwarf conifer understory",
+        desc: "Dwarf conifer with understory, short conifer trees with grass or moss understory, spread rate and flame moderate",
+        depth: 0.5,
+        deadMext: 0.12,
+        particles: [
+            {...Dead1, load: 0.20661157024793386, savr: 2300, heat: 8000},
+            {...Stem, load: 0.09182736455463728, savr: 2000, heat: 8000}
+        ],
+    },
+    { number: 165,
+        code: "tu5",
+        label: "Very high load, dry climate timber-shrub",
+        desc: "Very high load, dry climate timber shrub, heavy forest litter with shrub or small tree understory, spread rate and flame moderate",
+        depth: 1,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.18365472910927455, savr: 1500, heat: 8000},
+            {...Dead10, load: 0.18365472910927455, heat: 8000},
+            {...Dead100, load: 0.13774104683195593, heat: 8000},
+            {...Stem, load: 0.13774104683195593, savr: 750, heat: 8000}
+        ],
+    },
+    { number: 181,
+        code: "tl1",
+        label: "Low load, compact conifer litter",
+        desc: "Low load compact conifer litter, compact forest litter, light to moderate load, 1-2 inches deep, may represent a recent burn, spread rate and flame low",
+        depth: 0.2,
+        deadMext: 0.3,
+        particles: [
+            {...Dead1, load: 0.04591368227731864, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.10101010101010101, heat: 8000},
+            {...Dead100, load: 0.1652892561983471, heat: 8000},
+        ],
+    },
+    { number: 182,
+        code: "tl2",
+        label: "Low load broadleaf litter",
+        desc: "Low load broadleaf litter, broadleaf, hardwood litter, spread rate and flame low",
+        depth: 0.2,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.06427915518824609, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.10560146923783285, heat: 8000},
+            {...Dead100, load: 0.10101010101010101, heat: 8000},
+        ],
+    },
+    { number: 183,
+        code: "tl3",
+        label: "Moderate load conifer litter",
+        desc: "Moderate load conifer litter, moderate load conifer litter, light load of coarse fuels, spread rate is very low and flame low",
+        depth: 0.3,
+        deadMext: 0.2,
+        particles: [
+            {...Dead1, load: 0.02295684113865932, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.10101010101010101, heat: 8000},
+            {...Dead100, load: 0.12855831037649218, heat: 8000},
+        ],
+    },
+    { number: 184,
+        code: "tl4",
+        label: "Small downed logs",
+        desc: "Small downed logs moderate load of fine litter and coarse fuels, small diameter downed logs, spread rate and flame low",
+        depth: 0.4,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.02295684113865932, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.06887052341597796, heat: 8000},
+            {...Dead100, load: 0.1928374655647383, heat: 8000},
+        ],
+    },
+    { number: 185,
+        code: "tl5",
+        label: "High load conifer litter",
+        desc: "High load conifer litter, light slash or dead fuel, spread rate and flame low",
+        depth: 0.6,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.05280073461891643, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.11478420569329659, heat: 8000},
+            {...Dead100, load: 0.20202020202020202, heat: 8000},
+        ],
+    },
+    { number: 186,
+        code: "tl6",
+        label: "High load broadleaf litter",
+        desc: "Moderate load broadleaf litter, spread rate and flame moderate",
+        depth: 0.3,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.11019283746556473, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.055096418732782364, heat: 8000},
+            {...Dead100, load: 0.055096418732782364, heat: 8000},
+        ],
+    },
+    { number: 187,
+        code: "tl7",
+        label: "Large downed logs",
+        desc: "Large downed logs, heavy load forest litter, larger diameter downed logs, spread rate and flame low",
+        depth: 0.4,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.013774104683195591, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.06427915518824609, heat: 8000},
+            {...Dead100, load: 0.371900826446281, heat: 8000},
+        ],
+    },
+    { number: 188,
+        code: "tl8",
+        label: "Long-needle litter",
+        desc: "Long needle litter, moderate load long needle pine litter, may have small amounts of herbaceous fuel, spread rate moderate and flame low",
+        depth: 0.3,
+        deadMext: 0.35,
+        particles: [
+            {...Dead1, load: 0.2662993572084481, savr: 1800, heat: 8000},
+            {...Dead10, load: 0.06427915518824609, heat: 8000},
+            {...Dead100, load: 0.050505050505050504, heat: 8000},
+        ],
+    },
+    { number: 189,
+        code: "tl9",
+        label: "Very high load broadleaf litter",
+        desc: "Very high load broadleaf litter, may be heavy needle drape, spread rate and flame moderate",
+        depth: 0.6,
+        deadMext: 0.35,
+        particles: [
+            {...Dead1, load: 0.305325987144169, savr: 1800, heat: 8000},
+            {...Dead10, load: 0.1515151515151515, heat: 8000},
+            {...Dead100, load: 0.19054178145087236, heat: 8000},
+        ],
+    },
+    { number: 201,
+        code: "sb1",
+        label: "Low load activity fuel",
+        desc: "Low load activity fuel, light dead and down activity fuel, fine fuel is 10-20 t/ac, 1-3 inches in diameter, depth < 1 foot, spread rate moderate and flame low",
+        depth: 1,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.06887052341597796, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.13774104683195593, heat: 8000},
+            {...Dead100, load: 0.505050505050505, heat: 8000},
+        ],
+    },
+    { number: 202,
+        code: "sb2",
+        label: "Moderate load activity or low load blowdown",
+        desc: "Moderate load activity fuel or low load blowdown, 7-12 t/ac, 0-3 inch diameter class, depth about 1 foot, blowdown scattered with many still standing, spread rate moderate and flame low",
+        depth: 1,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.20661157024793386, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.1951331496786042, heat: 8000},
+            {...Dead100, load: 0.18365472910927455, heat: 8000},
+        ],
+    },
+    { number: 203,
+        code: "sb3",
+        label: "High load activity fuel or moderate load blowdown",
+        desc: "High load activity fuel or moderate load blowdown, heavy dead down activity fuel or moderate blowdown, 7-12 t/ac, 0-.25 inch diameter class, depth > 1 foot, blowdown moderate trees compacted to near the ground, spread rate and flame high",
+        depth: 1.2,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.2525252525252525, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.12626262626262624, heat: 8000},
+            {...Dead100, load: 0.13774104683195593, heat: 8000},
+        ],
+    },
+    { number: 204,
+        code: "sb4",
+        label: "High load blowdown",
+        desc: "High load blowdown, heavy blowdown fuel, blowdown is total fuelbed not compacted, foliage and fine fuel still attached to blowdown, spread rate and flame very high ",
+        depth: 2.7,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.24104683195592286, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.16069788797061524, heat: 8000},
+            {...Dead100, load: 0.24104683195592286, heat: 8000},
+        ],
+    },
+    { number: 301,
+        code: "crown",
+        label: "Crown canopy fuel",
+        desc: "Crown canopy fuel model used by Rothermel`s crown fire spread rate model.",
+        depth: 1,
+        deadMext: 0.25,
+        particles: [
+            {...Dead1, load: 0.138, savr: 2000, heat: 8000},
+            {...Dead10, load: 0.092, heat: 8000},
+            {...Dead100, load: 0.23, heat: 8000},
+            {...Stem, load: 0.092, savr: 1500, heat: 8000}
+        ],
+    },
+]

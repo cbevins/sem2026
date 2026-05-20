@@ -2,14 +2,15 @@ export class FuelBedParticle {
     constructor(fuelModelParticle, loadFraction=1) {
         const p = fuelModelParticle
 
-        // This class has 7 FuelModelParticle properties
+        // This class has 8 FuelModelParticle properties
+        this.deadfm = p.deadfm
+        this.density = p.dens
+        this.effMineral = p.seff
+        this.heat = p.heat
+        this.livefm = p.livefm
         this.ovendryLoad = p.load * loadFraction
         this.savr = p.savr
-        this.density = p.dens
-        this.heat = p.heat
         this.totalMineral = p.stot
-        this.effMineral = p.seff
-        this.fmcc = p.fmcc
 
         // This class has 10 derived properties that do not depend upon fuel moisture.
         // 3 properties (surfaceAreaWtg, sizeClasWtg, and fineFuelLoad) are set by the parent FuelBedLifeCategory
@@ -43,18 +44,16 @@ export class FuelBedParticle {
         return this
     }
 
-    // mois = {th1h, tl10h, tl100h, stem, herb}
-    updateMoistureContent(mois) {
-        // 3 derived properties that depend upon fuel moisture
-
+    // Updates the 3 FuelBedParticle properties that depend upon fuel moisture
+    updateMoistureContent(moistureContent) {
         // Particle fuel moisture content (lb water / lb ovendry load)
-        this.mois = mois[this.fmcc]
+        this.mois = moistureContent
 
         // Particle heat of pre-ignition (BTU/lb) from Rothermel Eq 12 (p 7, 26)
-        this.qig = this.effHeating * (250.0 + 1116.0 * mois)
+        this.qig = this.effHeating * (250.0 + 1116.0 * this.mois)
 
         // Particle effective water load (lb water / lb effective fuel load)
-        this.fineWaterLoad = this.fineFuelLoad * mois
+        this.fineWaterLoad = this.fineFuelLoad * this.mois
         return this
     }
 
@@ -88,10 +87,13 @@ class FuelBedLifeCategory {
         this.ovendryLoad = 0
         this.particles = []
         this.qig = 0
+        this.reactionIntensity = 0
+        this.reactionIntensityDry = 0
         this.savr = 0
         this.sizeClassArea = [0,0,0,0,0,0]
         this.sizeClassWtg = [0,0,0,0,0,0]
         this.surfaceArea = 0
+        this.surfaceAreaWtg = 0
         this.volume = 0
     }
 
@@ -99,13 +101,13 @@ class FuelBedLifeCategory {
         const p = new FuelBedParticle(fuelModelParticle, loadFraction)
         // Ensure that cured live fuels use the correct dead fuel moisture content class
         if (this.category === "dead") {
-            if (p.fmcc !== 'tl1h' && p.fmcc !== 'tl10h' && p.fmcc !== 'tl100h') {
-                if(p.sizzeClass <= 1) p.fmcc = 'tl1h'
-                else if (p.sizeClass <=3) p.fmcc = 'tl10h'
-                else p.fmcc = 'tl100h'
+            if (p.deadfm !== 'dead1h' && p.deadfm !== 'dead10h' && p.deadfm !== 'dead100h') {
+                if(p.sizeClass <= 1) p.deadfm = 'dead1h'
+                else if (p.sizeClass <=3) p.deadfm = 'dead10h'
+                else p.deadfm = 'dead100h'
             }
         }
-        this.particle.push(p)
+        this.particles.push(p)
         return this
     }
 
@@ -142,21 +144,25 @@ class FuelBedLifeCategory {
 
         // Assign each life category fuel particle its effective fuel load
         for(let particle of this.particles) {
-            particle.fineFuelLoad = (this.savr > 0) ? this.ovendryLoad * Math.exp(this.fineFuelLoadfactor / this.savr) : 0
+            particle.fineFuelLoad = (particle.savr > 0) ? particle.ovendryLoad * Math.exp(this.fineFuelLoadFactor / particle.savr) : 0
             this.fineFuelLoad += particle.fineFuelLoad
         }
 
         this.mineralDamping = (this.effMineral > 0) ? fraction(0.174 / this.effMineral**0.19) : 1
     }
 
-    // mois = {th1h, tl10h, tl100h, stem, herb}
-    updateMoistureContent(mois) {
+    // Updates the 3 FuelBedLifeCategory properties that depend upon fuel moisture
+    // moistureContents is an object with properties {dead1h, dead10h, dead100h, herb, stem}
+    updateMoistureContent(moistureContents) {
         // Fuel bed life category weighted values
         this.mois = 0
         this.fineWaterLoad = 0
         this.qig = 0
+        const moistureLifeCategory = (this.category === 'dead') ? "deadfm" : "livefm"
         for(let particle of this.particles) {
-            particle.updateMoistureContent(mois)
+            const moistureClass = particle[moistureLifeCategory]
+            const moistureContent = moistureContents[moistureClass]
+            particle.updateMoistureContent(moistureContent)
             this.mois += particle.mois * particle.surfaceAreaWtg    // wtd average
             this.qig += particle.qig * particle.surfaceAreaWtg      // wtd average
             // The fine fuel water load applies ONLY to the dead fuel category,
@@ -168,9 +174,6 @@ class FuelBedLifeCategory {
         // The fine fuel moisture content applies ONLY to the dead fuel category,
         // and is ONLY used in the computation of live fuel moisture content of extinction
         this.fineMois = this.fineWaterLoad / this.fineFuelLoad
-
-        const r = this.mois / this.mext
-        this.moistureDamping = fraction(1 - 2.59 * r + 5.11 * r * r - 3.52 * r * r * r)
     }
 }
 
@@ -178,24 +181,45 @@ export class FuelBed {
     /**
      * 
      * @param {StandardFuelModel} fuelModel Reference to a StandardFuelModel class instance.
-     * @param {number} deadHerb Dead fraction of the ovendry load of FuelParticles with type "herb"
+     * @param {object} cured May have properties {herb, stem} or others as assigned by each fuel model
      */
-    constructor(fuelModel, deadHerb=0) {
-        this.fuelModel = fuelModel
-        this.deadHerb = deadHerb
+    constructor(fuelModel, cured={}) {
+        this.bulkDensity = 0
+        this.cured = cured
         this.depth = fuelModel.depth
+        this.ovendryLoad = 0
+        this.packingRatio = 0
+        this.packingRatioOpt = 0
+        this.packingRatioRatio = 0
+        this.propagatingFluxRatio = 0
+        this.qig = 0
+        this.reactionIntensity = 0
+        this.reactionIntensityDry = 0
+        this.reactionVelocityExp = 1
+        this.reactionVelocityMax = 0
+        this.reactionVelocityOpt = 0
+        this.residenceTime = 0
+        this.savr = 1
+        this.savr15 = 1
+        this.surfaceArea = 0
+        this.volume = 0
 
         // Create the dead and live fuel beds, and add their constituent particles
         this.dead = new FuelBedLifeCategory('dead', fuelModel.deadMext)
         this.live = new FuelBedLifeCategory('live', 1)
-        for(let fmp of fuelModel.particles) {
-            if (fmp.dead === 1)
-                this.dead.addParticle(fmp, 1)
-            else if (fmp.dead === 0)
-                this.live.addparticle(fmp, 1)
+        for(let particle of fuelModel.particles) {
+            // Divide the particle into separate "dead" and "live" categories, if needed
+            let curedFraction = particle.cured      // particle default cured fraction
+            if (Object.hasOwn(cured, particle.type)) {
+                curedFraction = cured[particle.type]// overridden by cured parameter
+            }
+            if (curedFraction === 1)
+                this.dead.addParticle(particle, 1)  // add all of it to dead category
+            else if (curedFraction === 0)
+                this.live.addParticle(particle, 1)  // add all of it to live category
             else {
-                this.dead.addparticle(fmp, fmp.dead)
-                this.live.addParticle(fmp, (1-fmp.dead))
+                this.dead.addParticle(particle, curedFraction)
+                this.live.addParticle(particle, (1 - curedFraction))
             }
         }
         this.dead.updateParticles()
@@ -214,46 +238,45 @@ export class FuelBed {
             this[prop] = this.dead[prop] * this.dead.surfaceAreaWtg + this.live[prop] * this.live.surfaceAreaWtg
 
         // Fuel bed calculated properties
-        this.bulkDensity = (this.bedDepth > 0) ? this.ovendryLoad / this.bedDepth : 0
+        this.bulkDensity = (this.depth > 0) ? this.ovendryLoad / this.depth : 0
 
         // Packing ratio
-        this.packingRatio = (this.bedDepth > 0) ? this.volume / this.bedDepth : 0
+        this.packingRatio = (this.depth > 0) ? this.volume / this.depth : 0
 
         //  Rothermel (1972) eq 37 (p 19, 26) and eq 69 (p32).
-        this.optPackingRatio = (this.savr > 0) ? 3.348 / this.savr ** 0.8189 : 0
+        this.packingRatioOpt = (this.savr > 0) ? 3.348 / this.savr ** 0.8189 : 0
 
         // Ratio of packing ratio to the optimum packing ratio
-        this.packingRatioRatio = (this.optPackingRatio > 0) ? this.packingRatio / this.optPackingRatio : 0
+        this.packingRatioRatio = (this.packingRatioOpt > 0) ? this.packingRatio / this.packingRatioOpt : 0
 
         // The no-wind, no-slope propagating flux (ratio) is the numerator of the Rothermel (1972)
         // spread rate equation 1 and has units of heat per unit area per unit time.
         // See Rothermel (1972) eq 42 (p 20, 26) and eq 76 (p32).
-        this.propFlux = (this.savr > 0)
+        this.propagatingFluxRatio = (this.savr > 0)
             ? Math.exp((0.792 + 0.681 * Math.sqrt(this.savr)) * (this.packingRatio + 0.1)) / (192 + 0.2595 * this.savr) : 0
 
         // This is an arbitrary variable 'A' used to derive the fuel bed optimum reaction velocity (1/min).
         // See Rothermel (1972) eq 39 (p19, 26) and 67 (p 31).
-        this.reactionVelA = (this.savr > 0) ? 133 / this.savr**0.7913 : 0
+        this.reactionVelocityExp = (this.savr > 0) ? 133 / this.savr**0.7913 : 0
 
         this.savr15 = (this.savr > 0) ? this.savr**1.5 : 0
 
         // Fuel bed flame residence time (min)
         this.residenceTime = (this.savr > 0) ? 384 / this.savr : 0
-    }
 
         // Fuel bed maximum reaction velocity (1/min)
         // See Rothermel (1972) eq 36 (p 19, 26) and 68 (p 32).
-        this.reactionVelMax = (this.savr15 > 0) ? this.savr15 / (495 + 0.0594 * this.savr15) : 0
+        this.reactionVelocityMax = (this.savr15 > 0) ? this.savr15 / (495 + 0.0594 * this.savr15) : 0
 
         // Fuel bed optimum reaction velocity (min-1)
         // See Rothermel (1972) eq 38 (p 19, 26) and eq 67 (p 31).
-        this.reactionVelOpt = (this.packingRatioRatio>0 && this.packingRatioRatio < 1)
-            ? this.reactionVelMax * this.packingRatioRatio**this.reactionVelA
-                * Math.exp(this.reactionVelA * (1 - this.packingRatioRatio)) : 0
+        this.reactionVelocityOpt = (this.packingRatioRatio > 0)
+            ? this.reactionVelocityMax * this.packingRatioRatio**this.reactionVelocityExp
+                * Math.exp(this.reactionVelocityExp * (1 - this.packingRatioRatio)) : 0
 
         // Fuel bed life category Reaction intensity under ovendry fuel conditions (BTU/ft2/min)
         for(let life of ['dead', 'live'])
-            this[life].dryRxInt = this.reactionVelOpt * this[life].netLoad * this[life].heat * this[life].mineralDamping
+            this[life].reactionIntensityDry = this.reactionVelocityOpt * this[life].netLoad * this[life].heat * this[life].mineralDamping
 
         // Fire spread heat sink (BTU/ft3)
         this.heatSink = this.bulkDensity *  this.qig
@@ -268,21 +291,28 @@ export class FuelBed {
         this.liveMextFactor = 2.9 * (this.dead.fineFuelLoad / this.live.fineFuelLoad)
     }
 
+    // mois is an object with properties {dead1h, dead10h, dead100h, herb, stem}
     updateMoisture(mois) {
         this.dead.updateMoistureContent(mois)
         this.live.updateMoistureContent(mois)
-
-        // Fuel bed life category reaction intensity under current moisture conditions (BTU/ft2/min)
-        for(let life of ['dead', 'live'])
-            this[life].rxInt = this[life].dryRxInt * this[life].moistureDamping
-
-        // Fuel bed reaction intensity under current moisture conditions (BTU/ft2/min)
-        this.rxInt = this.dead.rxInt + this.live.rxInt
 
         // Live fuel moisture content of extinction
         const dry = 1 - this.dead.fineMois / this.dead.mext
         const liveMext = this.liveMextFactor * dry - 0.226
         this.live.mext = Math.max(liveMext, this.dead.mext)
+
+        // Now we can determine the fuel life category mineral damping
+        let r = this.dead.mois / this.dead.mext
+        this.dead.moistureDamping = fraction(1 - 2.59 * r + 5.11 * r * r - 3.52 * r * r * r)
+        r = this.live.mois / this.live.mext
+        this.live.moistureDamping = fraction(1 - 2.59 * r + 5.11 * r * r - 3.52 * r * r * r)
+
+        // Fuel bed life category reaction intensity under current moisture conditions (BTU/ft2/min)
+        for(let life of ['dead', 'live'])
+            this[life].reactionIntensity = this[life].reactionIntensityDry * this[life].moistureDamping
+
+        // Fuel bed reaction intensity under current moisture conditions (BTU/ft2/min)
+        this.reactionIntensity = this.dead.reactionIntensity + this.live.reactionIntensity
         return this
     }
 }

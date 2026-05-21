@@ -1,16 +1,17 @@
 export class FuelBedParticle {
-    constructor(fuelModelParticle, loadFraction=1) {
+    constructor(fuelModelParticle, moistureClass, loadFraction=1) {
         const p = fuelModelParticle
 
         // This class has 8 FuelModelParticle properties
-        this.deadfm = p.deadfm
-        this.density = p.dens
-        this.effMineral = p.seff
-        this.heat = p.heat
-        this.livefm = p.livefm
+        // DEPRECATED this.deadfm = p.deadfm
+        this.density = p.dens           // used only TEMPORARILY to determine *this* FuelBedParticle surfaceArea and volume
+        this.effMineral = p.seff        // used by FuelBedLifeCategory to determine its wtd effMineral
+        this.heat = p.heat              // used by FuelBedLifeCategory to determine its wtd heat
+        // DEPRECATED this.livefm = p.livefm
+        this.moistureClass = moistureClass
         this.ovendryLoad = p.load * loadFraction
-        this.savr = p.savr
-        this.totalMineral = p.stot
+        this.savr = p.savr              // used by FuelBedLifeCategory to determine its wtd savr
+        this.totalMineral = p.stot      // used only TEMPORARILY to determine *this* FuelBedParticle netLoad
 
         // This class has 10 derived properties that do not depend upon fuel moisture.
         // 3 properties (surfaceAreaWtg, sizeClasWtg, and fineFuelLoad) are set by the parent FuelBedLifeCategory
@@ -77,9 +78,9 @@ class FuelBedLifeCategory {
         this.category = category        // 'dead' or 'live'
         this.fineFuelLoad = 0
         this.fineFuelLoadFactor = (this.category === 'dead') ? -138 : -500
-        this.effMineral = 0
-        this.heat = 0
-        this.mineralDamping = 1
+        this.effMineral = 0     // used only temporarily to determine this.mineralDamping
+        this.heat = 0           // used only in FuelBed to derive life category reactionIntensityDry
+        this.mineralDamping = 1 // used only in FuelBed to derive life category reactionIntensityDry
         this.mext = mext
         this.mois = 0
         this.moistureDamping = 0
@@ -98,15 +99,16 @@ class FuelBedLifeCategory {
     }
 
     addParticle(fuelModelParticle, loadFraction) {
-        const p = new FuelBedParticle(fuelModelParticle, loadFraction)
-        // Ensure that cured live fuels use the correct dead fuel moisture content class
-        if (this.category === "dead") {
-            if (p.deadfm !== 'dead1h' && p.deadfm !== 'dead10h' && p.deadfm !== 'dead100h') {
-                if(p.sizeClass <= 1) p.deadfm = 'dead1h'
-                else if (p.sizeClass <=3) p.deadfm = 'dead10h'
-                else p.deadfm = 'dead100h'
-            }
-        }
+        const moistureClass = (this.category === 'dead') ? fuelModelParticle.deadfm : fuelModelParticle.livefm
+        const p = new FuelBedParticle(fuelModelParticle, moistureClass, loadFraction)
+        // DEPRECATED Ensure that cured live fuels use the correct dead fuel moisture content class
+        // if (this.category === "dead") {
+        //     if (p.deadfm !== 'dead1h' && p.deadfm !== 'dead10h' && p.deadfm !== 'dead100h') {
+        //         if(p.sizeClass <= 1) p.deadfm = 'dead1h'
+        //         else if (p.sizeClass <=3) p.deadfm = 'dead10h'
+        //         else p.deadfm = 'dead100h'
+        //     }
+        // }
         this.particles.push(p)
         return this
     }
@@ -158,10 +160,10 @@ class FuelBedLifeCategory {
         this.mois = 0
         this.fineWaterLoad = 0
         this.qig = 0
-        const moistureLifeCategory = (this.category === 'dead') ? "deadfm" : "livefm"
+        // DEPRECATED: const moistureLifeCategory = (this.category === 'dead') ? "deadfm" : "livefm"
         for(let particle of this.particles) {
-            const moistureClass = particle[moistureLifeCategory]
-            const moistureContent = moistureContents[moistureClass]
+            // DEPRECATED: const moistureClass = particle[moistureLifeCategory]
+            const moistureContent = moistureContents[particle.moistureClass]
             particle.updateMoistureContent(moistureContent)
             this.mois += particle.mois * particle.surfaceAreaWtg    // wtd average
             this.qig += particle.qig * particle.surfaceAreaWtg      // wtd average
@@ -254,7 +256,7 @@ export class FuelBed {
         this.propagatingFluxRatio = (this.savr > 0)
             ? Math.exp((0.792 + 0.681 * Math.sqrt(this.savr)) * (this.packingRatio + 0.1)) / (192 + 0.2595 * this.savr) : 0
 
-        // This is an arbitrary variable 'A' used to derive the fuel bed optimum reaction velocity (1/min).
+        // This is the arbitrary variable 'A' used to derive the fuel bed optimum reaction velocity (1/min).
         // See Rothermel (1972) eq 39 (p19, 26) and 67 (p 31).
         this.reactionVelocityExp = (this.savr > 0) ? 133 / this.savr**0.7913 : 0
 
@@ -285,7 +287,6 @@ export class FuelBed {
         // 'effective heating number' to determine the ratio of fine dead to fine live fuels.
         // See Rothermel (1972) eq 88 on page 35.
         this.liveMextFactor = 2.9 * (this.dead.fineFuelLoad / this.live.fineFuelLoad)
-
         
         // Fuel bed slope coeffient `phiS` slope factor.
         // This factor is an intermediate parameter that is constant for a fuel bed,
@@ -324,19 +325,14 @@ export class FuelBed {
         // This factor is an intermediate parameter that is constant for a fuel bed,
         // and used to determine the fire spread wind coefficient `phiW`.
         // See Rothermel (1972) eq 47 (p 23, 26) and eq 79 (p 33).
-        //
-        // @param {float} betr Fuel bed packing ratio (ratio).
-        // @param {float} wnde The fuel bed wind coefficient `phiW` correlation factor `E`.
-        // @param {float} wndc The fuel bed wind coefficient `phiW` correlation factor `C`.
-        // @return float Factor used to derive the wind coefficient `phiW' (ratio).
         this.windK = (this.packingRatioRatio > 0 && this.windE > 0) ?
             this.windC * this.packingRatioRatio**-this.windE : 0
     }
 
-    // mois is an object with properties {dead1h, dead10h, dead100h, herb, stem}
-    updateMoisture(mois) {
-        this.dead.updateMoistureContent(mois)
-        this.live.updateMoistureContent(mois)
+    // moistureContents is an object with properties {dead1h, dead10h, dead100h, herb, stem}
+    updateMoisture(moistureContents) {
+        this.dead.updateMoistureContent(moistureContents)
+        this.live.updateMoistureContent(moistureContents)
 
         // Fuel bed weighted heat of preignition
         this.qig = this.dead.qig * this.dead.surfaceAreaWtg + this.live.qig * this.live.surfaceAreaWtg

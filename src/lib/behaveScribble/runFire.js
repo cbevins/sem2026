@@ -111,3 +111,11 @@ const Expected124 = {
 console.log(`\nValidating fm124: -------------------------------------------------`)
 errors = compareObjects(Expected124, fm124, 1)
 console.log(`Found ${errors} errors while validating fm124------------------------`)
+
+const t0 = performance.now()
+const reps = 1000
+for(let i=0; i<reps; i++) {
+    let m = new FuelBed(catalog.get(10), curedObj).updateMoisture(moisObj)
+}
+const t1 = performance.now()
+console.log(`${reps} reps of new FuelBed() required ${Math.round(t1-t0)} msec`)

@@ -11,30 +11,45 @@
 // Every fuel model has one or more types of FuelModelParticle with the following properties:
 
 const FuelModelParticle = {
-    type: "",       // key to match this particle with the appropriate fraction cured class
-    load: 0,        // ovendry fuel load (lb/ft2) [where lb/ft2 = 0.004591368227731864 * ton/ac]
-    savr: 1,        // surface-area-to-volume ratio (ft2/ft3)
-    heat: 8000,     // low heat content, heat of combustion (BTU/lb)
-    dens: 32,       // ovendry density (lb/ft3)
-    stot: 0.0555,   // fuel particle total minerl content (lb minerals / lb ovendry fuel)
-    seff: 0.01,     // fuel particle effective mineral content (lb silica-free minerals / lb ovendry wood)
-    cured: 1,       // fraction of the fuel particle load that is dead or cured [0-1]
-    deadfm: "",     // key to match this particle to the appropriate fuel moisture class when dead
-    livefm: ""}     // key to match this particle to the appropriate fuel moisture class when live
+    // The "type" property is used to match the particle with the appropriate fraction cured class.
+    // The standard fire behavior fuel models use "dead1h", "dead10h", "dead100h", "stem", and "herb",
+    // but custom fuel models may assign new keys as needed, such as "cheatgrass", or "fineChaparral".
+    // In this cases, the CuringConditions object would then look like:
+    //     curingConditions = {herb: 0.5, cheatgrass: 0.75, fineChaparral: 1}
+    type: "",
 
-// The "type" property is used to match the particle with the appropriate fraction cured class.
-// The standard fire behavior fuel models use "dead1h", "dead10h", "dead100h", "stem", and "herb",
-// but custom fuel models may assign new keys as needed, such as "cheatgrass", or "fineChaparral".
-// In this case, when invoking "new FuelBed(modelKey, curedObj)", the "curedObj" could
-// then look like: {herb: 0.5, cheatgrass: 0.75, fineChaparral: 1}
+    // The :life" property is one of "dead", "live", or "curable"
+    life: "dead",
 
-// The "deadfm" and "livefm" properties are used to match the particle with the appropriate
-// fuel moisture content class.  The standard fire behavior fuel models use "dead1h", "dead10h",
-// "dead100h", "herb" and "stem", but custom fuel models may assign new keys as needed,
-// such as "duff", "litter", "liveCheatgrass", or "deadCheatgrass". When calling
-// FuelBed.updateMoisture(moisObj), the moisObj could then look like:
-// {dead1h: 0.05, dead10h: 0.07, dead100h: 0.12, herb: 1.5, stem: 2,5, duff: 0.25,
-//  litter: 0.15, liveCheatgrass: 1.5, deadCheatgrass: 0.05}.
+    // The "ovendryLoad" is in (lb/ft2) [where lb/ft2 = 0.004591368227731864 * ton/ac]
+    ovendryLoad: 0,
+
+    // The "savr" is the surface area-t-volume ratio (ft2/ft3)
+    savr: 1,
+
+    // The "heat" is the low heat content, aka the heat of combustion (BTU/lb)
+    heat: 8000,
+
+    // The "density" is the fuel particle fiber density (lb/ft3)
+    density: 32,
+
+    // The "totalMineral" is the fuel particle total minerl content (lb minerals / lb ovendry fuel)
+    totalMineral: 0.0555,
+
+    // The "effectiveMineral" is fuel particle "effective" (non-silica) mineral content (lb silica-free minerals / lb ovendry wood)
+    effectiveMineral: 0.01,
+
+    // The "deadMoistureClass" is the key to the moisture content applied when this particle is dead
+    // The standard fuel models use "dead1h", "dead10h", and "dead100h" but custom fuel models may
+    // create new keys such as "duff", "litter", or "fineChaparral" in which case MoistureConditions
+    // {dead1h: 0.05, dead10h: 0.07, dead100h: 0.12, herb: 1.5, stem: 2,5, litter: 0.2, duff: 0.25}
+    deadMoistureClass: "",
+
+    // The "liveMoistureClass" is the key to the moisture content applied when this particle is dead
+    // The standard fuel models use "herb" and "stem", but custom fuel models may create new keys such
+    // as "liveCheatgrass" or "liveFineChaparral", in which case the MoistureConditions object would look like:
+    // {dead1h: 0.05, dead10h: 0.07, dead100h: 0.12, herb: 1.5, stem: 2,5, liveCheatgrass: 1.2, liveFineChaparral: 2.0}
+    liveMoistureClass: ""}
 
 // The heat-of-combustion, density, and two mineral content properties do not vary
 // significantly across vegetative fuels and are generally treated as constants.
@@ -56,20 +71,24 @@ const FuelModelParticle = {
 // Dead 1-h fuel moisture time-lag class particles have a surface area-to-volume ratio
 // less than 192 1/ft (equivalent to a 0.25-in diameter cylinder), and the standard fuel model
 // surface-area-to-volume ratios range from 750 to 3500 1/ft (0.064 to 0.0137 inch diameter).
-// Here is the template object for creating a standard dead 1-h time-lag fuel particle:
-const Dead1 = {...FuelModelParticle, type: "dead1h", cured: 1, deadfm: "dead1h", livefm: "dead1h"}
+// The following template object is used to create standard dead 1-h time-lag fuel particles:
+const Dead1 = {...FuelModelParticle, type: "dead1h", life: "dead",
+    deadMoistureClass: "dead1h", liveMoistureClass: "dead1h"}
 
 // Dead 10-h fuel moisture time-lag class particles have a surface area-to-volume ratio
 // between 48 and 192 1/ft (1 to 0.25 inch diameter).  The standard fire behavior fuel models
 // use a fixed surface-area-to-volume ratio of 109 1/ft (0.44-in diameter).
-// Here is the template object for creating a standard dead 10-h time-lag fuel particle:
-const Dead10 = {...FuelModelParticle, type: "dead10h", cured: 1, savr: 109, deadfm: "dead10h", livefm: "dead10h"}
+// The following template object is used to create standard dead 10-h time-lag fuel particles:
+const Dead10 = {...FuelModelParticle, type: "dead10h", life: "dead", savr: 109,
+    deadMoistureClass: "dead10h", liveMoistureClass: "dead10h"}
 
-// Dead 100-h fuel moisture time-lag class particles have a surface areato-volume ratio
+// Dead 100-h fuel moisture time-lag class particles have a surface area-to-volume ratio
 // between 192 and 16 1/ft (1 to 3 inch diameter).  The standard fire behavior fuel models
 // use a fixed surface-area-to-volume ratio of 30 (1.6-in diameter).
+// The following template object is used to create standard dead 100-h time-lag fuel particles:
 // Here is the template object for creating a standard dead 100-h time-lag fuel particle:
-const Dead100 = {...FuelModelParticle, type: "dead100h", cured: 1, savr: 30, deadfm: "dead100h", livefm: "dead100h"}
+const Dead100 = {...FuelModelParticle, type: "dead100h", life: "dead", savr: 30,
+    deadMoistureClass: "dead100h", liveMoistureClass: "dead100h"}
 
 // ----------------------------------------------------------------------------
 // Part 1.2 Live Category FuelParticles
@@ -84,7 +103,8 @@ const Dead100 = {...FuelModelParticle, type: "dead100h", cured: 1, savr: 30, dea
 // Standard fire behavior fuel model surface area-to-volume ratios for stems range from
 // 750 to 2000 1/ft (0.064 to 0.024 inch diameter).
 // Here is the template object for creating a standard live stem fuel particle:
-const Stem = {...FuelModelParticle, type: "stem", cured: 0, deadfm: "dead1h", livefm: "stem"}
+const Stem = {...FuelModelParticle, type: "stem", life: "live",
+    deadMoistureClass: "dead1h", liveMoistureClass: "stem"}
 
 // "Herb" fuels include grasses, forbs, and ferns that may cure during the season.
 // Herbs are usually fully live when their moisture content exceeds 120%, and are
@@ -92,7 +112,8 @@ const Stem = {...FuelModelParticle, type: "stem", cured: 0, deadfm: "dead1h", li
 // Standard fire behavior fuel model surface area-to-volume ratios for herbs range from
 // range from 1300 to 2000 1/ft (0.369 to 0.024 inches).
 // Here is the template object for creating a standard live herb fuel particle:
-const Herb = {...FuelModelParticle, type: "herb", cured: 0, deadfm: "dead1h", livefm: "herb"}
+const Herb = {...FuelModelParticle, type: "herb", life: "curable",
+    deadMoistureClass: "dead1h", liveMoistureClass: "herb"}
 
 // ----------------------------------------------------------------------------
 // Part 2 FuelModel Class Definition
@@ -133,7 +154,7 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.12,
         particles: [
-            {...Dead1, load: 0.034, savr: 3500, heat: 8000},
+            {...Dead1, ovendryLoad: 0.034, savr: 3500, heat: 8000},
         ],
     },
     { number: 2,
@@ -143,10 +164,10 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.092, savr: 3000, heat: 8000},
-            {...Dead10, load: 0.046, heat: 8000},
-            {...Dead100, load: 0.023, heat: 8000},
-            {...Herb, load: 0.023, savr: 1500, heat: 8000},
+            {...Dead1, ovendryLoad: 0.092, savr: 3000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.046, heat: 8000},
+            {...Dead100, ovendryLoad: 0.023, heat: 8000},
+            {...Herb, ovendryLoad: 0.023, savr: 1500, heat: 8000},
         ],
     },
     { number: 3,
@@ -156,7 +177,7 @@ export const StandardFuelModels = [
         depth: 2.5,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.138, savr: 1500, heat: 8000},
+            {...Dead1, ovendryLoad: 0.138, savr: 1500, heat: 8000},
         ],
     },
     { number: 4,
@@ -166,10 +187,10 @@ export const StandardFuelModels = [
         depth: 6,
         deadMext: 0.2,
         particles: [
-            {...Dead1, load: 0.23, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.184, heat: 8000},
-            {...Dead100, load: 0.092, heat: 8000},
-            {...Stem, load: 0.23, savr: 1500, heat: 8000}
+            {...Dead1, ovendryLoad: 0.23, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.184, heat: 8000},
+            {...Dead100, ovendryLoad: 0.092, heat: 8000},
+            {...Stem, ovendryLoad: 0.23, savr: 1500, heat: 8000}
         ],
     },
     { number: 5,
@@ -179,9 +200,9 @@ export const StandardFuelModels = [
         depth: 2,
         deadMext: 0.2,
         particles: [
-            {...Dead1, load: 0.046, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.023, heat: 8000},
-            {...Stem, load: 0.092, savr: 1500, heat: 8000}
+            {...Dead1, ovendryLoad: 0.046, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.023, heat: 8000},
+            {...Stem, ovendryLoad: 0.092, savr: 1500, heat: 8000}
         ],
     },
     { number: 6,
@@ -191,9 +212,9 @@ export const StandardFuelModels = [
         depth: 2.5,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.069, savr: 1750, heat: 8000},
-            {...Dead10, load: 0.115, heat: 8000},
-            {...Dead100, load: 0.092, heat: 8000},
+            {...Dead1, ovendryLoad: 0.069, savr: 1750, heat: 8000},
+            {...Dead10, ovendryLoad: 0.115, heat: 8000},
+            {...Dead100, ovendryLoad: 0.092, heat: 8000},
         ],
     },
     { number: 7,
@@ -203,10 +224,10 @@ export const StandardFuelModels = [
         depth: 2.5,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.052, savr: 1750, heat: 8000},
-            {...Dead10, load: 0.086, heat: 8000},
-            {...Dead100, load: 0.069, heat: 8000},
-            {...Stem, load: 0.017, savr: 1500, heat: 8000}
+            {...Dead1, ovendryLoad: 0.052, savr: 1750, heat: 8000},
+            {...Dead10, ovendryLoad: 0.086, heat: 8000},
+            {...Dead100, ovendryLoad: 0.069, heat: 8000},
+            {...Stem, ovendryLoad: 0.017, savr: 1500, heat: 8000}
         ],
     },
     { number: 8,
@@ -216,9 +237,9 @@ export const StandardFuelModels = [
         depth: 0.2,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.069, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.046, heat: 8000},
-            {...Dead100, load: 0.115, heat: 8000},
+            {...Dead1, ovendryLoad: 0.069, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.046, heat: 8000},
+            {...Dead100, ovendryLoad: 0.115, heat: 8000},
         ],
     },
     { number: 9,
@@ -228,9 +249,9 @@ export const StandardFuelModels = [
         depth: 0.2,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.134, savr: 2500, heat: 8000},
-            {...Dead10, load: 0.019, heat: 8000},
-            {...Dead100, load: 0.007, heat: 8000},
+            {...Dead1, ovendryLoad: 0.134, savr: 2500, heat: 8000},
+            {...Dead10, ovendryLoad: 0.019, heat: 8000},
+            {...Dead100, ovendryLoad: 0.007, heat: 8000},
         ],
     },
     { number: 10,
@@ -240,10 +261,10 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.138, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.092, heat: 8000},
-            {...Dead100, load: 0.23, heat: 8000},
-            {...Stem, load: 0.092, savr: 1500, heat: 8000}
+            {...Dead1, ovendryLoad: 0.138, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.092, heat: 8000},
+            {...Dead100, ovendryLoad: 0.23, heat: 8000},
+            {...Stem, ovendryLoad: 0.092, savr: 1500, heat: 8000}
         ],
     },
     { number: 11,
@@ -253,9 +274,9 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.069, savr: 1500, heat: 8000},
-            {...Dead10, load: 0.207, heat: 8000},
-            {...Dead100, load: 0.253, heat: 8000},
+            {...Dead1, ovendryLoad: 0.069, savr: 1500, heat: 8000},
+            {...Dead10, ovendryLoad: 0.207, heat: 8000},
+            {...Dead100, ovendryLoad: 0.253, heat: 8000},
         ],
     },
     { number: 12,
@@ -265,9 +286,9 @@ export const StandardFuelModels = [
         depth: 2.3,
         deadMext: 0.2,
         particles: [
-            {...Dead1, load: 0.184, savr: 1500, heat: 8000},
-            {...Dead10, load: 0.644, heat: 8000},
-            {...Dead100, load: 0.759, heat: 8000},
+            {...Dead1, ovendryLoad: 0.184, savr: 1500, heat: 8000},
+            {...Dead10, ovendryLoad: 0.644, heat: 8000},
+            {...Dead100, ovendryLoad: 0.759, heat: 8000},
         ],
     },
     { number: 13,
@@ -277,9 +298,9 @@ export const StandardFuelModels = [
         depth: 3,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.322, savr: 1500, heat: 8000},
-            {...Dead10, load: 1.058, heat: 8000},
-            {...Dead100, load: 1.288, heat: 8000},
+            {...Dead1, ovendryLoad: 0.322, savr: 1500, heat: 8000},
+            {...Dead10, ovendryLoad: 1.058, heat: 8000},
+            {...Dead100, ovendryLoad: 1.288, heat: 8000},
         ],
     },
     { number: 91,
@@ -334,8 +355,8 @@ export const StandardFuelModels = [
         depth: 0.4,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.004591368227731864, savr: 2200, heat: 8000},
-            {...Herb, load: 0.013774104683195591, savr: 2000, heat: 8000},
+            {...Dead1, ovendryLoad: 0.004591368227731864, savr: 2200, heat: 8000},
+            {...Herb, ovendryLoad: 0.013774104683195591, savr: 2000, heat: 8000},
         ],
     },
     { number: 102,
@@ -345,8 +366,8 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.004591368227731864, savr: 2000, heat: 8000},
-            {...Herb, load: 0.04591368227731864, savr: 1800, heat: 8000},
+            {...Dead1, ovendryLoad: 0.004591368227731864, savr: 2000, heat: 8000},
+            {...Herb, ovendryLoad: 0.04591368227731864, savr: 1800, heat: 8000},
         ],
     },
     { number: 103,
@@ -356,9 +377,9 @@ export const StandardFuelModels = [
         depth: 2,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.004591368227731864, savr: 1500, heat: 8000},
-            {...Dead10, load: 0.018365472910927456, heat: 8000},
-            {...Herb, load: 0.06887052341597796, savr: 1300, heat: 8000},
+            {...Dead1, ovendryLoad: 0.004591368227731864, savr: 1500, heat: 8000},
+            {...Dead10, ovendryLoad: 0.018365472910927456, heat: 8000},
+            {...Herb, ovendryLoad: 0.06887052341597796, savr: 1300, heat: 8000},
         ],
     },
     { number: 104,
@@ -368,8 +389,8 @@ export const StandardFuelModels = [
         depth: 2,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.01147842056932966, savr: 2000, heat: 8000},
-            {...Herb, load: 0.0872359963269054, savr: 1800, heat: 8000},
+            {...Dead1, ovendryLoad: 0.01147842056932966, savr: 2000, heat: 8000},
+            {...Herb, ovendryLoad: 0.0872359963269054, savr: 1800, heat: 8000},
         ],
     },
     { number: 105,
@@ -379,8 +400,8 @@ export const StandardFuelModels = [
         depth: 1.5,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.018365472910927456, savr: 1800, heat: 8000},
-            {...Herb, load: 0.11478420569329659, savr: 1600, heat: 8000},
+            {...Dead1, ovendryLoad: 0.018365472910927456, savr: 1800, heat: 8000},
+            {...Herb, ovendryLoad: 0.11478420569329659, savr: 1600, heat: 8000},
         ],
     },
     { number: 106,
@@ -390,8 +411,8 @@ export const StandardFuelModels = [
         depth: 1.5,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.004591368227731864, savr: 2200, heat: 9000},
-            {...Herb, load: 0.15610651974288337, savr: 2000, heat: 9000},
+            {...Dead1, ovendryLoad: 0.004591368227731864, savr: 2200, heat: 9000},
+            {...Herb, ovendryLoad: 0.15610651974288337, savr: 2000, heat: 9000},
         ],
     },
     { number: 107,
@@ -401,8 +422,8 @@ export const StandardFuelModels = [
         depth: 3,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.04591368227731864, savr: 2000, heat: 8000},
-            {...Herb, load: 0.24793388429752067, savr: 1800, heat: 8000},
+            {...Dead1, ovendryLoad: 0.04591368227731864, savr: 2000, heat: 8000},
+            {...Herb, ovendryLoad: 0.24793388429752067, savr: 1800, heat: 8000},
         ],
     },
     { number: 108,
@@ -412,9 +433,9 @@ export const StandardFuelModels = [
         depth: 4,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.02295684113865932, savr: 1500, heat: 8000},
-            {...Dead10, load: 0.0459139, heat: 8000},
-            {...Herb, load: 0.33516988062442604, savr: 1300, heat: 8000},
+            {...Dead1, ovendryLoad: 0.02295684113865932, savr: 1500, heat: 8000},
+            {...Dead10, ovendryLoad: 0.0459139, heat: 8000},
+            {...Herb, ovendryLoad: 0.33516988062442604, savr: 1300, heat: 8000},
         ],
     },
     { number: 109,
@@ -424,9 +445,9 @@ export const StandardFuelModels = [
         depth: 5,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.04591368227731864, savr: 1800, heat: 8000},
-            {...Dead10, load: 0.04591368227731864, heat: 8000},
-            {...Herb, load: 0.4132231404958677, savr: 1600, heat: 8000},
+            {...Dead1, ovendryLoad: 0.04591368227731864, savr: 1800, heat: 8000},
+            {...Dead10, ovendryLoad: 0.04591368227731864, heat: 8000},
+            {...Herb, ovendryLoad: 0.4132231404958677, savr: 1600, heat: 8000},
         ],
     },
     { number: 121,
@@ -436,9 +457,9 @@ export const StandardFuelModels = [
         depth: 0.9,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.009182736455463728, savr: 2000, heat: 8000},
-            {...Herb, load: 0.02295684113865932, savr: 1800, heat: 8000},
-            {...Stem, load: 0.02984403, savr: 1800, heat: 8000}
+            {...Dead1, ovendryLoad: 0.009182736455463728, savr: 2000, heat: 8000},
+            {...Herb, ovendryLoad: 0.02295684113865932, savr: 1800, heat: 8000},
+            {...Stem, ovendryLoad: 0.02984403, savr: 1800, heat: 8000}
         ],
     },
     { number: 122,
@@ -448,10 +469,10 @@ export const StandardFuelModels = [
         depth: 1.5,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.02295684113865932, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.02295684113865932, heat: 8000},
-            {...Herb, load: 0.027548209366391182, savr: 1800, heat: 8000},
-            {...Stem, load: 0.04591368227731864, savr: 1800, heat: 8000}
+            {...Dead1, ovendryLoad: 0.02295684113865932, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.02295684113865932, heat: 8000},
+            {...Herb, ovendryLoad: 0.027548209366391182, savr: 1800, heat: 8000},
+            {...Stem, ovendryLoad: 0.04591368227731864, savr: 1800, heat: 8000}
         ],
     },
     { number: 123,
@@ -461,10 +482,10 @@ export const StandardFuelModels = [
         depth: 1.8,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.013774104683195591, savr: 1800, heat: 8000},
-            {...Dead10, load: 0.01147842056932966, heat: 8000},
-            {...Herb, load: 0.06657483930211203, savr: 1600, heat: 8000},
-            {...Stem, load: 0.057392102846648294, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.013774104683195591, savr: 1800, heat: 8000},
+            {...Dead10, ovendryLoad: 0.01147842056932966, heat: 8000},
+            {...Herb, ovendryLoad: 0.06657483930211203, savr: 1600, heat: 8000},
+            {...Stem, ovendryLoad: 0.057392102846648294, savr: 1600, heat: 8000}
         ],
     },
     { number: 124,
@@ -474,11 +495,11 @@ export const StandardFuelModels = [
         depth: 2.1,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.0872359963269054, savr: 1800, heat: 8000},
-            {...Dead10, load: 0.013774104683195591, heat: 8000},
-            {...Dead100, load: 0.004591368227731864, heat: 8000},
-            {...Herb, load: 0.15610651974288337, savr: 1600, heat: 8000},
-            {...Stem, load: 0.3259871441689623, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.0872359963269054, savr: 1800, heat: 8000},
+            {...Dead10, ovendryLoad: 0.013774104683195591, heat: 8000},
+            {...Dead100, ovendryLoad: 0.004591368227731864, heat: 8000},
+            {...Herb, ovendryLoad: 0.15610651974288337, savr: 1600, heat: 8000},
+            {...Stem, ovendryLoad: 0.3259871441689623, savr: 1600, heat: 8000}
         ],
     },
     { number: 141,
@@ -488,10 +509,10 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.01147842056932966, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.01147842056932966, heat: 8000},
-            {...Herb, load: 0.0068870523415977955, savr: 1800, heat: 8000},
-            {...Stem, load: 0.05968778696051423, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.01147842056932966, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.01147842056932966, heat: 8000},
+            {...Herb, ovendryLoad: 0.0068870523415977955, savr: 1800, heat: 8000},
+            {...Stem, ovendryLoad: 0.05968778696051423, savr: 1600, heat: 8000}
         ],
     },
     { number: 142,
@@ -501,10 +522,10 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.06198347107438017, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.11019283746556473, heat: 8000},
-            {...Dead100, load: 0.03443526170798898, heat: 8000},
-            {...Stem, load: 0.17676767676767677, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.06198347107438017, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.11019283746556473, heat: 8000},
+            {...Dead100, ovendryLoad: 0.03443526170798898, heat: 8000},
+            {...Stem, ovendryLoad: 0.17676767676767677, savr: 1600, heat: 8000}
         ],
     },
     { number: 143,
@@ -514,9 +535,9 @@ export const StandardFuelModels = [
         depth: 2.4,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.02066115702479339, savr: 1600, heat: 8000},
-            {...Dead10, load: 0.13774104683195593, heat: 8000},
-            {...Stem, load: 0.28466483011937554, savr: 1400, heat: 8000}
+            {...Dead1, ovendryLoad: 0.02066115702479339, savr: 1600, heat: 8000},
+            {...Dead10, ovendryLoad: 0.13774104683195593, heat: 8000},
+            {...Stem, ovendryLoad: 0.28466483011937554, savr: 1400, heat: 8000}
         ],
     },
     { number: 144,
@@ -526,10 +547,10 @@ export const StandardFuelModels = [
         depth: 3,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.03902662993572084, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.05280073461891643, heat: 8000},
-            {...Dead100, load: 0.009182736455463728, heat: 8000},
-            {...Stem, load: 0.11707988980716252, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.03902662993572084, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.05280073461891643, heat: 8000},
+            {...Dead100, ovendryLoad: 0.009182736455463728, heat: 8000},
+            {...Stem, ovendryLoad: 0.11707988980716252, savr: 1600, heat: 8000}
         ],
     },
     { number: 145,
@@ -539,9 +560,9 @@ export const StandardFuelModels = [
         depth: 6,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.1652892561983471, savr: 750, heat: 8000},
-            {...Dead10, load: 0.09641873278236915, heat: 8000},
-            {...Stem, load: 0.13314967860422405, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.1652892561983471, savr: 750, heat: 8000},
+            {...Dead10, ovendryLoad: 0.09641873278236915, heat: 8000},
+            {...Stem, ovendryLoad: 0.13314967860422405, savr: 1600, heat: 8000}
         ],
     },
     { number: 146,
@@ -551,9 +572,9 @@ export const StandardFuelModels = [
         depth: 2,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.13314967860422405, savr: 750, heat: 8000},
-            {...Dead10, load: 0.06657483930211203, heat: 8000},
-            {...Stem, load: 0.06427915518824609, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.13314967860422405, savr: 750, heat: 8000},
+            {...Dead10, ovendryLoad: 0.06657483930211203, heat: 8000},
+            {...Stem, ovendryLoad: 0.06427915518824609, savr: 1600, heat: 8000}
         ],
     },
     { number: 147,
@@ -563,10 +584,10 @@ export const StandardFuelModels = [
         depth: 6,
         deadMext: 0.15,
         particles: [
-            {...Dead1, load: 0.16069788797061524, savr: 750, heat: 8000},
-            {...Dead10, load: 0.24334251606978877, heat: 8000},
-            {...Dead100, load: 0.10101010101010101, heat: 8000},
-            {...Stem, load: 0.15610651974288337, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.16069788797061524, savr: 750, heat: 8000},
+            {...Dead10, ovendryLoad: 0.24334251606978877, heat: 8000},
+            {...Dead100, ovendryLoad: 0.10101010101010101, heat: 8000},
+            {...Stem, ovendryLoad: 0.15610651974288337, savr: 1600, heat: 8000}
         ],
     },
     { number: 148,
@@ -576,10 +597,10 @@ export const StandardFuelModels = [
         depth: 3,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.0941230486685032, savr: 750, heat: 8000},
-            {...Dead10, load: 0.15610651974288337, heat: 8000},
-            {...Dead100, load: 0.03902662993572084, heat: 8000},
-            {...Stem, load: 0.19972451790633605, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.0941230486685032, savr: 750, heat: 8000},
+            {...Dead10, ovendryLoad: 0.15610651974288337, heat: 8000},
+            {...Dead100, ovendryLoad: 0.03902662993572084, heat: 8000},
+            {...Stem, ovendryLoad: 0.19972451790633605, savr: 1600, heat: 8000}
         ],
     },
     { number: 149,
@@ -589,10 +610,10 @@ export const StandardFuelModels = [
         depth: 4.4,
         deadMext: 0.4,
         particles: [
-            {...Dead1, load: 0.20661157024793386, savr: 750, heat: 8000},
-            {...Dead10, load: 0.11248852157943066, heat: 8000},
-            {...Herb, load: 0.07116620752984389, savr: 1800, heat: 8000},
-            {...Stem, load: 0.3213957759412305, savr: 1500, heat: 8000}
+            {...Dead1, ovendryLoad: 0.20661157024793386, savr: 750, heat: 8000},
+            {...Dead10, ovendryLoad: 0.11248852157943066, heat: 8000},
+            {...Herb, ovendryLoad: 0.07116620752984389, savr: 1800, heat: 8000},
+            {...Stem, ovendryLoad: 0.3213957759412305, savr: 1500, heat: 8000}
         ],
     },
     { number: 161,
@@ -602,11 +623,11 @@ export const StandardFuelModels = [
         depth: 0.6,
         deadMext: 0.2,
         particles: [
-            {...Dead1, load: 0.009182736455463728, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.04132231404958678, heat: 8000},
-            {...Dead100, load: 0.06887052341597796, heat: 8000},
-            {...Herb, load: 0.009182736455463728, savr: 1800, heat: 8000},
-            {...Stem, load: 0.04132231404958678, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.009182736455463728, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.04132231404958678, heat: 8000},
+            {...Dead100, ovendryLoad: 0.06887052341597796, heat: 8000},
+            {...Herb, ovendryLoad: 0.009182736455463728, savr: 1800, heat: 8000},
+            {...Stem, ovendryLoad: 0.04132231404958678, savr: 1600, heat: 8000}
         ],
     },
     { number: 162,
@@ -616,10 +637,10 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.0436179981634527, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.08264462809917356, heat: 8000},
-            {...Dead100, load: 0.057392102846648294, heat: 8000},
-            {...Stem, load: 0.009182736455463728, savr: 1600, heat: 8000}
+            {...Dead1, ovendryLoad: 0.0436179981634527, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.08264462809917356, heat: 8000},
+            {...Dead100, ovendryLoad: 0.057392102846648294, heat: 8000},
+            {...Stem, ovendryLoad: 0.009182736455463728, savr: 1600, heat: 8000}
         ],
     },
     { number: 163,
@@ -629,11 +650,11 @@ export const StandardFuelModels = [
         depth: 1.3,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.050505050505050504, savr: 1800, heat: 8000},
-            {...Dead10, load: 0.0068870523415977955, heat: 8000},
-            {...Dead100, load: 0.01147842056932966, heat: 8000},
-            {...Herb, load: 0.029843893480257115, savr: 1600, heat: 8000},
-            {...Stem, load: 0.050505050505050504, savr: 1400, heat: 8000}
+            {...Dead1, ovendryLoad: 0.050505050505050504, savr: 1800, heat: 8000},
+            {...Dead10, ovendryLoad: 0.0068870523415977955, heat: 8000},
+            {...Dead100, ovendryLoad: 0.01147842056932966, heat: 8000},
+            {...Herb, ovendryLoad: 0.029843893480257115, savr: 1600, heat: 8000},
+            {...Stem, ovendryLoad: 0.050505050505050504, savr: 1400, heat: 8000}
         ],
     },
     { number: 164,
@@ -643,8 +664,8 @@ export const StandardFuelModels = [
         depth: 0.5,
         deadMext: 0.12,
         particles: [
-            {...Dead1, load: 0.20661157024793386, savr: 2300, heat: 8000},
-            {...Stem, load: 0.09182736455463728, savr: 2000, heat: 8000}
+            {...Dead1, ovendryLoad: 0.20661157024793386, savr: 2300, heat: 8000},
+            {...Stem, ovendryLoad: 0.09182736455463728, savr: 2000, heat: 8000}
         ],
     },
     { number: 165,
@@ -654,10 +675,10 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.18365472910927455, savr: 1500, heat: 8000},
-            {...Dead10, load: 0.18365472910927455, heat: 8000},
-            {...Dead100, load: 0.13774104683195593, heat: 8000},
-            {...Stem, load: 0.13774104683195593, savr: 750, heat: 8000}
+            {...Dead1, ovendryLoad: 0.18365472910927455, savr: 1500, heat: 8000},
+            {...Dead10, ovendryLoad: 0.18365472910927455, heat: 8000},
+            {...Dead100, ovendryLoad: 0.13774104683195593, heat: 8000},
+            {...Stem, ovendryLoad: 0.13774104683195593, savr: 750, heat: 8000}
         ],
     },
     { number: 181,
@@ -667,9 +688,9 @@ export const StandardFuelModels = [
         depth: 0.2,
         deadMext: 0.3,
         particles: [
-            {...Dead1, load: 0.04591368227731864, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.10101010101010101, heat: 8000},
-            {...Dead100, load: 0.1652892561983471, heat: 8000},
+            {...Dead1, ovendryLoad: 0.04591368227731864, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.10101010101010101, heat: 8000},
+            {...Dead100, ovendryLoad: 0.1652892561983471, heat: 8000},
         ],
     },
     { number: 182,
@@ -679,9 +700,9 @@ export const StandardFuelModels = [
         depth: 0.2,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.06427915518824609, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.10560146923783285, heat: 8000},
-            {...Dead100, load: 0.10101010101010101, heat: 8000},
+            {...Dead1, ovendryLoad: 0.06427915518824609, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.10560146923783285, heat: 8000},
+            {...Dead100, ovendryLoad: 0.10101010101010101, heat: 8000},
         ],
     },
     { number: 183,
@@ -691,9 +712,9 @@ export const StandardFuelModels = [
         depth: 0.3,
         deadMext: 0.2,
         particles: [
-            {...Dead1, load: 0.02295684113865932, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.10101010101010101, heat: 8000},
-            {...Dead100, load: 0.12855831037649218, heat: 8000},
+            {...Dead1, ovendryLoad: 0.02295684113865932, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.10101010101010101, heat: 8000},
+            {...Dead100, ovendryLoad: 0.12855831037649218, heat: 8000},
         ],
     },
     { number: 184,
@@ -703,9 +724,9 @@ export const StandardFuelModels = [
         depth: 0.4,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.02295684113865932, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.06887052341597796, heat: 8000},
-            {...Dead100, load: 0.1928374655647383, heat: 8000},
+            {...Dead1, ovendryLoad: 0.02295684113865932, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.06887052341597796, heat: 8000},
+            {...Dead100, ovendryLoad: 0.1928374655647383, heat: 8000},
         ],
     },
     { number: 185,
@@ -715,9 +736,9 @@ export const StandardFuelModels = [
         depth: 0.6,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.05280073461891643, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.11478420569329659, heat: 8000},
-            {...Dead100, load: 0.20202020202020202, heat: 8000},
+            {...Dead1, ovendryLoad: 0.05280073461891643, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.11478420569329659, heat: 8000},
+            {...Dead100, ovendryLoad: 0.20202020202020202, heat: 8000},
         ],
     },
     { number: 186,
@@ -727,9 +748,9 @@ export const StandardFuelModels = [
         depth: 0.3,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.11019283746556473, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.055096418732782364, heat: 8000},
-            {...Dead100, load: 0.055096418732782364, heat: 8000},
+            {...Dead1, ovendryLoad: 0.11019283746556473, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.055096418732782364, heat: 8000},
+            {...Dead100, ovendryLoad: 0.055096418732782364, heat: 8000},
         ],
     },
     { number: 187,
@@ -739,9 +760,9 @@ export const StandardFuelModels = [
         depth: 0.4,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.013774104683195591, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.06427915518824609, heat: 8000},
-            {...Dead100, load: 0.371900826446281, heat: 8000},
+            {...Dead1, ovendryLoad: 0.013774104683195591, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.06427915518824609, heat: 8000},
+            {...Dead100, ovendryLoad: 0.371900826446281, heat: 8000},
         ],
     },
     { number: 188,
@@ -751,9 +772,9 @@ export const StandardFuelModels = [
         depth: 0.3,
         deadMext: 0.35,
         particles: [
-            {...Dead1, load: 0.2662993572084481, savr: 1800, heat: 8000},
-            {...Dead10, load: 0.06427915518824609, heat: 8000},
-            {...Dead100, load: 0.050505050505050504, heat: 8000},
+            {...Dead1, ovendryLoad: 0.2662993572084481, savr: 1800, heat: 8000},
+            {...Dead10, ovendryLoad: 0.06427915518824609, heat: 8000},
+            {...Dead100, ovendryLoad: 0.050505050505050504, heat: 8000},
         ],
     },
     { number: 189,
@@ -763,9 +784,9 @@ export const StandardFuelModels = [
         depth: 0.6,
         deadMext: 0.35,
         particles: [
-            {...Dead1, load: 0.305325987144169, savr: 1800, heat: 8000},
-            {...Dead10, load: 0.1515151515151515, heat: 8000},
-            {...Dead100, load: 0.19054178145087236, heat: 8000},
+            {...Dead1, ovendryLoad: 0.305325987144169, savr: 1800, heat: 8000},
+            {...Dead10, ovendryLoad: 0.1515151515151515, heat: 8000},
+            {...Dead100, ovendryLoad: 0.19054178145087236, heat: 8000},
         ],
     },
     { number: 201,
@@ -775,9 +796,9 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.06887052341597796, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.13774104683195593, heat: 8000},
-            {...Dead100, load: 0.505050505050505, heat: 8000},
+            {...Dead1, ovendryLoad: 0.06887052341597796, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.13774104683195593, heat: 8000},
+            {...Dead100, ovendryLoad: 0.505050505050505, heat: 8000},
         ],
     },
     { number: 202,
@@ -787,9 +808,9 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.20661157024793386, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.1951331496786042, heat: 8000},
-            {...Dead100, load: 0.18365472910927455, heat: 8000},
+            {...Dead1, ovendryLoad: 0.20661157024793386, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.1951331496786042, heat: 8000},
+            {...Dead100, ovendryLoad: 0.18365472910927455, heat: 8000},
         ],
     },
     { number: 203,
@@ -799,9 +820,9 @@ export const StandardFuelModels = [
         depth: 1.2,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.2525252525252525, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.12626262626262624, heat: 8000},
-            {...Dead100, load: 0.13774104683195593, heat: 8000},
+            {...Dead1, ovendryLoad: 0.2525252525252525, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.12626262626262624, heat: 8000},
+            {...Dead100, ovendryLoad: 0.13774104683195593, heat: 8000},
         ],
     },
     { number: 204,
@@ -811,9 +832,9 @@ export const StandardFuelModels = [
         depth: 2.7,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.24104683195592286, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.16069788797061524, heat: 8000},
-            {...Dead100, load: 0.24104683195592286, heat: 8000},
+            {...Dead1, ovendryLoad: 0.24104683195592286, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.16069788797061524, heat: 8000},
+            {...Dead100, ovendryLoad: 0.24104683195592286, heat: 8000},
         ],
     },
     { number: 301,
@@ -823,10 +844,10 @@ export const StandardFuelModels = [
         depth: 1,
         deadMext: 0.25,
         particles: [
-            {...Dead1, load: 0.138, savr: 2000, heat: 8000},
-            {...Dead10, load: 0.092, heat: 8000},
-            {...Dead100, load: 0.23, heat: 8000},
-            {...Stem, load: 0.092, savr: 1500, heat: 8000}
+            {...Dead1, ovendryLoad: 0.138, savr: 2000, heat: 8000},
+            {...Dead10, ovendryLoad: 0.092, heat: 8000},
+            {...Dead100, ovendryLoad: 0.23, heat: 8000},
+            {...Stem, ovendryLoad: 0.092, savr: 1500, heat: 8000}
         ],
     },
 ]

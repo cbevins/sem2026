@@ -1,17 +1,17 @@
-export function traverseObject(obj, indent = 0) {
+export function traverseObject(obj, indent=1) {
     for (let key in obj) {
         // Check if the property belongs to the object itself
         if (Object.hasOwn(obj, key)) { 
             const value = obj[key]
-            const padding = " ".repeat(indent)
+            const padding = " ".repeat(4*indent)
 
             if (typeof value === "object" && value !== null) {
-                console.log(`${padding}${key}:`)
+                console.log(`${indent}: ${padding}${key}:`)
                 // Recurse into the nested object
-                traverseObject(value, indent + 2)
+                traverseObject(value, indent + 1)
             } else {
                 // Display primitive values (string, number, etc.)
-                console.log(`${padding}${key}: ${value}`)
+                console.log(`${indent}: ${padding}${key}: ${value}`)
             }
         }
     }

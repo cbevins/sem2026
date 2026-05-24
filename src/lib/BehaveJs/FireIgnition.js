@@ -1,6 +1,11 @@
-
-export class FireBed {
-    constructor(fuelBed, moistureConditions={}){
+/**
+ * The FireIgnition class determines the ignition requirements of a fuel bed
+ * under a specific set of fuel moisture conditions to estimate its no-wind,
+ * no-slope reaction intensity and spread rate.
+ */
+export class FireIgnition {
+    constructor(fuelBed, moistureConditions={}) {
+        this.fuelBed = fuelBed
         this.setMoistureConditions(fuelBed, moistureConditions)
     }
 

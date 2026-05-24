@@ -36,10 +36,11 @@ export const ExpectedFuelBed010 = {
         // volume: 0
     }
 }
-export const ExpectedFireBed010 = {
+export const ExpectedFireIgnition010 = {
     heatSink: 412.34037227937284,
     // heatSource: 0,
     heatPreIgn: 746.993428042342,
+    // liveMextFactor: 6.908948234294801,
     reactionIntensity: 5794.6954002291168,
     noWindSpreadRate: 0.67900860922904482,
     dead: {
@@ -55,31 +56,24 @@ export const ExpectedFireBed010 = {
         moistureDamping: 0.59341294014849078,
         mext: 5.1935979022741359,
         reactionIntensity: 2182.287993033714,
-    }
-}
-//---------------------------------------------
-export const Expected010 = {
-    heatSink: 412.34037227937284,
-    // liveMextFactor: 6.908948234294801,
-    qig: 746.993428042342,
-    reactionIntensity: 5794.6954002291168,
-    ros0: 0.67900860922904482,
-    dead: {
-        fineMois: 0.05389207884883955,
-        fineWaterLoad: 0.008463731497256665,
-        mois: 0.051626884422110553,
-        moistureDamping: 0.65206408989980214,
-        reactionIntensity: 3612.4074071954024,
-        // reactionIntensityDry: 5539.9575948899355,
-    },
-    live: {
-        effMineral: 0.01,
-        moistureDamping: 0.59341294014849078,
-        mext: 5.1935979022741359,
-        reactionIntensity: 2182.287993033714,
         // reactionIntensityDry: 3677.5200629895871,
     }
 }
+
+export const ExpectedFireBehavior010 = {
+    // p1 no-wind, no-slope spread rate
+    noWindNoSlopeSpreadRate: 0.67900860922904482, // fm124: 1.4333245773924823
+    // p2 ADDITIONAL spread rate added to the no-wind, no-slope spread rate:
+    additionalWindSlopeSpreadRate: 17.872671716374864, // fm124: 47.037101416598077
+    // p3 cross-slope wind spread rate (sum of p1 and p2)
+    crossSlopeWindSpreadRate: 18.551680325448835, // fm124: 48.47042599399056
+    effWindSpeed: 880.55194372010692,
+    xComponent: 0.75673013692577218, // fm124: 1.9584486126230398
+    yComponent: 17.856644527335789, // fm124: 46.996312501163828
+    effWindFactor: 26.321715915373524,  // fm124: 32.816782854703028
+    headingFromUpslope: 87.573367385837855, // fm124: 87.613728665173383
+}
+//---------------------------------------------
 
 export const Expected124 = {
     heatSink: 319.21640437931171,

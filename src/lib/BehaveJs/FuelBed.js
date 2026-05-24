@@ -8,7 +8,7 @@ export class FuelBed {
     setFuelConditions(fuelModel, curingConditions={}) {
         // Apply any changed curing conditions
         this.curingConditions = curingConditions
-        this.fuelModelCode = fuelModel.code     // just save the FuelModel.code
+        this.modelCode = fuelModel.code     // just save the FuelModel.code
 
         this.depth = fuelModel.depth
         this.dead = new DeadFuelBed(fuelModel, curingConditions)

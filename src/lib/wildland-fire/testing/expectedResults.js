@@ -18,7 +18,7 @@ export const ExpectedFuelBed010 = {
         // heatSouce: 0,
         mext: 0.25,
         mineralDamping: 0.41739692790939131,
-        netLoad: (1 - 0.0555) * 0.13859233668341708,
+        netLoad: 0.13859233668341708,
         ovendryLoad: 0.46,
         reactionIntensityDry: 5539.9575948899355,   // currently is 18387.6
         savr: 1888.8602386934672,

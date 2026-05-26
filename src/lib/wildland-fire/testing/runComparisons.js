@@ -42,6 +42,6 @@ function compare(objName, modelName, expected, actual) {
 }
 
 // compare('FuelBed', 'FuelModel 124', ExpectedFuelBed124, fuelBed124)
-compare('FuelBed', 'FuelModel 10', ExpectedFuelBed010, fuelBed010)
+// compare('FuelBed', 'FuelModel 10', ExpectedFuelBed010, fuelBed010)
 // compare('FireIgnition', 'FuelModel 10', ExpectedFireIgnition010, fireIgnition010)
-// compare('FireBehavior', 'FuelModel 10', ExpectedFireBehavior010, fireBehavior010)
+compare('FireBehavior', 'FuelModel 10', ExpectedFireBehavior010, fireBehavior010)

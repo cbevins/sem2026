@@ -94,8 +94,10 @@ export class FuelIgnition {
         this.reactionIntensity = reactionIntensity
         this.noWindSpreadRate = noWindSpreadRate
 
-        // if (this.config.saveTestProps) {
-        // }
+        if (this.config.saveTestProps) {
+            this.dead = cat.dead
+            this.live = cat.live
+        }
         if (this.config.saveInfoProps) {
             this.heatPreIgn = heatPreIgn
             this.heatSink = heatSink

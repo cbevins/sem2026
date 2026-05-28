@@ -136,4 +136,8 @@ export class FuelBed {
         }        
         return this
     }
+    openWindSpeedAdjustmentFactor() {
+        const f = Math.min(6, Math.max(this.depth, 0.1))
+        return 1.83 / Math.log((20 + 0.36 * f) / (0.13 * f))
+    }
 }

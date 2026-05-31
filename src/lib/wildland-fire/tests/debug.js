@@ -17,11 +17,9 @@ const fuelBed = new FuelBed(fuelModel, curingConditions, config)
 const fuelIgnition = new FuelIgnition(fuelBed, moistureConditions, config)
 const fireBehavior = new FireBehavior(fuelIgnition, windSlopeConditions,
     behaviorConfig, config)
-const fireEllipse = new FireEllipse(fireBehavior, config)
 
-const theta = 90
 const elapsed = 60
-const rotationDegrees = 0
-const lcs = fireEllipse.calcPerimeterPointFromCenter(theta, elapsed, rotationDegrees)
-
-console.log(fireEllipse, lcs)
+const betaDegrees = 360 - 42.573367385837855 // FM124: 360 - 42.613728665173383
+const fireEllipse = new FireEllipse(fireBehavior, config)
+            .setElapsedTime(elapsed)
+            .setFireVectorAngle(betaDegrees)

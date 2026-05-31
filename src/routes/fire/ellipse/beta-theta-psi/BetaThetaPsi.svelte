@@ -9,11 +9,29 @@
     let height = 400
 
     // Input parameter controls
-    let bearing     = $state(0)
+    let runTest = false
+    let b,e,h,l
+    // FireEllipse.test.js FBFM010 and FBFM124 inputs
+    if (runTest) {
+        const lengthWidthRatio = [3.5015680219321221, 3.5015819412846603]
+        const headingSpreadRate = [18.551680325448835, 48.47042599399056]
+        const headingFromNorth = [87.573367385837855, 87.613728665173383]
+        const elapsedTime = 60
+        b = headingFromNorth[0]
+        e = elapsedTime
+        h = headingSpreadRate[0]
+        l = lengthWidthRatio[0]
+    } else {
+        b = 0
+        e = 100
+        h = 1
+        l = 2 
+    }
+    let bearing     = $state(b)
+    let elapsed     = $state(e)
+    let headRos     = $state(h)
+    let lwRatio     = $state(l)
     let degStep     = $state(5)
-    let elapsed     = $state(100)
-    let headRos     = $state(1)
-    let lwRatio     = $state(2)
     let src         = $state('angle') // 'angle' or 'head'
     let showBeta    = $state(true)
     let showPsi     = $state(true)

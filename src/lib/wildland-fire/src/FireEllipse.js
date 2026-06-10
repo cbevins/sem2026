@@ -1,83 +1,86 @@
 /**
- * FireEllipse represents a parametric fire ellipse defined by its (1) length-to-width
- * ratio and (2) head fire spread rate.  These two parameters distinguish one FireEllipse
- * instance from another, and determine derived properties such as eccentricity,
- * backing spread rate, length and width expansion rate.
+ * While the FireBehavior class produces fire spread rate and intensity in the direction
+ * of maximum spread, the FireEllipse class expands fire behavior to two dimensions
+ * under the assumption of uniform fuel, moisture, wind, and slope.  Under such
+ * conditions, the fire assumes an elliptical shape with the perimeter expanding fastest
+ * at the fire head and slowest at the fire back.
+ * 
+ * FireEllipse generates fire size, location, and behavior estimates for any point
+ * along the perimeter at any time since ignition, as long as the assumption of
+ * continuous conditions is valid.  It also places the fire within the geographical
+ * context of the user's projected coordinate system.
+ * 
+ * Four of the 7 inputs are provided by the FireBehavior class; passing a reference as
+ * the 'inputs' object provides the 'headingSpreadRate', 'lengthWidthRatio', 'bearing',
+ * and 'flameLength' properties.  Alternately, they can also be provided from direct
+ * field observation.  These inputs determine the general ellipse shape, orientation,
+ * and spread rates at various angles.
+ * 
+ * The 'elapsedTime' parameter determines the ellipse area, length, width, perimeter
+ * length, and perimeter position at any time. Finally, by providing an ignition point
+ * location the ellipse can be placed into a geographical context of the user's choosing.
  */
-import { ConfigTemplate } from './ConfigTemplate.js'
-import { getPointOnEllipseCodePen } from './getPointOnEllipseCodePen.js'
+import { calcBetaFromTheta, toRadians } from './ellipseAngles.js'
 
 export class FireEllipse {
-     // ellipseParameters may be an object with "spreadRate", "lengthToWidthRatio",
-     // "headingFromNorth", and "flameLength" properties,
-     // such as an instance of the FireBehavior class .
-    constructor(inputs={}, config={}) {
-        this.config = {...ConfigTemplate, ...config}
-
-        // Assign inputs if specified, defaults if not specified
-        const {
-            spreadRate: headingSpreadRate = 1,
-            headingFromNorth: bearing = 0,
-            lengthWidthRatio = 1,
-            flameLength = 0,
-            elapsedTime = 1,
-            ignEast = 0,
-            ignNorth = 0,
-            betaDegrees = 0} = inputs
-
-        // setEllipse() may reset the following, which are used by updateEllipseDependents()
-        this.headingSpreadRate = headingSpreadRate
-        this.lengthWidthRatio = lengthWidthRatio
-        this.bearing = bearing
-        this.flameLength = flameLength
-
-        // setElapsedTime() may reset the following, which is used by updateElapsedTimeDependents()
-        this.elapsedTime = elapsedTime
-
-        // setPcs() may reset the following, which is used by updatePcsDependents()
-        this.ignitionPcs = {east: ignEast, north: ignNorth}
-
-        // setFireVectorAngle() may reset the following, which is used by updateFireVectorAngleDependents()
-        this.betaDegrees = betaDegrees
-
-        this.setEllipse()
+    constructor(inputs={}) {
+        // Default input parameter values
+        // These may be overridden during construction by specifying them in 'inputs'
+        this.parameters = [
+            // updateFireEllipse() is invoked whenever one of these are specified in inputs object
+            // (both of these and flameLength are also present in FireBehavior instances)
+            {key: 'headingSpreadRate', value: 0, call: 1},
+            {key: 'lengthWidthRatio', value: 1, call: 1},
+            // updateElapsedTime() is invoked whenever 'elapsedTime' is specified in 'inputs' object:
+            {key: 'elapsedTime', value: 0, call: 2},
+            // updatePosition() is invoked whenever one or more of these are specified in 'inputs' object:
+            {key: 'bearing', value: 0, call: 3},    // fire heading in degrees clockwise from north
+            {key: 'ignEast', value: 0, call: 3},    // ignition point easting (Projected Coordinate System)
+            {key: 'ignNorth', value: 0, call: 3},   // ignition point northing (Projected Coordinate System)
+            {key: 'ignX', value: 0, call: 3},       // ignition point Cartesian x, normally left to zero
+            {key: 'ignY', value: 0, call: 3},       // ignition point Cartesian y, normally left to zero
+            // updateFire() is invoked whenever 'flameLength' is specified in 'inputs' object
+            // (which is also present in FireBehavior instances)
+            {key: 'flameLength', value: 0, call: 4},
+        ]
+        // Set all inputs to their default values
+        for(let {key, value} of this.parameters) {
+            this[key] = value
+        }
+        // Set specified parameter values and update all properties
+        this.set(inputs)
     }
     
-    // Updates basic axis & shape properties dependent upon headRos, lwr
-    setEllipse(inputs={}) {
-        // Only assign new values to properties specified in the inputs object
-        // Otherwise, keep the property's current value
-        const {
-            // The following 4 properties would come from a FireBehavior reference input
-            spreadRate = this.headingSpreadRate,
-            headingFromNorth = this.bearing,
-            lengthWidthRatio = this.lengthWidthRatio,
-            flameLength = this.flameLength
-        } = inputs
-        this.headingSpreadRate = spreadRate
-        this.bearing = headingFromNorth
-        this.lengthWidthRatio = lengthWidthRatio
-        this.flameLength = flameLength
-
-        // To complicate matters, the following aliases could also be used
-        if (Object.hasOwn(inputs, 'headingSpreadRate'))
-            this.headingSpreadRate = inputs.headingSpreadRate   // same as spreadRate
-        if (Object.hasOwn(inputs, 'bearing'))
-            this.bearing = inputs.bearing       // same as headingFromNorth
-
-        return this.updateEllipseDependents()
+    // This method may be called whenever needed to provide new input values
+    // and update their dependent properties.
+    set(inputs={}) {
+        // Set all inputs to either their default or specified values
+        let start = 9
+        for(let parm of this.parameters) {
+            if (Object.hasOwn(inputs, parm.key)) {
+                this[parm.key] = inputs[parm.key]
+                start = Math.min(start, parm.call)
+            }
+        }
+        if (start === 1)
+            return this.updateFireEllipse()
+        else if (start === 2)
+            return this.updateElapsedTime()
+        else if (start === 3)
+            return this.updatePosition()
+        else if (start === 4)
+            return this.updateFire()
     }
 
-    updateEllipseDependents() {
-        // Fireline intensity (BTU/ft/s)
-        const flame = this.flameLength
-        this.firelineIntensity = (flame > 0) ? Math.pow(flame / 0.45, 1 / 0.46) : 0
-
+    // Called whenever 'headingSpreadRate' or 'lengthWidthRatio' changes
+    // to update fire ellipse shape
+    updateFireEllipse() {
         // ellipse eccentricity [0..1]
         const lwr = this.lengthWidthRatio
         this.eccentricity = Math.sqrt(lwr * lwr - 1) / lwr
-        // ALternatively, e = sqrt((1 - b*b) / a*a)
-        // this.eccentricity = Math.sqrt(1 - this.minorAxisrate**2 / this.majorAxisRate**2)
+        
+        // Alternatively, e = sqrt((1 - b*b) / a*a)
+        // this.eccentricity = Math.sqrt(1 - this.minorAxisRate**2 / this.majorAxisRate**2)
 
         // backing spread rate (ft/min)
         // BEHAVE and BehavePlus place the ignition point at one of the focii points
@@ -95,43 +98,28 @@ export class FireEllipse {
         // spread rate of the minor semi-axis (ft/min)
         this.hSpreadRate = 0.5 * this.minorExpansionRate
 
-        // expansion rate between the ignition point and center point
+        // expansion rate between the ignition point and center point (ft/min)
         this.gSpreadRate = this.fSpreadRate - this.backingSpreadRate
+
+        // The following is Catchpole & Alexander Equation 10, which produces the same
+        // result as above, but requires knowing 'f' (half the major axis ros) in advance:
+        // const gSpreadRateCatchpole = fSpreadRate * Math.sqrt(1 - lwr**-2)
 
         // Expansion rate of the latus rectum semi-chord (ft/min)
         // length = (2 * b*b) / a
         this.latusRectumSpreadRate = this.hSpreadRate * this.hSpreadRate / this.fSpreadRate
+
         // Alternatively, length = 2a(1-e2)
         // this.latusRectumSpreadRate = this.fSpreadRate * (1 - this.eccentricity**2)
 
-        // The following is Catchpole & Alexander Eq 10, which produces the same
-        // result as above, but requires knowing 'f' (half the major axis ros) in advance 
-        // const gSpreadRateCatchpole = fSpreadRate * Math.sqrt(1 - lwr**-2)
-        
-        // Rotation of ellipse from normal (counter-clockwise)
-        this.degRot = (450-this.bearing ) % 360
-        this.radRot = this.toRadians(this.degRot)
-        this.cosRot = Math.cos(this.radRot)
-        this.sinRot = Math.sin(this.radRot)
+        // Effective (wind plus slope) wind speed (ft/min) estimated from lengthWidthRatio
+        this.effectiveWindSpeed = 88 * (4 * (lwr - 1))
 
-        // Inverse rotation of ellipse back to normal (clockwise)
-        this.cosInvRot = Math.cos(-this.radRot)
-        this.sinInvRot = Math.sin(-this.radRot)
-
-        this.updateElapsedTimeDependents()
-        return this
+        return this.updateElapsedTime()
     }
 
-    // Elapsed time since ignition (min)
-    setElapsedTime(elapsedTime=null) {
-        if (elapsedTime && elapsedTime !== this.elapsedTime) {
-            this.elapsedTime = elapsedTime
-            this.updateElapsedTimeDependents()
-        }
-        return this
-    }
-
-    updateElapsedTimeDependents() {
+    // Called whenever 'elapsedTime' changes to update all distances, area, and perimeter
+    updateElapsedTime() {
         // Distance between the *ignition point* and the fire head
         this.headingDistance = this.headingSpreadRate * this.elapsedTime
         
@@ -159,197 +147,94 @@ export class FireEllipse {
         // Ellipse area (ft2)
         this.area = (Math.PI * this.length * this.width) / 4
 
-        // Ellipse perimeter length (ft) using Ramanujan's approximation.
+        return this.updatePosition()
+    }
+
+    // Ellipse perimeter length (ft) using Ramanujan's approximation.
+    // Placed inside a getter since its makes 3 transcendental Math calls
+    // and is not required to derive any other property
+    get perimeter() {
         const a = this.fDistance, b = this.hDistance
-        const h = Math.pow((a - b), 2) / Math.pow((a + b), 2)
-        this.perimeter = Math.PI * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)))
-
-        // Fire ignition point LCS {x, y} (local coordinate system)
-        this.ignitionLcs = {x: 0, y: 0}
-
-        // Fire head point LCS {x, y} (local coordinate system)
-        this.headLcs = {x: this.headingDistance * this.cosRot, y: this.headingDistance * this.sinRot}
-
-        // Center point LCS {x, y} (local coordinate system)
-        this.centerLcs = {x: this.gDistance * this.cosRot, y: this.gDistance * this.sinRot}
-
-        // Fire back point LCS {x, y} (local coordinate system)
-        this.backLcs = {x: this.backingDistance * this.cosRot, y: this.backingDistance * this.sinRot}
-
-        // Fire right flank point LCS {x, y} (local coordinate system)
-        this.rightLcs = {x: this.width/2 * this.cosRot, y: -this.width/2 * this.sinRot}
-        
-        // Fire left point LCS {x, y} (local coordinate system)
-        this.leftLcs = {x: this.width/2 * this.cosRot, y: this.width/2 * this.sinRot}
-
-        this.updatePcsDependents()
-        return this
-    }
-    
-    // Places the ellipse in the context of a Projected Coordinate System
-    setPcs(ignEast=null, ignNorth=null) {
-        if (ignEast !== null && ignNorth !== null) {
-            // Fire ignition PCS {east, north} (projected coordinate system)
-            this.ignitionPcs = {east: ignEast, north: ignNorth}
-            this.updatePcsDependents()
-        }
+        const h = (a - b)**2 / (a + b)**2
+        return Math.PI * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)))
     }
 
-    updatePcsDependents() {
-        const {east:ignEast, north:ignNorth} = this.ignitionPcs
-        // Fire ellipse center PCS {east, north} (projected coordinate system)
-        this.centerPcs = {
-            east: ignEast + this.gDistance * this.cosRot,
-            north: ignNorth + this.gDistance * this.sinRot}
-        
-        // Fire ellipse head {east, north} (projected coordinate system)
-        this.headPcs = {
-            east: ignEast + this.headingDistance * this.cosRot,
-            north: ignNorth + this.headingDistance * this.sinRot}
-        
-        // Fire ellipse back PCS {east, north} (projected coordinate system)
-        this.backPcs = {
-            east: ignEast + this.backingDistance * this.cosRot,
-            north: ignNorth + this.backingDistance * this.sinRot}
+    // Called whenever 'bearing', 'ignEast', 'ignNorth', 'ignX', or 'ignY' changes
+    updatePosition() {
+        // Rotation of ellipse from normal (counter-clockwise)
+        this.rotationDeg = (450 - this.bearing) % 360   // ellipse rotation degrees counter-clockwise from x-axis
+        this.rotationRad = toRadians(this.rotationDeg)
 
-        // Fire ellipse center PCS {east, north} (projected coordinate system)
-        this.centerPcs = {
-            east: ignEast + this.gDistance * this.cosRot,
-            north: ignNorth + this.gDistance * this.sinRot}
+        this.rotationCos = Math.cos(this.rotationRad)
+        this.rotationSin = Math.sin(this.rotationRad)
 
-        // Fire ellipse right flank PCS {east, north} (projected coordinate system)
-        this.rightPcs = {
-            east: ignEast + this.minorDistance * this.cosRot,
-            north: ignNorth + -this.minorDistance * this.sinRot}
-        
-        // Fire ellipse left flank PCS {east, north} (projected coordinate system)
-        this.leftPcs = {
-            east: ignEast + this.minorDistance * this.cosRot,
-            north: ignNorth + -this.minorDistance * this.sinRot}
+        // Inverse rotation of ellipse back to normal (clockwise)
+        // this.rotationCosInv = Math.cos(-this.rotationRad)
+        // this.rotationSinInv = Math.sin(-this.rotationRad)
 
-        // Fire perimeter PCS at the current fire vector beta
-        this.betaPerimeterPcs = {
-            east: ignEast + this.betaDistance * this.cosRot,
-            north: ignNorth + this.betaDistance * this.sinRot}
-        
-        this.updateFireVectorAngleDependents()
+        // Cannot use getBetaFireVector() for center point position!!!
+        this.centerX = this.ignX + this.gDistance * this.rotationCos
+        this.centerY = this.ignY + this.gDistance * this.rotationSin
+        this.centerE = this.centerX + this.ignEast - this.ignX
+        this.centerN = this.centerY + this.ignNorth - this.ignY
+        return this.updateFire()
+    }
+
+    updateFire() {    
+        const flame = this.flameLength
+        // Fireline intensity (BTU/ft/s) at head of fire
+        // This is scaled back for the beta angles to derived fli, flame length, hpua, scorch
+        const fli = (flame > 0) ? (flame / 0.45)**( 1 / 0.46) : 0
+        this.firelineIntensity = fli
+
+        // Heat per unit area (Btu/ft2)
+        const ros = this.headingSpreadRate
+        this.heatPerUnitArea = (ros > 0) ? (60 * fli / ros) : 0
+
         return this
     }
 
-    // Update the vector angle (degrees counter-clockwise from the fire heading direction)
-    // at which fire behavior and ellipse location is determined
-    // relative to the *ignition point*
-    setFireVectorAngle(betaDegrees=null) {
-        if (betaDegrees && betaDegrees !== this.betaDegrees) {
-            this.betaDegrees = betaDegrees
-            this.updateFireVectorAngleDependents()
-        }
-        return this
+    // Returns fire vector distance, perimeter, and behavior at theta,
+    // the *clockwise* angle from the fire head at the ellipse center point.
+    getThetaFireVector(clockwiseFromHead) {
+        const betaFromHead = calcBetaFromTheta(this, clockwiseFromHead)
+        const beta = this.getBetaFireVector(betaFromHead)
+        beta.theta = clockwiseFromHead
+        return beta
     }
 
-    updateFireVectorAngleDependents() {
-        const beta = this.toRadians(this.betaDegrees)
-        const cosBeta = Math.cos(beta)
-        const sinBeta = Math.sin(beta)
+    // Returns fire vector distance, perimeter, and behavior at beta,
+    // the *clockwise* angle from the fire head at the ignition point.
+    getBetaFireVector(clockwiseFromHead) {
+        // betaFromHead is the *counter-clockwise* rotation from fire heading
+        const betaFromHead = (360 - clockwiseFromHead) % 360
+        const radBeta = toRadians(betaFromHead + this.rotationDeg)
+        const beta = {
+            angle: clockwiseFromHead,
+            bearing: (this.bearing + clockwiseFromHead) % 360}
 
-        // Spread rate (ft/min) at betaDegrees from the fire head
-        const eccent = this.eccentricity
-        this.betaSpreadRate = (this.headingSpreadRate * (1 - eccent)) / (1 - eccent * cosBeta)
+        // Spread rate and distance requires 1 transcendetal
+        // and flame length adds an exponentiation
+        const e = this.eccentricity
+        beta.ratio = (1 - e) / (1 - e * Math.cos(toRadians(betaFromHead)))
+        beta.spreadRate = this.headingSpreadRate * beta.ratio
+        beta.distance = beta.spreadRate * this.elapsedTime
+        const fli = this.firelineIntensity * beta.ratio
+        beta.firelineIntensity = fli
+        beta.flameLength = (fli > 0) ? 0.45 * fli**0.46 : 0
 
-        // Distance (ft) from ignition point to the perimeter at betaDegrees from the fire head
-        this.betaDistance = this.betaSpreadRate * this.elapsedTime
-
-        // Fireline intensity (BTU/ft/s) at betaDegrees from the fire head
-        const betaFli = (this.headingSpreadRate > 0) 
-            ? this.firelineIntensity * this.betaSpreadRate / this.headingSpreadRate : 0
-        this.betaFirelineIntensity = betaFli
-
-        // Byram's (1959) flame length (ft)
-        this.betaFlameLength = (betaFli > 0) ? 0.45 * Math.pow(betaFli, 0.46) : 0
-
-        // Heat per unit area (BTU/ft2)
-        this.betaHeatPerUnitArea = (this.betaSpreadRate > 0)
-            ? 60 * this.betaFirelineIntensity /  this.betaSpreadRate : 0
-
-        this.betaLcs = {
-            x: this.betaDistance * cosBeta,
-            y: this.betaDistance * sinBeta}
-
-        this.betaPerimeterPcs = {
-            east: this.ignEast + this.betaDistance * this.cosRot,
-            north: this.ignNorth + this.betaDistance * this.sinRot}
-        return this
+        // Perimeter position requires 2 more trancendentals
+        beta.x = this.ignX + beta.distance * Math.cos(radBeta)
+        beta.y = this.ignY + beta.distance * Math.sin(radBeta)
+        beta.east = beta.x + this.ignEast - this.ignX
+        beta.north = beta.y + this.ignNorth - this.ignY
+        return beta
     }
-
-    //--------------------------------------------------------------------------
-    // Supporting methods
-    //--------------------------------------------------------------------------
-    
-    getPerimeterPointAtGeometricAngle(thetaDeg) {
-        // Calculate local angle relative to the ellipse's own rotation
-        const phi = this.radians(thetaDeg - this.degRot)
-        const thetaRadians = this.radians(thetaDeg)
-        const rx = this.fDistance
-        const ry = this.hDistance
-
-        // Find the distance (radius) from center to the perimeter at this local angle
-        // Formula: r = (rx * ry) / sqrt((ry * cos(phi))^2 + (rx * sin(phi))^2)
-        const cosPhi = Math.cos(phi)
-        const sinPhi = Math.sin(phi)
-        const r = (rx * ry) / Math.sqrt(Math.pow(ry * cosPhi, 2) + Math.pow(rx * sinPhi, 2))
-
-        // Convert polar coordinates (r, geometricAngle) to Cartesian (x, y)
-        // Note: We use the original geometricAngle to project from the world-space center
-        const x = this.centerLcs.x + r * Math.cos(thetaRadians)
-        const y = this.centerLcs.y + r * Math.sin(thetaRadians)
-        return {x, y}
+    betaBearingToBetaFromHead(betaBearing) {
+        return (360 + betaBearing - this.bearing) % 360
     }
-
-    /**
-     * Calculates the subtended point on the perimeter of a rotated ellipse given
-     * the parametric angle from ellipse center to to the subtending circle's perimeter.
-     * NOTE: this is NOT the geometric angle!
-     */
-    getPerimeterPointAtParametricAngle(thetaDeg) {
-        // Point on unrotated ellipse subtending circle
-        const thetaRadians = this.radians(thetaDeg)
-        const xBase = this.rx * Math.cos(thetaRadians)
-        const yBase = this.ry * Math.sin(thetaRadians)
-
-        // Apply the rotation matrix to the base point
-        // x' = x*cos(rot) - y*sin(rot)
-        // y' = x*sin(rot) + y*cos(rot)
-        const xRotated = xBase * this.cosRot - yBase * this.sinRot
-        const yRotated = xBase * this.sinRot + yBase * this.cosRot
-
-        // Translate back to the ellipse's center
-        return {x: this.center.x + xRotated, y: this.center.y + yRotated}
-    }
-    
-    isPointInEllipse(x, y) {
-        // Translate point to origin relative to ellipse center
-        const dx = x - this.center.x
-        const dy = y - this.center.y
-
-        // Rotate point inversely to align with axis
-        const rotX = dx * this.cosInvRot - dy * this.sinInvRot
-        const rotY = dx * this.sinInvRot + dy * this.cosInvRot
-
-        // Apply the ellipse equation: (x/rx)^2 + (y/ry)^2 <= 1
-        const disc = (rotX*rotX) / (this.rx2) + (rotY * rotY) / (this.ry2)
-        return disc <= 1
-    }
-
-    calcPerimeterPointFromCenter(thetaDegrees) {
-        const parametricAngle = true
-        const inDegrees = true
-        const [x,y] = getPointOnEllipseCodePen(
-            this.centerLcs.x, this.centerLcs.y, // cx, cy
-            this.fDistance, this.hDistance,     // rx, ry
-            thetaDegrees,
-            this.degRot, this.cosRot, this.sinRot,
-            parametricAngle, inDegrees)
-        return {x, y}
+    betaFromHeadToBetaFromBearing(betaFromHead) {
+        return (360 + this.bearing + betaFromHead) % 360
     }
 
     // Returns spread rate from the ellipse *perimeter* (or 'fire front')
@@ -360,122 +245,11 @@ export class FireEllipse {
         const g = this.gSpreadRate
         const h = this.hSpreadRate
         if (f <=0 || h <=0 || g <= 0) return 0
-        const psi = this.toRadians(psiDegrees)
+        const psi = toRadians(psiDegrees)
         const cosPsi = Math.cos(psi)
         const cos2Psi = cosPsi * cosPsi
         const sin2Psi = 1 - cos2Psi
         const ros = g * cosPsi + Math.sqrt((f * f * cos2Psi) + (h * h * sin2Psi))
         return ros
     }
-
-    // -------------------------------------------------------------------------
-    // The following are all 'beta', 'psi', and 'theta' angle computation methods
-    // that probably never need to be called directly by clients.
-    // -------------------------------------------------------------------------
-
-    // Returns the 'beta' degrees from the fire ellipse ignition point
-    // asociated with the 'psi' degrees at the perimeter from the heading iretcion.
-    // Unimplemented by BehavePlus
-    calcBetaFromPsi(psiDegrees) {
-        const thetaDegrees = this.calcThetaFromPsi(psiDegrees)
-        return this.calcBetaFromTheta(thetaDegrees)
-    }
-
-    // Used only by betaFromPsi(), and unused by BehavePlus
-    // Note: at thetaDeg 162, betaDeg suddenly drops from 87.52 deg to 0
-    // where it remains until thetaDeg 199 when it pops back up to -87.52
-    calcBetaFromTheta(thetaDegrees) {
-        const f = this.fSpreadRate
-        const g = this.gSpreadRate
-        const h = this.hSpreadRate
-        const theta = this.toRadians(thetaDegrees)
-        // The following are from Catchpole (1982) Eq 2
-        const y = h * Math.sin(theta)       // y = R * t * h * sin(theta)
-        const x = g + f * Math.cos(theta)   // x = R * t * (g + f * cos(theta))
-        if (x === 0) {
-            // theta intercepts perimeter at one of the beta (focus) latus rectum end points
-            // so beta is either at 90 or 270 degrees
-            return (thetaDegrees < 180) ? 90 : 270
-        }
-        let beta = Math.atan(y/x)
-        // Quandrant adjustment
-        if (beta < 0) beta +=  Math.PI
-        if (thetaDegrees > 180) beta += Math.PI
-        return this.toDegrees(beta)
-    }
-
-    // Returns psi degrees given beta degrees
-    calcPsiFromBeta(betaDegrees) {
-        const thetaDegrees = this.calcThetaFromBeta(betaDegrees)
-        return this.calcPsiFromTheta(thetaDegrees)
-    }
-
-    // Catchpole et.al. (1982) Equation 6
-    // Used only by psiFromBeta()
-    calcPsiFromTheta(thetaDeg) {
-        const f = this.fSpreadRate
-        const h = this.hSpreadRate
-        if (f * h * thetaDeg <= 0) return 0
-        const theta = this.toRadians(thetaDeg)
-        const tanPsi = (Math.tan(theta) * f) / h
-        let psi = Math.atan(tanPsi)
-        // psi += ( psi < 0) ? pi : 0
-        // psi += ( theta > pi) ? pi : 0
-        // Quadrant adjustment
-        // 1st quadrant needs no adjustment
-        if (theta <= 0.5 * Math.PI) { /* do nothing */ }
-        // 2nd and 3rd quadrants
-        else if (theta > 0.5 * Math.PI && theta <= 1.5 * Math.PI) { psi += Math.PI }
-        // 4th quadrant
-        else if (theta > 1.5 * Math.PI) { psi += 2 * Math.PI }
-        const psiDeg = this.toDegrees(psi)
-        return psiDeg
-    }
-
-    // Given the polar angle 'beta' from the fire ignition point to any point on the perimeter,
-    // this function determines the angle 'theta' from the fire ellipse center to that point.
-    // This is Catchpole et.al. (1982) Equation 5.
-    // Used only by psiFromBeta()
-    calcThetaFromBeta(betaDegrees) {
-        const f = this.fSpreadRate
-        const g = this.gSpreadRate
-        const h = this.hSpreadRate
-        if (f <= 0 || h <= 0) return 0
-        const b = this.toRadians(betaDegrees)
-        const cosB = Math.cos(b)
-        const cos2B = cosB * cosB
-        const sin2B = 1 - cos2B
-        const f2 = f * f
-        const g2 = g * g
-        const h2 = h * h
-        const term = Math.sqrt(h2 * cos2B + (f2 - g2) * sin2B)  // term used in numerator
-        const num = h * cosB * term - f * g * sin2B
-        const denom = h2 * cos2B + f2 * sin2B
-        const cosTheta = num / denom
-        let theta = Math.acos(cosTheta)               // theta in radians when beta radians < PI
-        if (b >= Math.PI) theta = 2 * Math.PI - theta // theta in radians when beta >= PI
-        // Convert theta radians to degrees
-        let thetaDeg = this.toDegrees(theta)
-        return thetaDeg
-    }
-
-    // Used only by betaFromPsi(), Unused by BehavePlus
-    calcThetaFromPsi(psiDegrees) {
-        const f = this.fSpreadRate
-        const h = this.hSpreadRate
-        if ( f <= 0 ) return 0
-        const psi = this.toRadians(psiDegrees)
-        const tanTheta = Math.tan(psi) * h / f
-        let theta = Math.atan(tanTheta)
-        // Quadrant adjustment
-        if (psi <= 0.5 * Math.PI) { /* do nothing */ }
-        else if (psi > 0.5 * Math.PI && psi <= 1.5 * Math.PI ) { theta += Math.PI }
-        else if (psi > 1.5 * Math.PI ) { theta += 2 * Math.PI }
-        // Convert theta radians to degrees
-        return this.toDegrees(theta)
-    }
-
-    toDegrees(radians) {return radians * 180 / Math.PI}
-
-    toRadians(degrees) {return degrees * Math.PI / 180 }
 }

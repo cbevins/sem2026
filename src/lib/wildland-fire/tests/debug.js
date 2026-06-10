@@ -1,8 +1,37 @@
+// Mimics fireEllipse.test.js without the tests
 import { StandardFuelModelCatalog } from '../src/StandardFuelModelCatalog.js'
 import { FuelBed } from '../src/FuelBed.js'
 import { FuelIgnition } from '../src/FuelIgnition.js'
 import { FireBehavior } from '../src/FireBehavior.js'
 import { FireEllipse } from '../src/FireEllipse.js'
+
+const elapsed = 60
+
+const bpProps = {
+    // inputs
+    headingSpreadRate: [18.551680325448835, 48.47042599399056],
+    flameLength: [6.9996889013229229, 16.35631663317114],
+    bearing: [87.573367385837855, 87.613728665173383],
+    lengthWidthRatio: [3.5015680219321221, 3.5015819412846603],
+    elapsedTime: [elapsed, elapsed],
+    // setEllipse() outputs
+    firelineIntensity: [389.95413667947145, 2467.9286450361865],
+    eccentricity: [0.95835298387126711, 0.95835332217217739],
+    backingSpreadRate: [0.39452649041938642, 1.0307803973340242],
+    majorExpansionRate: [0.39452649041938642 + 18.551680325448835, 1.0307803973340242 + 48.47042599399056],
+    minorExpansionRate: [2 * 2.7053889424963877, 2 * 7.0684061120619655],
+    fSpreadRate: [9.4731034079341114, 1485.0361917397374 / elapsed],
+    hSpreadRate: [2.7053889424963877, 424.10436672371787 / elapsed],
+    gSpreadRate: [9.0785769175147255, 1423.189367899696 / elapsed],
+    headingDistance: [1113.1008195269301, 2908.2255596394334],
+    backingDistance: [23.671589425163184, 61.846823840041452],
+    fDistance: [elapsed * 9.4731034079341114, 1485.0361917397374],
+    hDistance: [elapsed * 2.7053889424963877, 424.10436672371787],
+    gDistance: [elapsed * 9.0785769175147255, 1423.189367899696],
+    // latusRectumDistance: [null, null],
+    length: [1136.7724089520932, 2970.0723834794749],
+    width: [324.64667309956644, 848.20873344743575],
+}
 
 const behaviorConfig = {limitSpreadRateByReactionIntensity: true,
     limitSpreadRateByEffWindSpeed: false}
@@ -17,9 +46,11 @@ const fuelBed = new FuelBed(fuelModel, curingConditions, config)
 const fuelIgnition = new FuelIgnition(fuelBed, moistureConditions, config)
 const fireBehavior = new FireBehavior(fuelIgnition, windSlopeConditions,
     behaviorConfig, config)
-
-const elapsed = 60
 const betaDegrees = 360 - 42.573367385837855 // FM124: 360 - 42.613728665173383
-const fireEllipse = new FireEllipse(fireBehavior, config)
-            .setElapsedTime(elapsed)
-            .setFireVectorAngle(betaDegrees)
+const fireEllipse = new FireEllipse({...fireBehavior, elapsedTime: elapsed})
+for(let [prop, values] of Object.entries(bpProps)) {
+    if (Math.abs(values[0] - fireEllipse[prop]) > 0.01)
+    console.log(`FM010 prop ${prop} expect value ${values[0]}, received ${fireEllipse[prop]}`)
+}
+
+// console.log(fireEllipse)

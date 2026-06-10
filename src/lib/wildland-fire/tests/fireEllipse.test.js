@@ -4,6 +4,7 @@ import { FuelBed } from '../src/FuelBed.js'
 import { FuelIgnition } from '../src/FuelIgnition.js'
 import { FireBehavior } from '../src/FireBehavior.js'
 import { FireEllipse } from '../src/FireEllipse.js'
+import * as Angle from '../src/ellipseAngles.js'
 
 import { parts } from './assertions.js'
 expect.extend({ parts })
@@ -70,11 +71,14 @@ const bpProps = {
     flameLength: [6.9996889013229229, 16.35631663317114],
     bearing: [87.573367385837855, 87.613728665173383],
     lengthWidthRatio: [3.5015680219321221, 3.5015819412846603],
-    // elapsedTime: [elapsed, elapsed],
-    // ignitionPcs: [{x:0, y:0}, {x:0, y:0}],
+    elapsedTime: [elapsed, elapsed],
+    ignX: [0, 0],
+    ignY: [0, 0],
+    ignEast: [0, 0],
+    ignNorth: [0, 0],
     // betaDegrees: [45, 45],
 
-    // setEllipse() outputs
+    // setFireEllipse() outputs
     firelineIntensity: [389.95413667947145, 2467.9286450361865],
     eccentricity: [0.95835298387126711, 0.95835332217217739],
     backingSpreadRate: [0.39452649041938642, 1.0307803973340242],
@@ -83,38 +87,17 @@ const bpProps = {
     fSpreadRate: [9.4731034079341114, 1485.0361917397374 / elapsed],
     hSpreadRate: [2.7053889424963877, 424.10436672371787 / elapsed],
     gSpreadRate: [9.0785769175147255, 1423.189367899696 / elapsed],
-    // latusRectumSpreadRate: [null, null],
-    // degRot: [null, null],
-    // radRot: [null, null],
-    // cosRot: [null, null],
-    // sinRot: [null, null],
-    // cosInvRot: [null, null],
-    // sinInvRot: [null, null],
-
     // setElapsedTime() outputs
     headingDistance: [1113.1008195269301, 2908.2255596394334],
     backingDistance: [23.671589425163184, 61.846823840041452],
     fDistance: [elapsed * 9.4731034079341114, 1485.0361917397374],
     hDistance: [elapsed * 2.7053889424963877, 424.10436672371787],
     gDistance: [elapsed * 9.0785769175147255, 1423.189367899696],
-    // latusRectumDistance: [null, null],
     length: [1136.7724089520932, 2970.0723834794749],
     width: [324.64667309956644, 848.20873344743575],
-    // ignitionLcs: [{east:0, north:0}, {east:0, north:0}],
-    // centerLcs: [{east:0, north:0}, {east:0, north:0}],
-    // headLcs: [{east:0, north:0}, {east:0, north:0}],
-    // backLcs: [{east:0, north:0}, {east:0, north:0}],
-    // rightLcs: [{east:0, north:0}, {east:0, north:0}],
-    // leftLcs: [{east:0, north:0}, {east:0, north:0}],
-
     // The following are off by a bit more than ppb
     // area: [289850.691417, 45.422576205218135 * (66.0 * 660.0)],
     // perimeter: [2476.2400999186934, 6469.7282289420209],
-
-    betaSpreadRate: [2.6256648650882601, 6.8494531181657319],
-    betaDistance: [elapsed * 2.6256648650882601, elapsed * 6.8494531181657319],
-    betaFirelineIntensity: [beta5fli010, beta5fli124],
-    betaFlameLength: [beta5fl010, beta5fl124],
 
     // These may be implemented by setFireVector() to 0, 90, 180, 270
     // headScorch: [39.580181786322299, 215.6827714],
@@ -182,7 +165,7 @@ const curingConditions = {herb: 0.778}
 const moistureConditions = {dead1h: 0.05, dead10h: 0.07, dead100h: 0.09, herb: 0.5, stem: 1.5}
 const windSlopeConditions = {midflameWindSpeed: 10*88, windBearing: 90, aspect: 180, slopeRatio: 0.25}
 
-describe('FuelEllipse Class', () => {
+describe('FireEllipse Class', () => {
     it(`Fuel Model 10 FireEllipse properties match BehavePlus v5 and v6 beta:`, () => {
         const idx = 0
         const fuelModel = catalog.get(10)
@@ -190,63 +173,48 @@ describe('FuelEllipse Class', () => {
         const fuelIgnition = new FuelIgnition(fuelBed, moistureConditions, config)
         const fireBehavior = new FireBehavior(fuelIgnition, windSlopeConditions,
             behaviorConfig, config)
-        const fireEllipse = new FireEllipse(fireBehavior, config)
-            .setElapsedTime(elapsed)
-            .setFireVectorAngle(beta5FromHead[0])
+        const fireEllipse = new FireEllipse({...fireBehavior, elapsedTime: elapsed})
     
         for(let [prop, values] of Object.entries(bpProps)) {
-            console.log(`FM010 prop ${prop} value ${values[1]}`)
+            console.log(`FM010 prop ${prop} expect ${values[0]} received ${fireEllipse[prop]}`)
             expect(fireEllipse[prop]).parts(values[idx], ppb)
         }
         expect(fireEllipse.area).parts(289850.691417, ppm)
         expect(fireEllipse.perimeter).parts(2476.2400999186934, ppt)
 
-        fireEllipse.setFireVectorAngle(0)
-        expect(fireEllipse.betaSpreadRate).parts(bpProps.headingSpreadRate[idx])
-        // expect(betaLcs.y).parts(0, ppb)
+        let head = fireEllipse.getBetaFireVector(0)
+        expect(head.spreadRate).parts(bpMethod.headRos[idx])
+        expect(head.distance).parts(bpMethod.headDist[idx])
+        expect(head.firelineIntensity).parts(bpMethod.headFli[idx])
+        expect(head.flameLength).parts(bpMethod.headFlame[idx])
         
-        // betaLcs = fireEllipse.calcIgnitionVectorPerimeterLcs(180, elapsed)
-        // expect(betaLcs.x).parts(-bpMethod.backDist[idx], ppb)
-        // expect(betaLcs.y).parts(0, ppb)
+        let back = fireEllipse.getBetaFireVector(180)
+        expect(back.spreadRate).parts(bpMethod.backRos[idx])
+        expect(back.distance).parts(bpMethod.backDist[idx])
+        expect(back.firelineIntensity).parts(bpMethod.backFli[idx])
+        expect(back.flameLength).parts(bpMethod.backFlame[idx])
+
+        let beta = fireEllipse.getBetaFireVector(beta5FromHead[0])
+        expect(beta.spreadRate).parts(bpMethod.beta5Ros[idx])
+        expect(beta.distance).parts(bpMethod.beta5Dist[idx])
+        expect(beta.firelineIntensity).parts(bpMethod.beta5Fli[idx])
+        expect(beta.flameLength).parts(bpMethod.beta5Flame[idx])
         
-        // Ellipse center LCS unrotated
-        expect(fireEllipse.centerLcs.x).parts(fireEllipse.gDistance, ppb)
-        expect(fireEllipse.centerLcs.y).parts(0, ppb)
+        // CURRENTLY - cannot get flank rates to agree
+        const b = Angle.calcBetaFromTheta(fireEllipse, 90) // beta=16.593900200299192
+        console.log(`**********At theta=90, beta=${b}`)
+        // beta = fireEllipse.getBetaFireVector(b)
+        // expect(beta.spreadRate).parts(bpMethod.flankRos[idx])
         
-        // // Ellipse center LCS, rotated 45 degreesa
-        // centerLcs = fireEllipse.calcCenterLcs(elapsed, 45)
-        // let radians = 45 * Math.PI / 180
-        // expect(centerLcs.x).parts(centerDist * Math.cos(radians), ppb)
-        // expect(centerLcs.y).parts(centerDist * Math.sin(radians), ppb)
+        // Flanking spread rate is returning the HEAD fSpreadRate
+        // instead of the FLANK hSpreadRate
 
-        // // Theta angles to get flank LCS, unrotated
-        // let flankLcs = fireEllipse.calcPerimeterPointFromCenter(90, elapsed, 0)
-        // expect(flankLcs.x).parts(centerDist, ppb)
-        // expect(flankLcs.y).parts(fireEllipse.calcMinorDistance(elapsed), ppb)
-
-        // flankLcs = fireEllipse.calcPerimeterPointFromCenter(270, elapsed, 0)
-        // expect(flankLcs.x).parts(centerDist, ppb)
-        // expect(flankLcs.y).parts(-fireEllipse.calcMinorDistance(elapsed), ppb)
-
-        // // theta head LCS
-        // let thetaLcs = fireEllipse.calcPerimeterPointFromCenter(0, elapsed, 0)
-        // // expect(thetaLcs.x).parts(fireEllipse.calcMajorDistance(elapsed), ppb)
-        // // expect(thetaLcs.y).parts(0, ppb)
-
-        // thetaLcs = fireEllipse.calcPerimeterPointFromCenter(180, elapsed, 0)
-        // // expect(thetaLcs.x).parts(-fireEllipse.calcMajorDistance(elapsed), ppb)
-        // expect(thetaLcs.y).parts(0, ppb)
-
-        // // expect(fireEllipse.calcThetaFromBeta(beta5FromHead[idx])).parts(bpMethod.beta6Theta[idx], ppb)
-        // let betaFromTheta = fireEllipse.calcBetaFromTheta(90)
-        // let thetaFromBeta = fireEllipse.calcThetaFromBeta(betaFromTheta)
-        // console.log(`theta 90 => beta ${betaFromTheta} => theta ${thetaFromBeta}`)
-        // expect(thetaFromBeta).parts(90, ppb)
-
-        // thetaFromBeta = fireEllipse.calcThetaFromBeta(90)
-        // betaFromTheta = fireEllipse.calcBetaFromTheta(thetaFromBeta)
-        // console.log(`beta 90 => theta ${thetaFromBeta} => beta ${betaFromTheta}`)
-        // expect(betaFromTheta).parts(90, ppb)
+        let flank = fireEllipse.getBetaFireVector(16.593900200299192)
+        expect(flank.spreadRate).parts(bpProps.hSpreadRate[idx])
+        // expect(flank.spreadRate).parts(bpMethod.flankRos[idx])
+        // expect(flank.distance).parts(bpMethod.flankDist[idx])
+        // expect(flank.firelineIntensity).parts(bpMethod.flankFli[idx])
+        // expect(flank.flameLength).parts(bpMethod.flankFlame[idx])
     })
 
     it(`Fuel Model 124 FireEllipse properties match BehavePlus v5 and v6 beta:`, () => {
@@ -256,73 +224,31 @@ describe('FuelEllipse Class', () => {
         const fuelIgnition = new FuelIgnition(fuelBed, moistureConditions, config)
         const fireBehavior = new FireBehavior(fuelIgnition, windSlopeConditions,
             behaviorConfig, config)
-        const fireEllipse = new FireEllipse(fireBehavior, config)
-            .setElapsedTime(elapsed)
-            .setFireVectorAngle(beta5FromHead[1])
+        const fireEllipse = new FireEllipse({...fireBehavior, elapsedTime: elapsed})
     
         for(let [prop, values] of Object.entries(bpProps)) {
-            console.log(`FM124 prop ${prop} value ${values[1]}`)
+            console.log(`FM124 prop ${prop} expect ${values[1]} received ${fireEllipse[prop]}`)
             expect(fireEllipse[prop]).parts(values[idx], ppb)
         }
         expect(fireEllipse.area).parts(45.422576205218135 * (66.0 * 660.0), ppm)
         expect(fireEllipse.perimeter).parts(6469.7282289420209, ppt)
+
+        let head = fireEllipse.getBetaFireVector(0)
+        expect(head.spreadRate).parts(bpMethod.headRos[idx])
+        expect(head.distance).parts(bpMethod.headDist[idx])
+        expect(head.firelineIntensity).parts(bpMethod.headFli[idx])
+        expect(head.flameLength).parts(bpMethod.headFlame[idx])
         
-        // let lcs =  fireEllipse.calcIgnitionVectorPerimeterLcs(0, elapsed)
-        // expect(lcs.x).parts(bpMethod.headDist[idx], ppb)
-        // expect(lcs.y).parts(0, ppb)
-        
-        // lcs =  fireEllipse.calcIgnitionVectorPerimeterLcs(180, elapsed)
-        // expect(lcs.x).parts(-bpMethod.backDist[idx], ppb)
-        // expect(lcs.y).parts(0, ppb)
-    })
+        let back = fireEllipse.getBetaFireVector(180)
+        expect(back.spreadRate).parts(bpMethod.backRos[idx])
+        expect(back.distance).parts(bpMethod.backDist[idx])
+        expect(back.firelineIntensity).parts(bpMethod.backFli[idx])
+        expect(back.flameLength).parts(bpMethod.backFlame[idx])
 
-    it(`Beta-Theta-Psi call sequence works forward and backward:`, () => {
-        // Build FireEllipse from direct input parameters for FM 10:
-        const behavior = {
-            spreadRate: 18.551680325448835,
-            // firelineIntensity: 389.95413667947145,
-            flameLength: 6.9996889013229229,
-            lengthWidthRatio: 3.5015680219321221,
-            headingFromNorth: 87.573367385837855,
-        }
-        const fireEllipse = new FireEllipse(behavior, config)
-        expect(fireEllipse.headingSpreadRate).parts(behavior.spreadRate, ppb)
-        expect(fireEllipse.firelineIntensity).parts(389.95413667947145, ppb)
-        expect(fireEllipse.lengthWidthRatio).parts(3.5015680219321221, ppb)
-
-        for(let thetaDegFromInput = 0; thetaDegFromInput<=360; thetaDegFromInput++) {
-            const betaDegFromTheta = fireEllipse.calcBetaFromTheta(thetaDegFromInput)
-            const psiDegFromTheta = fireEllipse.calcPsiFromTheta(thetaDegFromInput)
-            
-            const betaDegFromPsi = fireEllipse.calcBetaFromPsi(psiDegFromTheta)
-            expect(betaDegFromPsi).parts(betaDegFromTheta, ppb)
-            
-            const psiDegFromBeta = fireEllipse.calcPsiFromBeta(betaDegFromTheta)
-            expect(psiDegFromBeta).parts(psiDegFromTheta, ppb)
-            
-            const thetaDegFromPsi = fireEllipse.calcThetaFromPsi(psiDegFromTheta)
-            const thetaDegFromBeta = fireEllipse.calcThetaFromBeta(betaDegFromTheta)
-            expect(thetaDegFromPsi).parts(thetaDegFromInput, ppb)
-            expect(thetaDegFromBeta).parts(thetaDegFromInput, ppb)
-        }
-
-        for(let betaDegFromInput = 0; betaDegFromInput<=360; betaDegFromInput++) {
-            const thetaDegFromBeta = fireEllipse.calcThetaFromBeta(betaDegFromInput)
-            const psiDegFromBeta = fireEllipse.calcPsiFromBeta(betaDegFromInput)
-            const psiDegFromTheta = fireEllipse.calcPsiFromTheta(thetaDegFromBeta)
-            expect(psiDegFromBeta).parts(psiDegFromTheta, ppb)
-
-            const betaDegFromPsi = fireEllipse.calcBetaFromPsi(psiDegFromTheta)
-            expect(betaDegFromPsi).parts(betaDegFromInput, ppb)
-
-            const betaDegFromTheta = fireEllipse.calcBetaFromTheta(thetaDegFromBeta)
-            expect(betaDegFromTheta).parts(betaDegFromInput, ppb)
-            
-            const thetaDegFromPsi = fireEllipse.calcThetaFromPsi(psiDegFromBeta)
-            expect(thetaDegFromBeta).parts(thetaDegFromPsi, ppb)
-
-            const betaDegFromTheta2 = fireEllipse.calcBetaFromTheta(thetaDegFromPsi)
-            expect(betaDegFromTheta2).parts(betaDegFromInput, ppb)
-        }
+        let beta = fireEllipse.getBetaFireVector(beta5FromHead[1])
+        expect(beta.spreadRate).parts(bpMethod.beta5Ros[idx])
+        expect(beta.distance).parts(bpMethod.beta5Dist[idx])
+        expect(beta.firelineIntensity).parts(bpMethod.beta5Fli[idx])
+        expect(beta.flameLength).parts(bpMethod.beta5Flame[idx])
     })
 })

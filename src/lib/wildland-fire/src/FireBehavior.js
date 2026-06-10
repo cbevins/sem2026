@@ -144,11 +144,11 @@ export class FireBehavior {
         const lengthWidthRatio = 1 + 0.25 * (p.weff / 88)
 
         // Save whatever is needed for use further downstream
-        this.spreadRate = p.ros
+        this.headingSpreadRate = p.ros
         this.effWindFactor = p.phi
         this.effWindSpeed = p.weff
         this.headingFromUpslope = fireHeadingFromUpslope
-        this.headingFromNorth = fireHeadingFromNorth
+        this.bearing = fireHeadingFromNorth
         this.heatPerUnitArea = heatPerUnitArea
         this.firelineIntensity = firelineIntensity
         this.flameLength = flameLength

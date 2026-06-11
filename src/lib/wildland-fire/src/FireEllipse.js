@@ -20,7 +20,7 @@
  * length, and perimeter position at any time. Finally, by providing an ignition point
  * location the ellipse can be placed into a geographical context of the user's choosing.
  */
-import { calcBetaFromTheta, toRadians } from './ellipseAngles.js'
+import { toRadians } from './ellipseAngles.js'
 
 export class FireEllipse {
     constructor(inputs={}) {
@@ -192,49 +192,6 @@ export class FireEllipse {
         this.heatPerUnitArea = (ros > 0) ? (60 * fli / ros) : 0
 
         return this
-    }
-
-    // Returns fire vector distance, perimeter, and behavior at theta,
-    // the *clockwise* angle from the fire head at the ellipse center point.
-    getThetaFireVector(clockwiseFromHead) {
-        const betaFromHead = calcBetaFromTheta(this, clockwiseFromHead)
-        const beta = this.getBetaFireVector(betaFromHead)
-        beta.theta = clockwiseFromHead
-        return beta
-    }
-
-    // Returns fire vector distance, perimeter, and behavior at beta,
-    // the *clockwise* angle from the fire head at the ignition point.
-    getBetaFireVector(clockwiseFromHead) {
-        // betaFromHead is the *counter-clockwise* rotation from fire heading
-        const betaFromHead = (360 - clockwiseFromHead) % 360
-        const radBeta = toRadians(betaFromHead + this.rotationDeg)
-        const beta = {
-            angle: clockwiseFromHead,
-            bearing: (this.bearing + clockwiseFromHead) % 360}
-
-        // Spread rate and distance requires 1 transcendetal
-        // and flame length adds an exponentiation
-        const e = this.eccentricity
-        beta.ratio = (1 - e) / (1 - e * Math.cos(toRadians(betaFromHead)))
-        beta.spreadRate = this.headingSpreadRate * beta.ratio
-        beta.distance = beta.spreadRate * this.elapsedTime
-        const fli = this.firelineIntensity * beta.ratio
-        beta.firelineIntensity = fli
-        beta.flameLength = (fli > 0) ? 0.45 * fli**0.46 : 0
-
-        // Perimeter position requires 2 more trancendentals
-        beta.x = this.ignX + beta.distance * Math.cos(radBeta)
-        beta.y = this.ignY + beta.distance * Math.sin(radBeta)
-        beta.east = beta.x + this.ignEast - this.ignX
-        beta.north = beta.y + this.ignNorth - this.ignY
-        return beta
-    }
-    betaBearingToBetaFromHead(betaBearing) {
-        return (360 + betaBearing - this.bearing) % 360
-    }
-    betaFromHeadToBetaFromBearing(betaFromHead) {
-        return (360 + this.bearing + betaFromHead) % 360
     }
 
     // Returns spread rate from the ellipse *perimeter* (or 'fire front')

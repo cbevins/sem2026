@@ -7,10 +7,14 @@
 //  - hSpreadRate
 // -------------------------------------------------------------------------
 
+// NOTE ON ANGLE PARAMETERS!!!
+// All function angle arguements are ROTATIONAL degrees COUNTER-CLOCKWISE from fire heading
+
 // Returns the 'beta' counter-clockwise rotation degrees from the fire heading direction
 // from the fire ellipse ignition point
 // asociated with the 'psi' degrees at the perimeter from the heading direction.
 // Unimplemented by BehavePlus
+// psiDegrees is rotational dgrees counter-clockwise from fire head
 export function calcBetaFromPsi(fireEllipse, psiDegrees) {
     const thetaDegrees = calcThetaFromPsi(fireEllipse, psiDegrees)
     return calcBetaFromTheta(fireEllipse, thetaDegrees)
@@ -19,6 +23,7 @@ export function calcBetaFromPsi(fireEllipse, psiDegrees) {
 // Used only by betaFromPsi(), and unused by BehavePlus
 // Note: at thetaDeg 162, betaDeg suddenly drops from 87.52 deg to 0
 // where it remains until thetaDeg 199 when it pops back up to -87.52
+// thetaDegrees is rotational dgrees counter-clockwise from fire head
 export function calcBetaFromTheta(fireEllipse, thetaDegrees) {
     const f = fireEllipse.fSpreadRate
     const g = fireEllipse.gSpreadRate
@@ -40,6 +45,7 @@ export function calcBetaFromTheta(fireEllipse, thetaDegrees) {
 }
 
 // Returns psi degrees given beta degrees
+// betaDegrees is rotational dgrees counter-clockwise from fire head
 export function calcPsiFromBeta(fireEllipse, betaDegrees) {
     const thetaDegrees = calcThetaFromBeta(fireEllipse, betaDegrees)
     return calcPsiFromTheta(fireEllipse, thetaDegrees)
@@ -47,6 +53,7 @@ export function calcPsiFromBeta(fireEllipse, betaDegrees) {
 
 // Catchpole et.al. (1982) Equation 6
 // Used only by psiFromBeta()
+// thetaDegrees is rotational dgrees counter-clockwise from fire head
 export function calcPsiFromTheta(fireEllipse, thetaDeg) {
     const f = fireEllipse.fSpreadRate
     const h = fireEllipse.hSpreadRate
@@ -72,6 +79,7 @@ export function calcPsiFromTheta(fireEllipse, thetaDeg) {
 // this function determines the angle 'theta' from the fire ellipse center to that point.
 // This is Catchpole et.al. (1982) Equation 5.
 // Used only by psiFromBeta()
+// betaDegrees is rotational dgrees counter-clockwise from fire head
 export function calcThetaFromBeta(fireEllipse, betaDegrees) {
     const f = fireEllipse.fSpreadRate
     const g = fireEllipse.gSpreadRate
@@ -94,6 +102,7 @@ export function calcThetaFromBeta(fireEllipse, betaDegrees) {
 }
 
 // Used only by betaFromPsi(), Unused by BehavePlus
+// psiDegrees is rotational dgrees counter-clockwise from fire head
 export function calcThetaFromPsi(fireEllipse, psiDegrees) {
     const f = fireEllipse.fSpreadRate
     const h = fireEllipse.hSpreadRate

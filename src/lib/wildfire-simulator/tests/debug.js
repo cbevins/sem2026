@@ -3,6 +3,7 @@ import { FuelBed } from '../src/FuelBed.js'
 import { FuelIgnition } from '../src/FuelIgnition.js'
 import { FireBehavior } from '../src/FireBehavior.js'
 import { FireEllipse } from '../src/FireEllipse.js'
+import { BetaFireVector } from '../src/FireVector.js'
 
 // Inputs
 const inputs = {
@@ -32,12 +33,15 @@ const inputs = {
     ignEast: 0,
     ignNorth: 0,
 }
+const beta5FromHead  = [360 - 42.573367385837855, 360 - 42.613728665173383]
 
 const catalog = new StandardFuelModelCatalog()
 const fuelModel = catalog.get(10)
 const fuelBed = new FuelBed({fuelModel, ...inputs})
 const fuelIgnition = new FuelIgnition({fuelBed, ...inputs})
 const fireBehavior = new FireBehavior({fuelIgnition, ...inputs})
-// Note that fireBehavior must be spread as we use its props, and not as a reference
+// Note that the fireBehavior instance must be spread,
+// as FireEllipse uses its props directly, and NOT indirectly through its reference
 const fireEllipse = new FireEllipse({...fireBehavior, ...inputs})
-console.log(fireEllipse)
+const betaVector = new BetaFireVector(fireEllipse, beta5FromHead[0])
+console.log(betaVector)

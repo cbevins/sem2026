@@ -1,32 +1,49 @@
 import { FuelIgnition } from "./FuelIgnition.js"
 
 export class FireBehavior {
-    constructor(inputs) {
-        // 'fuelIgnition' is a required property, and must be a FuelModel instance
-        if (inputs?.fuelIgnition === 'undefined')
-            throw new Error(`new FireBehavior() was not passed an inputs '{fuelIgnition}' reference.`)
-        if (!(inputs?.fuelIgnition instanceof FuelIgnition))
-            throw new Error(`new FireBehavior({fuelIgnition}) is not an instance of FuelIgnition.`)
+        static Inputs = [
+        {key: 'fuelIgnition', desc: 'FuelIgnition object',
+            value: null, type: 'FuelIgnition', order: 1},
+        {key: 'midflameWindSpeed', desc: 'Wind speed at midflame height',
+            value: 0, type: 'quantity', units: 'ft/min', min: 0, max: 40*88, order: 1},
+        {key: 'windBearing', desc: 'Wind heading direction, degrees clockwise from north',
+            value: 0, type: 'quantity', units: 'degrees', min: 0, max: 360, order: 1},
+        {key: 'aspect', desc: 'Terrain aspect (down-slope direction), degrees clockwise from north',
+            value: 0, type: 'quantity', units: 'degrees', order: 1},
+        {key: 'slopeRatio', desc: 'Terrain slope steepness ratio of vertical rise to horizontal reach',
+            value: 0, type: 'ratio', min: 0, max: 58, order: 1},    // tan(89deg) = 57.2
+        {key: 'limitSpreadRateByReactionIntensity', desc: 'Apply Rothermels spread rate limit based on wind/fire energy ratio',
+            value: true, type: 'boolean', order: 1},
+        {key: 'limitSpreadRateByEffWindSpeed', desc: 'Apply Andrews spread rate limit based on effective wind speed',
+            value: false, type: 'boolean', order: 1},
+    ]
 
-        // Set default parameter values
-        const {midflameWindSpeed=0, // ft/min
-            windBearing=0,          // heading direction, compass degrees clockwise from north 
-            aspect=180,             // down-slope direction, compass degrees clockwise from north 
-            slopeRatio=0,            // terrain rise / reach
-            limitSpreadRateByReactionIntensity = true,
-            limitSpreadRateByEffWindSpeed = false
-        } = inputs
-        this.midflameWindSpeed = midflameWindSpeed
-        this.windBearing = windBearing
-        this.aspect = aspect
-        this.slopeRatio = slopeRatio
-        this.limitSpreadRateByReactionIntensity = limitSpreadRateByReactionIntensity
-        this.limitSpreadRateByEffWindSpeed = limitSpreadRateByEffWindSpeed
+    constructor(inputs) {
+        // Initialize all input parameters to either their default values
+        // or a value specified in the 'inputs' object
+        for(let {key, value} of FireBehavior.Inputs) {
+            this[key] = value
+            if (Object.hasOwn(inputs, key))
+                this[key] = inputs[key]
+        }
+
+        // 'fuelIgnition' is a required property, and must be a FuelModel instance
+        if (this.fuelIgnition === null)
+            throw new Error(`new FireBehavior(inputs) object does not have the required '{fuelIgnition}' property.`)
+        if (!(this.fuelIgnition instanceof FuelIgnition))
+            throw new Error(`new FireBehavior({fuelIgnition}) is not a valid FuelIgnition object.`)
 
         this.set(inputs)
     }
 
     set(inputs={}) {
+        // Update values of all properties present in the 'inputs' object
+        for(let {key} of FuelIgnition.Inputs) {
+            if (Object.hasOwn(inputs, key)) {
+                this[key] = inputs[key]
+            }
+        }
+
         // The constructor ensured that inputs.fuelIgnition exists
         const fuelIgnition = inputs.fuelIgnition
         const {noWindSpreadRate, reactionIntensity} = fuelIgnition
@@ -34,20 +51,8 @@ export class FireBehavior {
         const fuelBed = fuelIgnition.fuelBed
         const {slopeK, windB, windI, windK, residenceTime} = fuelBed
 
-        // Get the updated wind and slope conditions
-        const {midflameWindSpeed=this.midflameWindSpeed,
-            windBearing=this.windBearing,
-            aspect=this.aspect,
-            slopeRatio=this.slopeRatio,
-            limitSpreadRateByReactionIntensity=this.limitSpreadRateByReactionIntensity,
-            limitSpreadRateByEffWindSpeed=this.limitSpreadRateByEffWindSpeed,
-        } = inputs
-
-        // Save midflameWindSpeed for getScorchHeight()
-        this.midflameWindSpeed = midflameWindSpeed
-
-        const upslopeFromNorth = (aspect + 180) % 360
-        const windHeadingFromUpslope = (windBearing - upslopeFromNorth) % 360
+        const upslopeFromNorth = (this.aspect + 180) % 360
+        const windHeadingFromUpslope = (this.windBearing - upslopeFromNorth) % 360
 
         const part = {ros:0, phi: 0, weff: 0}
         let p1={...part}, p2={...part}, p3={...part}, p4={...part}, p5={...part}, p6={...part}, p7={...part}
@@ -65,11 +70,11 @@ export class FireBehavior {
         
         // Fire spread rate slope coefficient (ratio).
         // Rothermel's (1972) `phiS' as per equation 51 (p 24, 26).
-        const slopeFactor = slopeK * slopeRatio * slopeRatio
+        const slopeFactor = slopeK * this.slopeRatio * this.slopeRatio
 
         // Fire spread rate wind coefficient (ratio).
         // Rothermel's (1972) `phiW' as per equation 47 (p 23, 26).
-        const windFactor = (midflameWindSpeed > 0) ? windK * midflameWindSpeed**windB : 0
+        const windFactor = (this.midflameWindSpeed > 0) ? windK * this.midflameWindSpeed**windB : 0
 
         // Wind and slope contributions to the spread rate
         const slopeRos = p1.ros * slopeFactor
@@ -147,10 +152,10 @@ export class FireBehavior {
         // effective wind speed, depending upin configuration
         //----------------------------------------------------------------------
         let p
-        if (limitSpreadRateByReactionIntensity) 
-            p = limitSpreadRateByEffWindSpeed ? p7 : p5
+        if (this.limitSpreadRateByReactionIntensity) 
+            p = this.limitSpreadRateByEffWindSpeed ? p7 : p5
         else
-            p = limitSpreadRateByEffWindSpeed ? p6 : p3
+            p = this.limitSpreadRateByEffWindSpeed ? p6 : p3
 
         // Fire heat per unit area. (BTU/ft2)
         const heatPerUnitArea = reactionIntensity * residenceTime
@@ -184,6 +189,10 @@ export class FireBehavior {
             this.spreadRateLimit = p4.ros
             this.effWindSpeedLimit = p4.weff
             this.effWindLimitExceeded = (p3.weff > p4.weff)
+            this.upslopeFromNorth = upslopeFromNorth
+            this.windHeadingFromUpslope = windHeadingFromUpslope
+            this.slopeFactor = slopeFactor
+            this.windFactor = windFactor
         }
         // Only save these for testing and/or debugging
         if (saveProps >= 2) {

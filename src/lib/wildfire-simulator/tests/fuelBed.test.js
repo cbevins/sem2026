@@ -64,7 +64,7 @@ describe('FuelBed Class', () => {
         expect(fuelBed.live.reactionIntensityDry).parts(3677.5200629895871, ppb)
         expect(fuelBed.live.savr).parts(1500, ppb)
 
-        expect(fuelBed.openWindSpeedAdjustmentFactor()).parts(0.36210426360602416, ppb)
+        expect(fuelBed.midflameWindReduction).parts(0.36210426360602416, ppb)
     })
     
     it('Fuel Model 124 FuelBed properties match BehavePlus v5 and v6 beta:', () => {

@@ -115,7 +115,7 @@ describe('FireEllipse Class', () => {
             const fireEllipse = new FireEllipse({...fireBehavior, ...inputs})
         
             for(let [prop, values] of Object.entries(bpProps)) {
-                // console.log(`FM ${idx} prop ${prop} expect ${values[0]} received ${fireEllipse[prop]}`)
+                console.log(`FM ${fuel[idx]} prop ${prop} expect ${values[0]} received ${fireEllipse[prop]}`)
                 expect(fireEllipse[prop]).parts(values[idx], ppb)
             }
             expect(fireEllipse.area).parts(area[idx], ppm)

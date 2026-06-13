@@ -44,4 +44,4 @@ const fireBehavior = new FireBehavior({fuelIgnition, ...inputs})
 // as FireEllipse uses its props directly, and NOT indirectly through its reference
 const fireEllipse = new FireEllipse({...fireBehavior, ...inputs})
 const betaVector = new BetaFireVector(fireEllipse, beta5FromHead[0])
-console.log(betaVector)
+// console.log(fuelBed)

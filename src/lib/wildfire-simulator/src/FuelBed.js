@@ -5,12 +5,25 @@
 import { DeadFuelBed, LiveFuelBed } from "./FuelBedLife.js"
 
 export class FuelBed {
+    static Inputs = [
+        {key: 'fuelModel', desc: 'FuelModel object',
+            value: null, type: 'FuelModel', order: 1, required: true},
+    ]
+    
     constructor(inputs) {
-        // 'fuelModel' is a required property, and must be a FuelModel instance
-        if (inputs?.fuelModel === 'undefined')
-            throw new Error(`new FuelBed() was not passed an inputs '{fuelModel}' property.`)
-        if (inputs?.fuelModel?.deadMext === 'undefined')
-            throw new Error(`new FuelBed({fuelmodel}) does not appear to be a fuel model object.`)
+        // Initialize all input parameters to their default values
+        // or a value specified in the 'inputs' object
+        for(let {key, value} of FuelBed.Inputs) {
+            this[key] = value
+            if (Object.hasOwn(inputs, key))
+                this[key] = inputs[key]
+        }
+
+        // Check required inputs
+        if (this.fuelModel === null)
+            throw new Error(`new FuelBed(inputs) object does not have the required '{fuelModel}' property.`)
+        if (this.fuelModel?.deadMext === 'undefined')
+            throw new Error(`new FuelBed({fuelModel}) is not a valid FuelModel object.`)
 
         this.#init(inputs)
     }
@@ -79,6 +92,10 @@ export class FuelBed {
         // See Rothermel (1972) eq 88 on page 35.
         this.liveMextFactor = 2.9 * (this.dead.fineFuelLoad / this.live.fineFuelLoad)
 
+        // Open-canopy midflame wind speed reduction factor
+        const f = Math.min(6, Math.max(this.depth, 0.1))
+        this.midflameWindReduction = 1.83 / Math.log((20 + 0.36 * f) / (0.13 * f))
+
         //----------------------------------------------------------------------------------
         // The following are used by FireBehavior and therefore are saved as properties
         //----------------------------------------------------------------------------------
@@ -142,10 +159,5 @@ export class FuelBed {
             this.windE = windE
         }        
         return this
-    }
-
-    openWindSpeedAdjustmentFactor() {
-        const f = Math.min(6, Math.max(this.depth, 0.1))
-        return 1.83 / Math.log((20 + 0.36 * f) / (0.13 * f))
     }
 }

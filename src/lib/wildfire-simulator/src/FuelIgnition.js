@@ -14,21 +14,45 @@
 import { FuelBed } from "./FuelBed.js"
 
 export class FuelIgnition {
-    constructor(inputs) {
-        // 'fuelBed' is a required property, and must be a FuelModel instance
-        if (inputs?.fuelBed === 'undefined')
-            throw new Error(`new FuelIgnition() was not passed an inputs '{fuelBed}' reference.`)
-        if (!(inputs?.fuelBed instanceof FuelBed))
-            throw new Error(`new FuelIgnition({fuelBed}) is not an instance of FuelBed.`)
+    static Inputs = [
+        {key: 'fuelBed', desc: 'FuelBed object',
+            value: null, type: 'FuelBed', order: 1},
+        {key: 'moistureDead1h', desc: 'Dead 1-h time-lag fuel moisture content',
+            value: 0.1, type: 'ratio', min: 0, max: 9, order: 1},
+        {key: 'moistureDead10h', desc: 'Dead 10-h time-lag fuel moisture content',
+            value: 0.1, type: 'ratio', min: 0, max: 9, order: 1},
+        {key: 'moistureDead100h', desc: 'Dead 100-h time-lag fuel moisture content',
+            value: 0.1, type: 'ratio', min: 0, max: 9, order: 1},
+        {key: 'moistureLiveHerb', desc: 'Live herbaceous fuel moisture content',
+            value: 5, type: 'ratio', min: 0, max: 9, order: 1},
+        {key: 'moistureLiveStem', desc: 'Live stem, woody fuel moisture content',
+            value: 5, type: 'ratio', min: 0, max: 9, order: 1},
+    ]
 
-        // Set default parameter values
-        const {moistureDead1h=1, moistureDead10h=1, moistureDead100h=1,
-            moistureLiveHerb=5, moistureLiveStem=5} = inputs
-        this.moistureDead1 = moistureDead1h
-        this.moistureDead10 = moistureDead10h
-        this.moistureDead100 = moistureDead100h
-        this.moistureLiveHerb = moistureLiveHerb
-        this.moistureLiveStem = moistureLiveStem
+    constructor(inputs, customMoistureClasses=[]) {
+        // Add any custom moisture classes, such as 'moistureDuff' or moistureLitter'
+        this.customMoistureClasses = customMoistureClasses
+
+        // Initialize all input parameters to either their default values
+        // or a value specified in the 'inputs' object
+        for(let {key, value} of FuelIgnition.Inputs) {
+            this[key] = value
+            if (Object.hasOwn(inputs, key))
+                this[key] = inputs[key]
+        }
+
+        // Initialize any custom fuel moisture classes
+        for(let key of customMoistureClasses) {
+            this[key] = 5
+            if (Object.hasOwn(inputs, key))
+                this[key] = inputs[key]
+        }
+
+        // Check required inputs
+        if (this.fuelBed === null)
+            throw new Error(`new FuelIgnition(inputs) object does not have the required '{fuelBed}' property.`)
+        if (!(this.fuelBed instanceof FuelBed))
+            throw new Error(`new FuelIgnition({fuelBed}) is not a valid FuelBed object.`)
 
         this.set(inputs)
     }
@@ -36,17 +60,20 @@ export class FuelIgnition {
     // Moisture content determines the live fuel moisture content of extincion
     // and life category moisture damping coefficients
     set(inputs={}) {
+        // Update values of all properties present in the 'inputs' object
+        for(let {key} of FuelIgnition.Inputs) {
+            if (Object.hasOwn(inputs, key)) {
+                this[key] = inputs[key]
+            }
+        }
+        // Check for any custom moisture contents mentioned in the inputs
+        for(let key of this.customMoistureClasses) {
+            if (Object.hasOwn(inputs, key))
+                this[key] = inputs[key]
+        }
+
         // The constructor ensured that inputs.fuelBed exists
         const fuelBed = inputs.fuelBed
-
-        // Get the updated moisture contents
-        const moistureConditions = {
-            moistureDead1h: this.moistureDead1h,
-            moistureDead10h: this.moistureDead10,
-            moistureDead100h: this.moistureDead100h,
-            moistureLiveHerb: this.moistureLiveHerb,
-            moistureLiveStem: this.moistureLiveStem,
-            ...inputs}
 
         // Update life category moisture variables
         const cat = {dead: {}, live: {}}
@@ -57,7 +84,7 @@ export class FuelIgnition {
             cat[life].fineWaterLoad = 0
 
             for(let particle of fuelBed[life].particles) {
-                const moistureContent = moistureConditions[particle.moistureClass]
+                const moistureContent = this[particle.moistureClass]
                 cat[life].moisture += moistureContent * particle.surfaceAreaWtg    // wtd average
 
                 // Particle heat of pre-ignition (BTU/lb) from Rothermel Eq 12 (p 7, 26)

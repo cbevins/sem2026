@@ -23,43 +23,112 @@
 import { toRadians } from './ellipseAngles.js'
 
 export class FireEllipse {
+    // Input parameter definitions
+    // These may be overridden during construction or by set() by specifying them in 'inputs'
+    static Inputs = [
+        // updateFireEllipse() is invoked whenever one of these are specified in inputs object
+        // (both of these (and flameLength) are also present in FireBehavior instances)
+        {key: 'headingSpreadRate', desc: 'Maximum fire spread rate',
+            value: 0, type: 'quantity', units: 'ft/min', min: 0, order: 1},
+        {key: 'lengthWidthRatio', desc: 'Fire ellipse length-to-width ratio',
+            value: 1, type: 'ratio', min: 1, order: 1},
+        {key: 'flameLength', desc: 'Flame length',
+            value: 0, type: 'quantity', units: 'ft', order: 1},
+
+        // updateElapsedTime() is invoked whenever 'elapsedTime' is specified in 'inputs' object:
+        {key: 'elapsedTime', desc: 'Elapsed time since ignition',
+            value: 0, type: 'quantity', units: 'min', min: 0, order: 2},
+
+        // updatePosition() is invoked whenever one or more of these are specified in 'inputs' object:
+        {key: 'bearing', desc: 'Head fire bearing in degrees clockwie from north',
+            value: 0, type: 'quantity', units: 'degrees', min: 0, max: 360, order: 3},
+        {key: 'ignEast', desc: 'Ignition point false easting (Projected Coordinate System)',
+            value: 0, type: 'quantity', units: 'ft', order: 3},
+        {key: 'ignNorth',  desc: 'Ignition point false northing (Projected Coordinate System)',
+            value: 0, type: 'quantity', units: 'ft', order: 3},
+        {key: 'ignX', desc: 'Ignition point Cartesian x (normally left to 0)',
+            value: 0, type: 'quantity', units: 'ft', order: 3},       
+        {key: 'ignY', desc: 'Ignition point Cartesian y (normally left to 0)',
+            value: 0, type: 'quantity', units: 'ft', order: 3},       
+    ]
+
+    static Outputs = [
+        {key: 'area', desc: 'Fire ellipse area',
+            type: 'quantity', units: 'ft2'},
+        {key: 'backingDistance', desc: 'Fire ellipse ignition point to back distance',
+            type: 'quantity', units: 'ft'},
+        {key: 'backingSpreadRate', desc: 'Fire ellipse backing fire spread rate',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'centerE', desc: 'Fire ellipse center false easting (projected coordinate system)',
+            type: 'quantity', units: 'ft'},
+        {key: 'centerN', desc: 'Fire ellipse center false northing (projected coordinate system)',
+            type: 'quantity', units: 'ft'},
+        {key: 'centerX', desc: 'Fire ellipse center x-coordinate (local coordinate system)',
+            type: 'quantity', units: 'ft'},
+        {key: 'centerY', desc: 'Fire ellipse center y-coordinate (local coordinate system)',
+            type: 'quantity', units: 'ft'},
+        {key: 'eccentricity', desc: 'Fire ellipse eccentricity',
+            type: 'ratio', units: 'dl'},
+        {key: 'effectiveWindSpeed', desc: 'Fire ellipse effective wind speed (from length/width)',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'firelineIntensity', desc: 'Fire ellipse heading fireline intensity',
+            type: 'quantity', units: 'BTU/ft/s'},
+        {key: 'fDistance', desc: 'Fire ellipse major semi-axis length',
+            type: 'quantity', units: 'ft'},
+        {key: 'fSpreadRate', desc: 'Fire ellipse major semi-axis expansion rate',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'heatPerUnitArea', desc: 'Fire ellipse heat per unit area during passage of fire front',
+            type: 'quantity', units: 'Btu/ft2'},
+        {key: 'headingDistance', desc: 'Fire ellipse ignition point to head distance',
+            type: 'quantity', units: 'ft'},
+        {key: 'hDistance', desc: 'Fire ellipse minor semi-axis length',
+            type: 'quantity', units: 'ft'},
+        // NOTE that headingSpreadRate is an input property
+        {key: 'hSpreadRate', desc: 'Fire ellipse minor semi-axis expamsion rate',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'gDistance', desc: 'Fire ellipse ignition point to center distance',
+            type: 'quantity', units: 'ft'},
+        {key: 'gSpreadRate', desc: 'Fire ellipse center expansion rate from ignition point',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'latusRectumDistance', desc: 'Fire ellipse latus rectum length (normal to ignition point)',
+            type: 'quantity', units: 'ft'},
+        {key: 'latusRectumSpreadRate', desc: 'Fire ellipse latus rectum expansion rate (normal to ignition point)',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'length', desc: 'Fire ellipse total length',
+            type: 'quantity', units: 'ft'},
+        {key: 'majorExpansionRate', desc: 'Fire ellipse major axis expansion rate',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'minorExpansionRate', desc: 'Fire ellipse minor axis expansion rate',
+            type: 'quantity', units: 'ft/min'},
+        {key: 'rotationDeg', desc: 'Fire ellipse rotation counter-clockwise from Cartesian x-axis',
+            type: 'quantity', units: 'deg'},
+        {key: 'rotationRad', desc: 'Fire ellipse rotation counter-clockwise from Cartesian x-axis',
+            type: 'quantity', units: 'radians'},
+        {key: 'rotationCos', desc: 'Cosine of the fire ellipse rotation counter-clockwise from Cartesian x-axis',
+            type: 'fraction', units: 'cos'},
+        {key: 'rotationSin', desc: 'Sine of the fire ellipse rotation counter-clockwise from Cartesian x-axis',
+            type: 'fraction', units: 'sin'},
+        {key: 'width', desc: 'Fire ellipse total width',
+            type: 'quantity', units: 'ft'},
+    ]
     constructor(inputs={}) {
-        // Default input parameter values
-        // These may be overridden during construction by specifying them in 'inputs'
-        this.parameters = [
-            // updateFireEllipse() is invoked whenever one of these are specified in inputs object
-            // (both of these and flameLength are also present in FireBehavior instances)
-            {key: 'headingSpreadRate', value: 0, call: 1},
-            {key: 'lengthWidthRatio', value: 1, call: 1},
-            // updateElapsedTime() is invoked whenever 'elapsedTime' is specified in 'inputs' object:
-            {key: 'elapsedTime', value: 0, call: 2},
-            // updatePosition() is invoked whenever one or more of these are specified in 'inputs' object:
-            {key: 'bearing', value: 0, call: 3},    // fire heading in degrees clockwise from north
-            {key: 'ignEast', value: 0, call: 3},    // ignition point easting (Projected Coordinate System)
-            {key: 'ignNorth', value: 0, call: 3},   // ignition point northing (Projected Coordinate System)
-            {key: 'ignX', value: 0, call: 3},       // ignition point Cartesian x, normally left to zero
-            {key: 'ignY', value: 0, call: 3},       // ignition point Cartesian y, normally left to zero
-            // updateFire() is invoked whenever 'flameLength' is specified in 'inputs' object
-            // (which is also present in FireBehavior instances)
-            {key: 'flameLength', value: 0, call: 4},
-        ]
-        // Set all inputs to their default values
-        for(let {key, value} of this.parameters) {
+        // Initialize all input parameters to their default values
+        for(let {key, value} of FireEllipse.Inputs) {
             this[key] = value
         }
-        // Set specified parameter values and update all properties
+        // Processed the provided input values
         this.set(inputs)
     }
     
-    // This method may be called whenever needed to provide new input values
+    // Client may call this method whenever needed to provide new input values
     // and update their dependent properties.
     set(inputs={}) {
-        // Set all inputs to either their default or specified values
+        // Update values of all properties present in the 'inputs' object
         let start = 9
-        for(let parm of this.parameters) {
-            if (Object.hasOwn(inputs, parm.key)) {
-                this[parm.key] = inputs[parm.key]
-                start = Math.min(start, parm.call)
+        for(let {key, order} of FireEllipse.Inputs) {
+            if (Object.hasOwn(inputs, key)) {
+                this[key] = inputs[key]
+                start = Math.min(start, order)
             }
         }
         if (start === 1)
@@ -68,14 +137,12 @@ export class FireEllipse {
             return this.#updateElapsedTime()
         else if (start === 3)
             return this.#updatePosition()
-        else if (start === 4)
-            return this.#updateFire()
     }
 
     // Called whenever 'headingSpreadRate' or 'lengthWidthRatio' changes
     // to update fire ellipse shape
     #updateFireEllipse() {
-        // ellipse eccentricity [0..1]
+        // ellipse eccentricity [0..1] e = sqrt((a/b * a/b - 1) / (a/b))
         const lwr = this.lengthWidthRatio
         this.eccentricity = Math.sqrt(lwr * lwr - 1) / lwr
         
@@ -115,6 +182,15 @@ export class FireEllipse {
         // Effective (wind plus slope) wind speed (ft/min) estimated from lengthWidthRatio
         this.effectiveWindSpeed = 88 * (4 * (lwr - 1))
 
+        // Fireline intensity (BTU/ft/s) at head of fire
+        // This is scaled back for the beta angles to derived fli, flame length, hpua, scorch
+        this.firelineIntensity = (this.flameLength > 0)
+            ? (this.flameLength / 0.45)**( 1 / 0.46) : 0
+
+        // Heat per unit area (Btu/ft2)
+        const ros = this.headingSpreadRate
+        this.heatPerUnitArea = (ros > 0) ? (60 * this.firelineIntensity / ros) : 0
+
         return this.#updateElapsedTime()
     }
 
@@ -147,16 +223,12 @@ export class FireEllipse {
         // Ellipse area (ft2)
         this.area = (Math.PI * this.length * this.width) / 4
 
-        return this.#updatePosition()
-    }
-
-    // Ellipse perimeter length (ft) using Ramanujan's approximation.
-    // Placed inside a getter since its makes 3 transcendental Math calls
-    // and is not required to derive any other property
-    get perimeter() {
+        // Ellipse perimeter length (ft) using Ramanujan's approximation.
         const a = this.fDistance, b = this.hDistance
         const h = (a - b)**2 / (a + b)**2
-        return Math.PI * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)))
+        this.perimeter = Math.PI * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)))
+
+        return this.#updatePosition()
     }
 
     // Called whenever 'bearing', 'ignEast', 'ignNorth', 'ignX', or 'ignY' changes
@@ -177,20 +249,6 @@ export class FireEllipse {
         this.centerY = this.ignY + this.gDistance * this.rotationSin
         this.centerE = this.centerX + this.ignEast - this.ignX
         this.centerN = this.centerY + this.ignNorth - this.ignY
-        return this.#updateFire()
-    }
-
-    #updateFire() {    
-        const flame = this.flameLength
-        // Fireline intensity (BTU/ft/s) at head of fire
-        // This is scaled back for the beta angles to derived fli, flame length, hpua, scorch
-        const fli = (flame > 0) ? (flame / 0.45)**( 1 / 0.46) : 0
-        this.firelineIntensity = fli
-
-        // Heat per unit area (Btu/ft2)
-        const ros = this.headingSpreadRate
-        this.heatPerUnitArea = (ros > 0) ? (60 * fli / ros) : 0
-
         return this
     }
 

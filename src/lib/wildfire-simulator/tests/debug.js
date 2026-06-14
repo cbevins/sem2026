@@ -1,4 +1,7 @@
 import { StandardFuelModelCatalog } from '../src/StandardFuelModelCatalog.js'
+import { FuelModelProcessor } from '../src/FuelModelProcessor.js'
+import { FuelBedProcessor } from '../src/FuelBedProcessor.js'
+import { FuelIgnitionProcessor } from '../src/FuelIgnitionProcessor.js'
 import { FuelBed } from '../src/FuelBed.js'
 import { FuelIgnition } from '../src/FuelIgnition.js'
 import { FireBehavior } from '../src/FireBehavior.js'
@@ -33,15 +36,23 @@ const inputs = {
     ignEast: 0,
     ignNorth: 0,
 }
-const beta5FromHead  = [360 - 42.573367385837855, 360 - 42.613728665173383]
 
-const catalog = new StandardFuelModelCatalog()
-const fuelModel = catalog.get(10)
-const fuelBed = new FuelBed({fuelModel, ...inputs})
-const fuelIgnition = new FuelIgnition({fuelBed, ...inputs})
-const fireBehavior = new FireBehavior({fuelIgnition, ...inputs})
-// Note that the fireBehavior instance must be spread,
-// as FireEllipse uses its props directly, and NOT indirectly through its reference
-const fireEllipse = new FireEllipse({...fireBehavior, ...inputs})
-const betaVector = new BetaFireVector(fireEllipse, beta5FromHead[0])
-// console.log(fuelBed)
+const catalog = new FuelModelProcessor()
+const fuelModel = catalog.get({fuelKey: 10})
+const fuelBed = FuelBedProcessor.get({...fuelModel, ...inputs})
+const fuelIgnition = FuelIgnitionProcessor.get({...fuelBed, ...inputs})
+
+process.exit()
+
+// const beta5FromHead  = [360 - 42.573367385837855, 360 - 42.613728665173383]
+
+// const catalog = new StandardFuelModelCatalog()
+// const fuelModel = catalog.get(10)
+// const fuelBed = new FuelBed({fuelModel, ...inputs})
+// const fuelIgnition = new FuelIgnition({fuelBed, ...inputs})
+// const fireBehavior = new FireBehavior({fuelIgnition, ...inputs})
+// // Note that the fireBehavior instance must be spread,
+// // as FireEllipse uses its props directly, and NOT indirectly through its reference
+// const fireEllipse = new FireEllipse({...fireBehavior, ...inputs})
+// const betaVector = new BetaFireVector(fireEllipse, beta5FromHead[0])
+// // console.log(fuelBed)

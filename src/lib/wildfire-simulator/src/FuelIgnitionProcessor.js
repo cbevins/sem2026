@@ -110,7 +110,7 @@ export class FuelIgnitionProcessor {
         // No-wind, no-slope fire spread rate
         const noWindSpreadRate = (heatSink > 0) ? heatSource / heatSink : 0
         
-        // Only save these for testing and/or debugging
+        // Required outputs
         let pod = {reactionIntensity, noWindSpreadRate}
 
         const {saveProps=0} = inputs

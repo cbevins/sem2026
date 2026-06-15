@@ -139,7 +139,8 @@ export class FuelBedProcessor {
 
         let pod = {
             depth: inputs.depth,
-            dead, live,
+            dead,
+            live,
             savr, 
             packingRatio,
             propagatingFluxRatio,

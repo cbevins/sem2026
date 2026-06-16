@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // -----------------------------------------------------------------------------
 // Wildfire Simulation Library Processors
 // -----------------------------------------------------------------------------
@@ -7,7 +8,7 @@ import { makeFuelIgnition } from '../src/makeFuelIgnition.js'
 import { makeFireBehavior } from '../src/makeFireBehavior.js'
 import { makeFireShape } from '../src/makeFireShape.js'
 import { makeFireSize } from '../src/makeFireSize.js'
-import { makeBetaVector } from '../src/makeBetaVector.js'
+import { makeBetaVector, makeBeta6Vector, makePsiVector } from '../src/makeFireVectors.js'
 
 const div = '\n-------------------------------------------------------------------\n'
 
@@ -65,6 +66,16 @@ function makeFireSizeSpec(inputs={}) {
 function makeBetaVectorSpec(inputs={}) {
     const outputs = makeBetaVector(inputs)
     return log(9, 'makeBetaVector', inputs, outputs)
+}
+
+function makeBeta6VectorSpec(inputs={}) {
+    const outputs = makeBeta6Vector(inputs)
+    return log(10, 'makeBeta6Vector', inputs, outputs)
+}
+
+function makePsiVectorSpec(inputs={}) {
+    const outputs = makePsiVector(inputs)
+    return log(11, 'makePsiVector', inputs, outputs)
 }
 
 // -----------------------------------------------------------------------------
@@ -167,7 +178,8 @@ const elapsedTime = fetchElapsedTime()
 const ignitionPoint = fetchIgnitionPoint()
 const fireSize = makeFireSizeSpec({fireShape, elapsedTime, ignitionPoint, ...more})
 
-const head = makeBetaVectorSpec({fireShape, fireSize, betaFromHead: 0, ...more})
-// const back = makeBetaVector({fireSize, betaFromHead: 180, ...more})
-
-console.log(div, 'Final head vector:', head)
+const headVector = makeBetaVectorSpec({fireShape, fireSize, betaFromHead: 0, ...more})
+const backVector = makeBetaVectorSpec({fireShape, fireSize, betaFromHead: 180, ...more})
+const betaVector = makeBetaVectorSpec({fireShape, fireSize, betaFromHead: 45, ...more})
+const beta6Vector = makeBeta6VectorSpec({fireShape, fireSize, betaFromHead: 45, ...more})
+const psiVector = makePsiVectorSpec({fireShape, fireSize, psiFromHead: 45, ...more})

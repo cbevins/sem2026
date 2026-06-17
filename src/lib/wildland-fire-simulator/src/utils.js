@@ -13,6 +13,10 @@ export function clampFraction(f) {
     return Math.max(0, Math.min(1, f))
 }
 
+export function fraction(f) {
+    return Math.max(0, Math.min(1, f))
+}
+
 // 'headBearing' is degrees clockwise from north
 // 'clockwiseFromHead' is the vector degrees clockwise from the fire head
 export function clockwiseFromHeadToBearing(clockwiseFromHead, headBearing) {
@@ -22,6 +26,10 @@ export function clockwiseFromHeadToBearing(clockwiseFromHead, headBearing) {
 // 'rotation' is always degrees counter-clockwise from fire head
 export function clockwiseFromHeadToRotation(clockwiseFromHead) {
     return (360 - clockwiseFromHead) % 360
+}
+
+export function divide(num, den, whenZero=0) {
+    return (den>0) ? (num/den) : whenZero
 }
 
 // 'fli' is the fireline intensity (BTU/ft/s)
@@ -41,15 +49,19 @@ export function getScorchHeight(fli, airTemp=77, midflameWindSpeed=0) {
         Math.sqrt(fli + mph * mph * mph) : 0
 }
 
+export function positive(value) {
+    return (value<0) ? 0 : value
+}
+
+// 'rotation' is always degrees counter-clockwise from fire head
+export function rotationToClockwiseFromHead(rotation) {
+    return (360 - rotation) % 360
+}
+
 export function toDegrees(radians) {
     return radians * 180 / Math.PI
 }
 
 export function toRadians(degrees) {
     return degrees * Math.PI / 180
-}
-
-// 'rotation' is always degrees counter-clockwise from fire head
-export function rotationToClockwiseFromHead(rotation) {
-    return (360 - rotation) % 360
 }

@@ -9,6 +9,16 @@ export { makeFuelModel } from './src/makeFuelModel.js'
 export { makeLogger} from './src/makeLogger.js'
 export { makeBetaVector, makeBeta6Vector, makePsiVector, calcPsiSpreadRate} from './src/makeFireVectors.js'
 
+// Input object factories
+export { makeFireWeather } from './src/makeFireWeather.js'
+export { makeFuelCanopy } from './src/makeFuelCanopy.js'
+export { makeFuelCuring } from './src/makeFuelCuring.js'
+export { makeFuelMoisture } from './src/makeFuelMoisture.js'
+
+export { WfsBetaFromHead, WfsConfigs, WfsFirePosition, WfsFireTerrain, WfsFireWeather,
+    WfsFuelCuring, WfsFuelKey, WfsFuelMoisture, WfsPsiFromHead
+} from './src/WfsInputs.js'
+
 export {
     calcBetaFromPsi,
     calcBetaFromTheta,
@@ -23,6 +33,8 @@ export {bearingToClockwiseFromHead,
     clampFraction,
     clockwiseFromHeadToBearing,
     clockwiseFromHeadToRotation,
+    divide,
+    fraction,
     getFlameLength,
     getScorchHeight,
     rotationToClockwiseFromHead,

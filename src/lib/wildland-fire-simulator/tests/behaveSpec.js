@@ -8,82 +8,64 @@ import { makeFuelModel } from '../Wfs.js'
 import { makeLogger } from '../Wfs.js'
 import { makeBetaVector, makeBeta6Vector, makePsiVector} from '../Wfs.js'
 
+import { makeFireWeather } from '../Wfs.js'
+import { makeFuelCanopy } from '../Wfs.js'
+import { makeFuelCuring } from '../Wfs.js'
+import { makeFuelMoisture } from '../Wfs.js'
+
+import {Bp6BetaFromHead, Bp6Configs, Bp6FirePosition, Bp6FireTerrain, Bp6FireWeather,
+    Bp6FuelCanopy,
+    Bp6FuelCuring, Bp6FuelKey, Bp6FuelMoisture, Bp6PsiFromHead
+} from './Bp6Inputs.js'
+
+function done(configs) {
+    if (configs.logger) {
+        const msg = configs.logger.messages
+        console.log(`Finished with ${msg.length} messages:`, msg)
+    }
+    else console.log('There is no Logger.')
+}
+
+const div = '\n-------------------------------------------------------------------\n'
+console.clear()
+console.log(div,'\n\n\nWildfire Simulator', new Date())
+
 //------------------------------------------------------------------------------
 // Input object definitions
 //------------------------------------------------------------------------------
 
-let fuelKey = 10
-let fuelCuring = {
-    curedHerb: 0.778,
-    curedCheatgrass: 0.5            // an example custom fuel curing class
-}
-let fuelMoisture = {
-    moistureDead1h: 0.05,
-    moistureDead10h: 0.07,
-    moistureDead100h: 0.09,
-    moistureLiveHerb: 0.5,
-    moistureLiveStem: 1.5,
-    moistureLiveCheatgrass: 0.5,    // an example custom fuel moisture class
-}
-// input to makeFireBehavior(), may be modified by getMidflameWindSpeed()
-let fireWeather = {
-    airTemp: 95,            // only used by scorch height
-    midflameWindSpeed: 880, // required by makeFireBehavior
-    windBearing: 90,        // required by makeFireBehavior
-    windSource: 180,        // used/created by makeFireWeather
-    windSpeed10m: 900,      // used/created by makeFireWeather
-    windSpeed20ft: 880,     // used/created by makeFireWeather
-}
-// input to makeFireWeather
-let fuelCanopy = {
-    baseHeight: 6,
-    bulkDensity: 0.02,
-    cover: 1,
-    height: 40,
-}
-// input to makeFireBehavior
-let fireTerrain = {
-    aspect: 180,
-    elevation: 3000,
-    slopeDegrees: 14.03624347,
-    slopeRatio: 0.25,
-    topography: 'ridgetop',
-    upslope: 0,
-}
-let firePosition = {
-    elapsedTime: 60,
-    ignEast: 0,
-    ignNorth: 0
-}
-// input into makeFireShape (all are present in fireBehavior object)
-let observedFireBehavior = { 
-    headingSpreadRate: 0,
-    bearing: 0,
-    lengthWidthRatio: 1,
-    flameLength: 0,
-}
-let betaFromHead = 45
-let psiFromHead = 45
+const configs = {...Bp6Configs}
+configs.logger = makeLogger()
 
-let configs = {
-    detailLevel: 2,
-    logger: null,
-    slopeSteepnessInput: 'ratio',        // 'degrees', 'ratio'
-    windSpeedInput: 'midflame', // 'midflame', '20ft', '10m'
-    limitWindFactor: true,      // limit wind coefficient to 0.9 wind speed / reaction intensity
-    limitSpreadRate: true,      // limit max spread rate to effective wind speed
-}
+// Create fuelMoisture properties based on 'particle' or 'life' inputs
+let fuelMoisture = {...Bp6FuelMoisture}
+fuelMoisture = makeFuelMoisture({fuelMoisture}, configs)
+
+// Create fuelCuring properties based on 'input' or 'estimated'
+let fuelCuring = {...Bp6FuelCuring}
+fuelCuring = makeFuelCuring({fuelCuring, fuelMoisture}, configs)
+
+let fuelCanopy = {...Bp6FuelCanopy}
+fuelCanopy = makeFuelCanopy({fuelCanopy}, configs)
+
+let fireWeather = {...Bp6FireWeather}
+// Need a 'fuelbed'!
+fireWeather = makeFireWeather({fireWeather, fuelCanopy, fuelBed:{depth: 1}}, configs)
+console.log(fireWeather)
+done(configs)
+process.exit()
+
+const firePosition = Bp6FirePosition
+const fireTerrain = Bp6FireTerrain
+const fuelKey = Bp6FuelKey
+const betaFromHead = Bp6BetaFromHead
+const psiFromHead = Bp6PsiFromHead
 
 //------------------------------------------------------------------------------
 // Standards
 // - 'makeSomething(inputs, configs) methods take 2 arguments,
 //  an 'inputs' object with parameter keys, and a 'configs' object with parameter keys.
 //------------------------------------------------------------------------------
-const div = '\n-------------------------------------------------------------------\n'
-console.clear()
-console.log(div,'\n\n\nWildfire Simulator', new Date())
-
-configs.logger = makeLogger()
 
 //------------------------------------------------------------------------------
 // Pre-process inputs based on configuration
@@ -123,5 +105,3 @@ console.log(backVector)
 console.log(betaVector)
 console.log(beta6Vector)
 console.log(psiVector)
-
-console.log(`Finished with ${configs.logger.messages.length} messages:`, configs.logger.messages)

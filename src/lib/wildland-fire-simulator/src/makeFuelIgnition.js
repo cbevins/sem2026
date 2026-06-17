@@ -20,7 +20,7 @@ export function makeFuelIgnition(inputs={}, configs={}) {
             if(! Object.hasOwn(fuelMoisture, moistureClass)) {
                 moistureClass = (life === 'dead') ? 'moistureDead1h' : 'moistureLiveHerb'
                 if(configs.logger)
-                    configs.logger.log(`makeFuelIgnition(): a fuel particle has a moisture class '${particle.moistureClass}' that is not in the fuelMoisture inputs object. Assigned moisture class '${moistureClass}'.`)
+                    configs.logger.log(`makeFuelIgnition(): a fuel particle has a moisture class '${particle.moistureClass}' that is not in the fuelMoisture inputs object: assuming moisture class '${moistureClass}'.`)
             }
             const moistureContent = fuelMoisture[moistureClass]
             cat[life].moisture += moistureContent * particle.surfaceAreaWtg    // wtd average

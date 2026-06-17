@@ -195,7 +195,7 @@ function makeFuelBedLife(category, inputs, configs) {
                 let curedFraction = 0
                 if (!Object.hasOwn(fuelCuring, particle.curingClass)) {
                     if (configs.logger)
-                        configs.logger.log(`makeFuelBed() fuel model ${fuelModel.number} has a curingClass ${particle.curingClass} that was not provided as input: assuming 0 curing.`)
+                        configs.logger.log(`makeFuelBed() fuel model ${fuelModel.number} has a curingClass ${particle.curingClass} that was not provided as input: assuming a 0 percent cured.`)
                 } else {
                     curedFraction = fuelCuring[particle.curingClass]
                 }

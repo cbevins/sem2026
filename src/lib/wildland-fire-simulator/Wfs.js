@@ -8,6 +8,7 @@ export { makeFuelCatalog } from './src/makeFuelCatalog.js'
 export { makeFuelIgnition } from './src/makeFuelIgnition.js'
 export { makeFuelModel } from './src/makeFuelModel.js'
 export { makeLogger} from './src/makeLogger.js'
+export { makeWeightedFireBehavior } from './src/makeWeightedFireBehavior.js'
 export { makeBetaVector, makeBeta6Vector, makePsiVector, calcPsiSpreadRate} from './src/makeFireVectors.js'
 
 // WFS input object factories

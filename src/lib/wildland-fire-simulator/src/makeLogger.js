@@ -9,12 +9,15 @@ export class WfsLogger {
         this.messages = []
         this.throwOnLimit = throwOnLimit
     }
+    clear() {
+        this.messages = []
+    }
     log(msg) {
         if (this.active) {
             if (this.messages.length >= this.limit) {
-                if (this.throwOnLimit) {
+                if (this.throwOnLimit)
                     throw  new Error(`WfsLogger reached its limit of ${this.limit} messages.`)
-                }
+            } else {
                 this.messages.push(msg)
             }
         }

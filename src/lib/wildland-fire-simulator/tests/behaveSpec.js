@@ -1,3 +1,4 @@
+import { makeBetaVector, makeBeta6Vector, makePsiVector} from '../Wfs.js'
 import { makeFireBehavior } from '../Wfs.js'
 import { makeFireEllipse } from '../Wfs.js'
 import { makeFireSize } from '../Wfs.js'
@@ -7,7 +8,7 @@ import { makeFuelCatalog } from '../Wfs.js'
 import { makeFuelIgnition } from '../Wfs.js'
 import { makeFuelModel } from '../Wfs.js'
 import { makeLogger } from '../Wfs.js'
-import { makeBetaVector, makeBeta6Vector, makePsiVector} from '../Wfs.js'
+import { makeWeightedFireBehavior } from '../Wfs.js'
 
 import { makeFireWeather } from '../Wfs.js'
 import { makeFuelCanopy } from '../Wfs.js'
@@ -48,9 +49,6 @@ function fetchFuelMoisture() { return {...Bp6FuelMoisture} }
 function fetchObservedFireBehavior() { return {...Bp6ObservedFireBehavior}}
 function fetchPsiFromHead() { return Bp6PsiFromHead }
 
-// TODO
-function makeWeightedFireBehavior() { return {} }
-
 //------------------------------------------------------------------------------
 // Input object definitions
 //------------------------------------------------------------------------------
@@ -65,9 +63,16 @@ let fuelCatalog = makeFuelCatalog(configs)
 // fuelKeys must exist prior to makeFuelModel()
 let fuelKeys = fetchFuelKeys()
 
+// Now we can query relevent fuel moisture and curing classes for the selected fuels
+
 // FOR EACH fuelKey1 {...
 
 // fuelModel must exist prior to makeFuelBed()
+let xfuelModel1 = makeFuelModel({fuelCatalog}, configs)
+done(configs)
+
+let xfuelModel2 = makeFuelModel({fuelCatalog, fuelKey: 'junk'}, configs)
+console.log(xfuelModel1)
 let fuelModel1 = makeFuelModel({fuelCatalog, fuelKey: fuelKeys.fuelKey1}, configs)
 let fuelModel2 = fuelModel1
 // Can have 2 fuel models
@@ -163,12 +168,12 @@ const betaVector = makeBetaVector({fireSize, betaFromHead}, configs)
 const beta6Vector = makeBeta6Vector({fireSize, betaFromHead}, configs)
 const psiVector = makePsiVector({fireSize, psiFromHead}, configs)
 console.log(headVector)
-console.log(backVector)
-console.log(betaVector)
-console.log(beta6Vector)
-console.log(psiVector)
+// console.log(backVector)
+// console.log(betaVector)
+// console.log(beta6Vector)
+// console.log(psiVector)
 
-const stringKeys = fuelCatalog.getStringKeys()
-console.log('Moisture Classes', fuelCatalog.getMoistureClasses(stringKeys))
-console.log('Curing Classes', fuelCatalog.getCuringClasses(stringKeys))
+// const stringKeys = fuelCatalog.getStringKeys()
+// console.log('Moisture Classes', fuelCatalog.getMoistureClasses(stringKeys))
+// console.log('Curing Classes', fuelCatalog.getCuringClasses(stringKeys))
 done(configs)

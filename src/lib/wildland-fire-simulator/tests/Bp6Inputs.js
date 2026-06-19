@@ -19,13 +19,15 @@ export const Bp6Configs = {
     // input options:
     canopyHeightInputs: 'height-base',  // 'height-base', 'height-ratio', height-length', 'length-base', 'length-ratio', 'base-ratio'
     fuelCuringInput: 'input',           // 'estimated' or 'input'
+    fuelModels: 1,                      // 1 or 2
+    fuelModelWeighting: 'arithmetic',   // 'arithmetic', 'harmonic', or 'primary'
     deadFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     liveFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     midflameReductionInput: 'estimated',// 'input' or 'estimated' from fuel and canopy wind reduction
     midflameWindSpeedInput: 'input',    // 'input' or 'estimated' from upper wind speed and reduction factor
     slopeSteepnessInput: 'ratio',       // 'degrees', 'ratio', 'map'
     windSpeedInput: 'midflame',         // '20ft', '10m'
-    
+
     // linkages:
     linkBehaviorEllipse: true,
     linkBehaviorSpotting: true,

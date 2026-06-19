@@ -1,24 +1,25 @@
-import {
-    clockwiseFromHeadToBearing,
-    clockwiseFromHeadToRotation,
-    toRadians,
-} from './utils.js'
-
+import { clockwiseFromHeadToBearing, clockwiseFromHeadToRotation,
+    getFlameLength, getScorchHeight, requireInputs, toRadians } from './utils.js'
 import { calcPsiFromTheta, calcThetaFromBeta } from './getEllipseAngles.js'
 
 //------------------------------------------------------------------------------
-// Support functions
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
 // makeBetaVector()
-//------------------------------------------------------------------------------
-
 // 'Beta' fire vectors are anchored at the FireEllipse ignition point
 // at [ignX, ignY] in the local coordinate system,
 // or at [ignEast, ignNorth] projected coordinate system.
+//------------------------------------------------------------------------------
 export function makeBetaVector(inputs={}, configs={}) {
-    const {fireSize, betaFromHead} = inputs
-    const {bearing, eccentricity:e, headingSpreadRate, firelineIntensity, rotationDeg,
+    // Get applicable input objects
+    let {fireSize=null, betaFromHead=0, airTemp=77, windSpeed=0} = inputs
+
+    // Get applicable configs
+    let {includeFlameLength=false, includeScorchHeight=false} = configs
+
+    // Require the fireSize object, as it is too complex to be reasonablly defaulted
+    fireSize = requireInputs('makeBetaVector()', fireSize, 'fireSize')
+
+    // Get required fireSize (and fireEllipse) input properties
+    let {bearing, eccentricity:e, headingSpreadRate, firelineIntensity, rotationDeg,
         elapsedTime, ignX, ignY, ignEast, ignNorth,} = fireSize
 
     // betaRotation is the *counter-clockwise* rotation from fire heading
@@ -40,23 +41,43 @@ export function makeBetaVector(inputs={}, configs={}) {
     pod.east = pod.x + ignEast - ignX
     pod.north = pod.y + ignNorth - ignY
 
-    // client can add flame length and scorch height as needed
-    // pod.flameLength = getFlameLength(pod.firelineIntensity)
+    if (includeFlameLength)
+        pod.flameLength = getFlameLength(pod.firelineIntensity)
+    if (includeScorchHeight)
+        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, windSpeed)
     return pod
 }
 
-export function makeBeta6Vector(inputs={}, configs={}) {
-    const {fireSize, betaFromHead} = inputs
-    const betaRotation = clockwiseFromHeadToRotation(betaFromHead)
-    const pod = makeBetaVector(inputs)
+//------------------------------------------------------------------------------
+// makeBeta6Vector()
+//------------------------------------------------------------------------------
 
+export function makeBeta6Vector(inputs={}, configs={}) {
+    // Get applicable input objects
+    let {fireSize=null, betaFromHead=0, airTemp=77, windSpeed=0} = inputs
+
+    // Get applicable configs
+    let {includeFlameLength=false, includeScorchHeight=false} = configs
+
+    // Require the fireSize object, as it is too complex to be reasonablly defaulted
+    fireSize = requireInputs('makeBetaVector()', fireSize, 'fireSize')
+
+    // betaRotation is the *counter-clockwise* rotation from fire heading
+    const betaRotation = clockwiseFromHeadToRotation(betaFromHead)
+
+    // Let makeBetaVector() create the initial values
+    const pod = makeBetaVector(inputs, configs)
+
+    // Adjust fireline intensity to use psi distance
     pod.theta = calcThetaFromBeta(fireSize, betaRotation)
     pod.psi = calcPsiFromTheta(fireSize, pod.theta)
     pod.psiRos = calcPsiSpreadRate(fireSize, pod.psi)
     pod.firelineIntensity = fireSize.firelineIntensity * pod.psiRos / fireSize.headingSpreadRate
 
-    // client can add flame length and scorch height as needed
-    // pod.flameLength = getFlameLength(pod.firelineIntensity)
+    if (includeFlameLength)
+        pod.flameLength = getFlameLength(pod.firelineIntensity)
+    if (includeScorchHeight)
+        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, windSpeed)
     return pod
 }
 
@@ -65,18 +86,26 @@ export function makeBeta6Vector(inputs={}, configs={}) {
 //------------------------------------------------------------------------------
 
 export function makePsiVector(inputs={}, configs={}) {
-    const {fireSize, psiFromHead} = inputs
-    const {bearing, headingSpreadRate, firelineIntensity, rotationDeg,
+    // Get applicable input objects
+    let {fireSize=null, psiFromHead=0, airTemp=77, windSpeed=0} = inputs
+
+    // Get applicable configs
+    let {includeFlameLength=false, includeScorchHeight=false} = configs
+
+    // Require the fireSize object, as it is too complex to be reasonablly defaulted
+    fireSize = requireInputs('makePsiVector()', fireSize, 'fireSize')
+
+    // Get required fireSize (and fireEllipse) input properties
+    let {bearing, headingSpreadRate, firelineIntensity, rotationDeg,
         ignX, ignY, ignEast, ignNorth} = fireSize
 
-    // betaRotation is the *counter-clockwise* rotation from fire heading
+    // psiRotation is the *counter-clockwise* rotation from fire heading
     const psiRotation = clockwiseFromHeadToRotation(psiFromHead)
     const psiRadians = toRadians(psiRotation + rotationDeg)
 
     const pod = {}
     pod.angleFromHead = psiFromHead
     pod.bearing = clockwiseFromHeadToBearing(psiFromHead, bearing)
-
 
     pod.spreadRate = calcPsiSpreadRate(fireSize, psiRotation)
     pod.distance = pod.spreadRate * fireSize.elapsedTime
@@ -88,11 +117,13 @@ export function makePsiVector(inputs={}, configs={}) {
     pod.east = pod.x + ignEast - ignX
     pod.north = pod.y + ignNorth - ignY
 
-    // client can add flame length and scorch height as needed
-    // pod.flameLength = getFlameLength(pod.firelineIntensity)
+    if (includeFlameLength)
+        pod.flameLength = getFlameLength(pod.firelineIntensity)
+    if (includeScorchHeight)
+        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, windSpeed)
     return pod
 }
-    
+
 // Returns spread rate from the ellipse *perimeter* (or 'fire front')
 // at 'psiDegrees' *counter-clockwise* rotation from the heading direction
 // Catchpole et.al. (1982) Equation 7

@@ -1,11 +1,14 @@
 import { WfsFuelMoisture } from "./WfsInputs.js"
 
 export function makeFuelMoisture(inputs={}, configs={}) {
-    const {fuelMoisture=null} = inputs
-    const {deadFuelMoistureInput='particle', liveFuelMoistureInput='particle'} = configs
+    // Get applicable input objects
+    let {fuelMoisture=null} = inputs
+    // Get the applicable configs
+    let {deadFuelMoistureInput='particle', liveFuelMoistureInput='particle'} = configs
 
-    // Use either the provided fuel moisture object, or get the standard object
+    // Use either the provided fuelMoisture object, or clone the WfsFuelMoisture object
     const pod = (fuelMoisture === null) ? {...WfsFuelMoisture} : {...fuelMoisture}
+
     if (deadFuelMoistureInput === 'life') {
         pod.moistureDead1h = pod.moistureDeadFuels
         pod.moistureDead10h = pod.moistureDeadFuels

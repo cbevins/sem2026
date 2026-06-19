@@ -1,41 +1,46 @@
-import { WfsFireWeather } from "./WfsInputs.js"
-import { clamp } from './utils.js'
+import { WfsFireWeather, WfsFuelCanopy } from "./WfsInputs.js"
+import { checkInputs, clamp } from './utils.js'
 
 export function  makeFireWeather(inputs={}, configs={}) {
-    let {fireWeather=null, fuelCanopy=null, fuelBed=null} = inputs
+    // Get applicable input objects
+    let {fireWeather=null, fuelCanopy=null, fuelBed=null, fuelDepth=null} = inputs
+     // Get applicable configs
+    const {windSpeedInput, midflameWindSpeedInput, midflameReductionInput} = configs
+
     // Use either the provided fireWeather object, or get the standard object
     const pod = (fireWeather === null) ? {...WfsFireWeather} : {...fireWeather}
 
-    const {windSpeedInput, midflameWindSpeedInput} = configs
+    // Determine the 20-ft or 10-m wind speed
     if (windSpeedInput === '10m') {
         pod.windSpeed20ft = pod.windSpeed10m / 1.13
     } else { // (windSpeedInput === '20ft') {
         pod.windSpeed10m = 1.13 * pod.windSpeed20ft
     }
 
-    let canopySheltersFuel = false
-    let canopyWsrf = 1
+    // Does the midflame wind speed need to be estimated?
     if (midflameWindSpeedInput === 'estimated') {
-        // If no fuelCanopy object provided, assume there is no canopy
-        if (fuelCanopy === null) {
-            if (configs.logger)
-                configs.logger.log(`makeFireWeather() missing required 'fuelCanopy' input object to determine midflame wind speed: assuming no fuel canopy.`)
-        } else {
-            canopyWsrf = fuelCanopy.canopyWindReductionFactor
-            canopySheltersFuel = pod.canopySheltersFuel
+        // If so, does the midflame wind speed reduction factor need to be estimated?
+        if (midflameReductionInput === 'estimated') {
+            // Use either the provided 'fuelCanopy' object, or get the standard WfsFuelCanopy object
+            fuelCanopy = checkInputs('makeFireWeather()', fuelCanopy, 'fuelCanopy', WfsFuelCanopy, 'WfsFuelCanopy', configs)
+            let canopyWsrf = fuelCanopy.canopyWindReductionFactor
+            let canopySheltersFuel = pod.canopySheltersFuel
+
+            // If no fuelBed object or fuelDepth property provided, assume 1 foot bed depth
+            let depth = 1
+            if (fuelDepth !== null) {
+                depth = fuelDepth
+            } else if (fuelBed !== null) {
+                depth = fuelBed?.depth ?? 1
+            } else {
+                if (configs.logger)
+                    configs.logger.log(`makeFireWeather() missing required 'fuelBed' input object or 'fuelDepth' value to determine midflame wind speed reduction factor: assuming a 1-ft fuel depth.`)
+            }
+            depth = clamp(depth, 0.1, 6)
+            const fuelWsrf = 1.83 / Math.log((20 + 0.36 * depth) / (0.13 * depth))
+            pod.midflameReduction = canopySheltersFuel ? canopyWsrf : fuelWsrf
         }
-        // If no fuelCanopy object provided, assume 1 foot bed depth
-        let fuelDepth = 1
-        if (fuelBed === null) {
-            if (configs.logger)
-                configs.logger.log(`makeFireWeather() missing required 'fuelBed' input object to determine midflame wind speed: assuming a 1-ft fuel depth.`)
-        } else {
-            fuelDepth = fuelBed.depth
-        }
-        fuelDepth = clamp(fuelDepth, 0.1, 6)
-        const fuelWsrf = 1.83 / Math.log((20 + 0.36 * fuelDepth) / (0.13 * fuelDepth))
-        pod.midflameReduction = canopySheltersFuel ? canopyWsrf : fuelWsrf
         pod.midflameWindSpeed = pod.midflameReduction * pod.windSpeed20ft
-    } // else (midflameWindSpeedInput === 'input') {
+    }
     return pod
 }

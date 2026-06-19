@@ -2,8 +2,13 @@
  * The FuelBed class does as much processing of Fuel Model parameters as possible
  * up to the application of moisture, wind, and slope conditions.
  */
+import { requireInputs } from "./utils.js"
+
 export function makeFuelBed(inputs={}, configs={}) {
-    const {fuelModel} = inputs
+    // Get applicable input objects
+    let {fuelModel=null} = inputs
+    fuelModel = requireInputs('makeFuelBed()', fuelModel, 'fuelModel')
+    
     const dead = makeFuelBedLife('dead', inputs, configs)
     dead.mext = fuelModel.deadMext
     const live = makeFuelBedLife('live', inputs, configs)

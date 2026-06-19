@@ -1,9 +1,34 @@
+import { WfsFireTerrain, WfsFireWeather } from "./WfsInputs.js"
+import { checkInputs, getScorchHeight, requireInputs } from "./utils.js"
+
 export function makeFireBehavior(inputs={}, configs={}) {
-    const {fuelBed, fuelIgnition, fireWeather, fireTerrain} = inputs
-    const {slopeK, windB, windI, windK, residenceTime} = fuelBed
-    const {noWindSpreadRate, reactionIntensity} = fuelIgnition
-    const {windBearing, midflameWindSpeed} = fireWeather
-    const {aspect, slopeRatio} = fireTerrain
+    // Get applicable input objects
+    let {fuelBed=null, fuelIgnition=null, fireWeather=null, fireTerrain=null} = inputs
+
+    // Get applicable configs
+    let {limitWindFactor=true, limitSpreadRate=true, includeScorchHeight=false} = configs
+
+    // Require the fuelBed and fuelIgnition objects, as they are too complex to be reasonablly defaulted
+    fuelBed = requireInputs('makeFireBehavior()', fuelBed, 'fuelBed')
+    fuelIgnition = requireInputs('makeFireBehavior()', fuelIgnition, 'fuelIgnition')
+
+    // Use either the provided 'fireWeather' object, or get the standard WfsFireWeather object
+    fireWeather = checkInputs('makeFireBehavior()', fireWeather, 'fireWeather', WfsFireWeather, 'WfsFireWeather', configs)
+    // Use either the provided 'fireTerrain' object, or get the standard WfsFireTerrain object
+    fireTerrain = checkInputs('makeFireTerrain()', fireTerrain, 'fireTerrain', WfsFireTerrain, 'WfsFireTerrain', configs)
+
+    // Get required fuelBed input properties
+    let {slopeK, windB, windI, windK, residenceTime} = fuelBed
+    // Get required fuelIgnition input properties
+    let {noWindSpreadRate, reactionIntensity} = fuelIgnition
+    // Get required fireWeather input properties
+    let {windBearing, midflameWindSpeed, airTemp=77} = fireWeather
+    // Get required fireTerrain input properties
+    let {aspect, slopeRatio} = fireTerrain
+
+    //----------------------------------------------------------------------
+    // OK, here we go...
+    //----------------------------------------------------------------------
 
     const upslopeFromNorth = (aspect + 180) % 360
     const windHeadingFromUpslope = (windBearing - upslopeFromNorth) % 360
@@ -107,10 +132,8 @@ export function makeFireBehavior(inputs={}, configs={}) {
     //----------------------------------------------------------------------
     let p
     // limit wind coefficient to 0.9 * (windSpeed / reactionIntensity)
-    const limitWindFactor = configs?.limitWindFactor ?? true
-    // limit max spread rate to effective wind speed
-    const limitSpreadRate = configs?.limitSpreadRate ?? true
     if (limitWindFactor) 
+        // limit max spread rate to effective wind speed
         p = limitSpreadRate ? p7 : p5
     else
         p = limitSpreadRate ? p6 : p3
@@ -141,6 +164,9 @@ export function makeFireBehavior(inputs={}, configs={}) {
         flameLength: flameLength,
         lengthWidthRatio: lengthWidthRatio,
     }
+    if (includeScorchHeight)
+        pod.scorchHeight = getScorchHeight(firelineIntensity, airTemp, midflameWindSpeed)
+
     const {detailLevel=0} = configs
     // Only save these for informational purposes
     if (detailLevel >= 1) pod = {...pod,
@@ -148,10 +174,11 @@ export function makeFireBehavior(inputs={}, configs={}) {
         spreadRateLimit: p4.ros,
         effWindSpeedLimit: p4.weff,
         effWindLimitExceeded: (p3.weff > p4.weff),
-        upslopeFromNorth: upslopeFromNorth,
-        windHeadingFromUpslope: windHeadingFromUpslope,
+        midflameWindSpeed,
         slopeFactor: slopeFactor,
+        upslopeFromNorth: upslopeFromNorth,
         windFactor: windFactor,
+        windHeadingFromUpslope: windHeadingFromUpslope,
     }
     // Only save these for testing and/or debugging
     if (detailLevel >= 2) pod = {...pod,

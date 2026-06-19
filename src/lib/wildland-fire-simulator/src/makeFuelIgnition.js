@@ -3,10 +3,13 @@
  * under a specific set of fuel moisture conditions to estimate its no-wind,
  * no-slope reaction intensity and spread rate.
  */
-import { clampFraction } from './utils.js'
+import { clampFraction, requireInputs } from './utils.js'
 
 export function makeFuelIgnition(inputs={}, configs={}) {
-    const {fuelBed, fuelMoisture} = inputs
+    let {fuelBed=null, fuelMoisture=null} = inputs
+
+    fuelBed = requireInputs('makeFireIgnition()', fuelBed, 'fuelBed')
+    
     // Update life category moisture variables
     const cat = {dead: {}, live: {}}
     for(let life of ["dead", "live"]) {

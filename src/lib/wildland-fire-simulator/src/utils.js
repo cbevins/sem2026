@@ -5,6 +5,21 @@ export function bearingToClockwiseFromHead(vectorBearing, headBearing) {
     return (360 + vectorBearing - headBearing) % 360
 }
 
+export function checkInputs(funcName, prop, propName, dfltProp, dfltName, configs) {
+    if (prop === null) {
+        if (configs.logger)
+            configs.logger.log(`${funcName} missing required '${propName}' input object: assuming default ${dfltName} values.`)
+        prop = {...dfltProp}
+    }
+    return prop
+}
+
+export function requireInputs(funcName, prop, propName) {
+    if (prop === null)
+        throw new Error(`${funcName} missing required '${propName}' input object.`)
+    return prop
+}
+
 export function clamp(value, minVal, maxVal) {
     return Math.max(minVal, Math.min(maxVal, value))
 }

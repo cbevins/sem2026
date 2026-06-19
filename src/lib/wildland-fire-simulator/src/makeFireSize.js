@@ -1,6 +1,18 @@
+import { WfsFirePosition } from "./WfsInputs.js"
+import { checkInputs, requireInputs } from "./utils.js"
+
 export function makeFireSize(inputs={}, configs={}) {
-    const {fireEllipse, firePosition} = inputs
-    const {elapsedTime, ignX=0, ignY=0, ignEast=0, ignNorth=0} = firePosition
+    // Get applicable input objects
+    let {fireEllipse=null, firePosition=null} = inputs
+
+    // Require the fireEllipse object, as it is too complex to be reasonablly defaulted
+    fireEllipse = requireInputs('makeFireSize()', fireEllipse, 'fireEllipse')
+    
+    // Use either the provided firePosition object, or get the standard WfsFireSize object
+    firePosition = checkInputs('makeFireSize()', firePosition, 'firePosition', WfsFirePosition, 'WfsFirePosition', configs)
+
+    // Get required firePosition input properties
+    const {elapsedTime=1, ignX=0, ignY=0, ignEast=0, ignNorth=0} = firePosition
 
     // Distance between the *ignition point* and the fire head
     const headingDistance = fireEllipse.headingSpreadRate * elapsedTime
@@ -34,7 +46,8 @@ export function makeFireSize(inputs={}, configs={}) {
     const h = (a - b)**2 / (a + b)**2
     const perimeter = Math.PI * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)))
 
-    // Cannot use getBetaFireVector() for center point position, so do it manually here
+    // Since getBetaFireVector() cannot be used to determine the center point position,
+    // we have to do it hgere manually
     const centerX = ignX + gDistance * fireEllipse.rotationCos
     const centerY = ignY + gDistance * fireEllipse.rotationSin
     const centerE = centerX + ignEast - ignX

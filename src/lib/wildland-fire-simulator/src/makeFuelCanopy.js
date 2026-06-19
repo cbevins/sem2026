@@ -2,11 +2,14 @@ import { WfsFuelCanopy } from "./WfsInputs.js"
 import { divide, fraction, positive } from './utils.js'
 
 export function makeFuelCanopy(inputs={}, configs={}) {
+    // Get applicable input objects
     const {fuelCanopy=null} = inputs
+    // Get applicable configs
+    const {canopyHeightInputs} = configs
+
     // Use either the provided fuelCanopy object, or get the standard object
     const pod = (fuelCanopy === null) ? {...WfsFuelCanopy} : {...fuelCanopy}
     
-    const {canopyHeightInputs} = configs
     let base, height, length, ratio
     if (canopyHeightInputs === 'height-length') {
         height = pod.canopyHeight

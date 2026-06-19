@@ -21,9 +21,16 @@ export const Bp6Configs = {
     fuelCuringInput: 'input',           // 'estimated' or 'input'
     deadFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     liveFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
-    midflameWindSpeedInput: 'input',    // 'input', 'estimated'
-    slopeSteepnessInput: 'ratio',       // 'degrees', 'ratio'
-    windSpeedInput: 'midflame',         // 'midflame', '20ft', '10m'
+    midflameReductionInput: 'estimated',// 'input' or 'estimated' from fuel and canopy wind reduction
+    midflameWindSpeedInput: 'input',    // 'input' or 'estimated' from upper wind speed and reduction factor
+    slopeSteepnessInput: 'ratio',       // 'degrees', 'ratio', 'map'
+    windSpeedInput: 'midflame',         // '20ft', '10m'
+    
+    // linkages:
+    linkBehaviorEllipse: true,
+    linkBehaviorSpotting: true,
+    linkBehaviorCrowning: true,
+    linkBehaviorMortality: true,
 
     // simulation computation option
     limitWindFactor: true,      // limit wind coefficient to 0.9 wind speed / reaction intensity
@@ -35,14 +42,16 @@ export const Bp6Configs = {
 // inputs required by makeFireSize()
 export const Bp6FirePosition = {
     elapsedTime: 60,            
-    ignEast: 0,
-    ignNorth: 0
+    ignEast: 1000,
+    ignNorth: 2000
 }
 
 // input to makeFireBehavior
 export const Bp6FireTerrain = {
     aspect: 180,                // required by makeFireBehavior
     elevation: 3000,
+    ridgeValleyDistance: 5000,
+    ridgeValleyElevation: 1000,
     slopeDegrees: 14.03624347,
     slopeRatio: 0.25,           // required by makeFireBehavior
     topography: 'ridgetop',
@@ -55,9 +64,15 @@ export const Bp6FireWeather = {
     midflameReduction: 1,   // output
     midflameWindSpeed: 880, // required by makeFireBehavior()
     windBearing: 90,        // required by makeFireBehavior()
-    windSource: 180,        // used/created by makeFireWeather
-    windSpeed10m: 900,      // used/created by makeFireWeather
+    windSource: 270,        // used/created by makeFireWeather
+    windSpeed10m: 0,        // used/created by makeFireWeather
     windSpeed20ft: 880,     // used/created by makeFireWeather
+}
+
+export const Bp6FuelKeys = {
+    fuelCover1: 0.6,
+    fuelKey1: 10,
+    fuelKey2: 124,
 }
 
 // input to makeFireWeather)()
@@ -84,8 +99,9 @@ export const Bp6FuelCuring = {
     // curedCheatgrass: 0.5    // an example custom fuel curing class
 // }
 
-export const Bp6FuelKey = 10
-
+export const Bp6FuelKey1 = 10
+export const Bp6FuelKey2 = 124
+export const Bp6FuelCover1 = 0.6
 
 // Add custom fuel moisture classes like so:
 // Now FuelModel particle's can reference the 'moistureLiveCheatgrass' moisture class
@@ -94,13 +110,23 @@ export const Bp6FuelKey = 10
 //     moistureLiveCheatgrass: 0.5,    // an example custom fuel moisture class
 // }
 export const Bp6FuelMoisture = {
-    moistureDead1h: 0.05,       // required input to makeFuelIgnition()
-    moistureDead10h: 0.07,      // required input to makeFuelIgnition()
-    moistureDead100h: 0.09,     // required input to makeFuelIgnition()
-    moistureLiveHerb: 0.5,      // required input to makeFuelIgnition()
-    moistureLiveStem: 1.5,      // required input to makeFuelIgnition()
-    moistureDeadFuels: 0.1,     // used when configs.deadFuelMoistures = 'category'
-    moistureLiveFuels: 3,       // used when configs.liveFuelMoistures = 'category'
+    // required input to makeFuelIgnition() when configs.[dead|live]FuelMoistures = 'particle'
+    moistureDead1h: 0.05,
+    moistureDead10h: 0.07,
+    moistureDead100h: 0.09,
+    moistureLiveHerb: 0.5,
+    moistureLiveStem: 1.5,
+    // required when configs.[dead|live]FuelMoistures = 'life'
+    moistureDeadFuels: 0.05,
+    moistureLiveFuels: 1.5,
+}
+
+// inputs to makeFireTerrain when slopeSteepnessInputs = 'map'
+export const Bp6Map = {
+    mapScale: 24000,            // map sacle factor (Greater than 1, i.e., 24000)
+    mapContourInterval: 20,     // map contour interval (ft)
+    mapContours: 0,             // number of contours crossed in mapDistance
+    mapDistance: 0,             // map distance covered in the measurement
 }
 
 // inputs into makeFireEllipse (all are present in fireBehavior object)

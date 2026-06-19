@@ -22,8 +22,11 @@
  */
 import { toRadians } from './utils.js'
 
+// eslint-disable-next-line no-unused-vars
 export function makeFireEllipse(inputs={}, configs={}) {
+    // Get applicable input objects
     const {fireBehavior} = inputs
+    // Get required fireBehavior input properties
     const {headingSpreadRate, bearing, lengthWidthRatio, flameLength} = fireBehavior
 
     // ellipse eccentricity [0..1] e = sqrt((a/b * a/b - 1) / (a/b))

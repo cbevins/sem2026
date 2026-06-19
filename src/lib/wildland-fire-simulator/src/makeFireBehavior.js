@@ -159,10 +159,15 @@ export function makeFireBehavior(inputs={}, configs={}) {
         effWindSpeed: p.weff,
         headingFromUpslope: fireHeadingFromUpslope,
         bearing: fireHeadingFromNorth,
-        heatPerUnitArea: heatPerUnitArea,
-        firelineIntensity: firelineIntensity,
-        flameLength: flameLength,
+        heatPerUnitArea,
+        firelineIntensity,
+        flameLength,
         lengthWidthRatio: lengthWidthRatio,
+        midflameWindSpeed,
+        // following are used by makeWeightedFireBehavior()
+        reactionIntensity,
+        effWindLimitExceeded: (p3.weff > p4.weff),
+        effWindSpeedLimit: p4.weff,
     }
     if (includeScorchHeight)
         pod.scorchHeight = getScorchHeight(firelineIntensity, airTemp, midflameWindSpeed)
@@ -172,9 +177,6 @@ export function makeFireBehavior(inputs={}, configs={}) {
     if (detailLevel >= 1) pod = {...pod,
         residenceTime: residenceTime,
         spreadRateLimit: p4.ros,
-        effWindSpeedLimit: p4.weff,
-        effWindLimitExceeded: (p3.weff > p4.weff),
-        midflameWindSpeed,
         slopeFactor: slopeFactor,
         upslopeFromNorth: upslopeFromNorth,
         windFactor: windFactor,

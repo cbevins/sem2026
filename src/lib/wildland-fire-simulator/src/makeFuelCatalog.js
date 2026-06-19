@@ -67,6 +67,46 @@ export class FuelModelCatalog {
         return (fuelModel === undefined) ? null : this.#clone(fuelModel)
     }
 
+    getNumberKeys() {
+        const keys = []
+        for (const key of this.catalog.keys()) {
+            if(Number.isFinite(key)) keys.push(key)
+        }
+        return keys
+    }
+
+    getCuringClasses(fuelKeys=[]) {
+        const {curing} = this.#getParticleClasses(fuelKeys)
+        return [...curing]
+    }
+
+    getMoistureClasses(fuelKeys=[]) {
+        const {moisture} = this.#getParticleClasses(fuelKeys)
+        return [...moisture]
+    }
+
+    #getParticleClasses(fuelKeys=[]) {
+        const curing = new Set()
+        const moisture = new Set()
+        for (let key of fuelKeys) {
+            const fuelModel = this.catalog.get(key)
+            for (let particle of fuelModel.particles) {
+                moisture.add(particle.deadMoistureClass)
+                moisture.add(particle.liveMoistureClass)
+                curing.add(particle.curingClass)
+            }
+        }
+        return {moisture, curing}
+    }
+
+    getStringKeys() {
+        const keys = []
+        for (const key of this.catalog.keys()) {
+            if(typeof key === 'string') keys.push(key)
+        }
+        return keys
+    }
+
     /**
      * @param {number|string} A fuelKey number or string
      * @returns TRUE if the fuelKey exists in the catalog, FALSE if it doesn't exist

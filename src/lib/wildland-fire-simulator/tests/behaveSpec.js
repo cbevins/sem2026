@@ -167,4 +167,8 @@ console.log(backVector)
 console.log(betaVector)
 console.log(beta6Vector)
 console.log(psiVector)
+
+const stringKeys = fuelCatalog.getStringKeys()
+console.log('Moisture Classes', fuelCatalog.getMoistureClasses(stringKeys))
+console.log('Curing Classes', fuelCatalog.getCuringClasses(stringKeys))
 done(configs)

@@ -118,7 +118,7 @@ export const WfsFuelMoisture = {
 // }
 
 // inputs to makeFireTerrain when slopeSteepnessInputs = 'map'
-export const WfsMap = {
+export const WfsSlopeMap = {
     mapScale: 24000,            // map sacle factor (Greater than 1, i.e., 24000)
     mapContourInterval: 20,     // map contour interval (ft)
     mapContours: 0,             // number of contours crossed in mapDistance

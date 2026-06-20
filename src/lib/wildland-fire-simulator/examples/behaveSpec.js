@@ -18,7 +18,7 @@ import { makeFuelMoisture } from '../Wfs.js'
 
 import {Bp6BetaFromHead, Bp6Configs, Bp6FirePosition, Bp6FireTerrain, Bp6FireWeather,
     Bp6FuelCanopy, Bp6FuelCuring, Bp6FuelKeys, Bp6FuelMoisture, Bp6ObservedFireBehavior, Bp6PsiFromHead
-} from './Bp6Inputs.js'
+} from '../tests/Bp6Inputs.js'
 
 function done(configs) {
     if (configs.logger) {
@@ -31,7 +31,7 @@ function done(configs) {
 
 const div = '\n-------------------------------------------------------------------\n'
 console.clear()
-console.log(div,'\n\n\nWildfire Simulator', new Date())
+console.log(div,'\n\n\nBehavePlus Spec of Wildfire Simulator', new Date())
 
 //------------------------------------------------------------------------------
 // The following are input data server functions provided by the client.
@@ -157,16 +157,16 @@ configs.includeScorchHeight = true
 const betaFromHead = fetchBetaFromHead()
 const psiFromHead = fetchPsiFromHead()
 
-const headVector = makeBetaVector({fireSize, betaFromHead: 0}, configs)
-const backVector = makeBetaVector({fireSize, betaFromHead: 180}, configs)
-const betaVector = makeBetaVector({fireSize, betaFromHead}, configs)
-const beta6Vector = makeBeta6Vector({fireSize, betaFromHead}, configs)
-const psiVector = makePsiVector({fireSize, psiFromHead}, configs)
+const headVector = makeBetaVector({fireSize, fireWeather, betaFromHead: 0}, configs)
+const backVector = makeBetaVector({fireSize, fireWeather, betaFromHead: 180}, configs)
+const betaVector = makeBetaVector({fireSize, fireWeather, betaFromHead}, configs)
+const beta6Vector = makeBeta6Vector({fireSize, fireWeather, betaFromHead}, configs)
+const psiVector = makePsiVector({fireSize, fireWeather, psiFromHead}, configs)
 console.log(headVector)
-// console.log(backVector)
-// console.log(betaVector)
-// console.log(beta6Vector)
-// console.log(psiVector)
+console.log(backVector)
+console.log(betaVector)
+console.log(beta6Vector)
+console.log(psiVector)
 
 // const stringKeys = fuelCatalog.getStringKeys()
 // console.log('Moisture Classes', fuelCatalog.getMoistureClasses(stringKeys))

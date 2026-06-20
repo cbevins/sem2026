@@ -34,11 +34,14 @@ let fuelModel = makeFuelModel({fuelCatalog, fuelKey: 124}, configs)
 let fuelBed = makeFuelBed({fuelModel, fuelCuring}, configs)
 
 let fuelIgnition = makeFuelIgnition({fuelBed, fuelMoisture}, configs)
-console.log(fuelIgnition)
 
 let fireWeather = {...Bp6FireWeather}
-let fireTerrain = {...Bp6FireTerrain}
+let fireTerrain = makeFireTerrain({fireTerrain:{...Bp6FireTerrain}}, configs)
 
 let fireBehavior = makeFireBehavior({fuelBed, fuelIgnition, fireWeather, fireTerrain}, configs)
 let fireEllipse = makeFireEllipse({fireBehavior}, configs)
-console.log(fireEllipse)
+
+let firePosition = {...Bp6FirePosition}
+let fireSize = makeFireSize({fireEllipse, firePosition})
+
+console.log(fireSize)

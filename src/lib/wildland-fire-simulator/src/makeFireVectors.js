@@ -1,4 +1,5 @@
-import { clockwiseFromHeadToBearing, clockwiseFromHeadToRotation,
+import { WfsFireWeather } from "./WfsInputs.js"
+import { checkInputs, clockwiseFromHeadToBearing, clockwiseFromHeadToRotation,
     getFlameLength, getScorchHeight, requireInputs, toRadians } from './utils.js'
 import { calcPsiFromTheta, calcThetaFromBeta } from './getEllipseAngles.js'
 
@@ -10,7 +11,7 @@ import { calcPsiFromTheta, calcThetaFromBeta } from './getEllipseAngles.js'
 //------------------------------------------------------------------------------
 export function makeBetaVector(inputs={}, configs={}) {
     // Get applicable input objects
-    let {fireSize=null, betaFromHead=0, airTemp=77, windSpeed=0} = inputs
+    let {fireSize=null, fireWeather=null, betaFromHead=0} = inputs
 
     // Get applicable configs
     let {includeFlameLength=false, includeScorchHeight=false} = configs
@@ -43,8 +44,13 @@ export function makeBetaVector(inputs={}, configs={}) {
 
     if (includeFlameLength)
         pod.flameLength = getFlameLength(pod.firelineIntensity)
-    if (includeScorchHeight)
-        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, windSpeed)
+
+    if (includeScorchHeight) {
+        // Use either the provided 'fireWeather' object, or get the standard WfsFireWeather object
+        fireWeather = checkInputs('makeBetaVector()', fireWeather, 'fireWeather', WfsFireWeather, 'WfsFireWeather', configs)
+        let {airTemp=77, midflameWindSpeed=0} = fireWeather
+        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, midflameWindSpeed)
+    }
     return pod
 }
 
@@ -54,13 +60,13 @@ export function makeBetaVector(inputs={}, configs={}) {
 
 export function makeBeta6Vector(inputs={}, configs={}) {
     // Get applicable input objects
-    let {fireSize=null, betaFromHead=0, airTemp=77, windSpeed=0} = inputs
+    let {fireSize=null, fireWeather=null, betaFromHead=0} = inputs
 
     // Get applicable configs
     let {includeFlameLength=false, includeScorchHeight=false} = configs
 
     // Require the fireSize object, as it is too complex to be reasonablly defaulted
-    fireSize = requireInputs('makeBetaVector()', fireSize, 'fireSize')
+    fireSize = requireInputs('makeBeta6Vector()', fireSize, 'fireSize')
 
     // betaRotation is the *counter-clockwise* rotation from fire heading
     const betaRotation = clockwiseFromHeadToRotation(betaFromHead)
@@ -76,8 +82,12 @@ export function makeBeta6Vector(inputs={}, configs={}) {
 
     if (includeFlameLength)
         pod.flameLength = getFlameLength(pod.firelineIntensity)
-    if (includeScorchHeight)
-        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, windSpeed)
+    if (includeScorchHeight) {
+        // Use either the provided 'fireWeather' object, or get the standard WfsFireWeather object
+        fireWeather = checkInputs('makeBeta6Vector()', fireWeather, 'fireWeather', WfsFireWeather, 'WfsFireWeather', configs)
+        let {airTemp=77, midflameWindSpeed=0} = fireWeather
+        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, midflameWindSpeed)
+    }
     return pod
 }
 
@@ -87,7 +97,7 @@ export function makeBeta6Vector(inputs={}, configs={}) {
 
 export function makePsiVector(inputs={}, configs={}) {
     // Get applicable input objects
-    let {fireSize=null, psiFromHead=0, airTemp=77, windSpeed=0} = inputs
+    let {fireSize=null, fireWeather=null, psiFromHead=0} = inputs
 
     // Get applicable configs
     let {includeFlameLength=false, includeScorchHeight=false} = configs
@@ -95,7 +105,7 @@ export function makePsiVector(inputs={}, configs={}) {
     // Require the fireSize object, as it is too complex to be reasonablly defaulted
     fireSize = requireInputs('makePsiVector()', fireSize, 'fireSize')
 
-    // Get required fireSize (and fireEllipse) input properties
+    // Get required fireEllipse/fireSize/firePosition input properties from fireSize
     let {bearing, headingSpreadRate, firelineIntensity, rotationDeg,
         ignX, ignY, ignEast, ignNorth} = fireSize
 
@@ -119,8 +129,12 @@ export function makePsiVector(inputs={}, configs={}) {
 
     if (includeFlameLength)
         pod.flameLength = getFlameLength(pod.firelineIntensity)
-    if (includeScorchHeight)
-        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, windSpeed)
+    if (includeScorchHeight) {
+        // Use either the provided 'fireWeather' object, or get the standard WfsFireWeather object
+        fireWeather = checkInputs('makePsiVector()', fireWeather, 'fireWeather', WfsFireWeather, 'WfsFireWeather', configs)
+        let {airTemp=77, midflameWindSpeed=0} = fireWeather
+        pod.scorchHeight = getScorchHeight(pod.firelineIntensity, airTemp, midflameWindSpeed)
+    }
     return pod
 }
 

@@ -19,8 +19,10 @@ export { makeFuelMoisture } from './src/makeFuelMoisture.js'
 
 // Standard WFS data object templates
 export { WfsBetaFromHead, WfsConfigs, WfsFirePosition, WfsFireTerrain, WfsFireWeather,
-    WfsFuelCuring, WfsFuelKeys, WfsFuelMoisture, WfsMap, WfsPsiFromHead
+    WfsFuelCuring, WfsFuelKeys, WfsFuelMoisture, WfsSlopeMap, WfsPsiFromHead
 } from './src/WfsInputs.js'
+
+export { WfsFire } from './src/WsfFire.js'
 
 export {
     calcBetaFromPsi,

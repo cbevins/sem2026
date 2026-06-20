@@ -80,7 +80,7 @@ describe('makeFireEllipse()', () => {
             expect(configs.logger.length()).toBe(0)
 
             for(let [prop, values] of Object.entries(bpFireEllipse)) {
-                console.log(`FM ${fuel[idx]} prop ${prop} expect ${values[0]} received ${fireEllipse[prop]}`)
+                // console.log(`FM ${fuel[idx]} prop ${prop} expect ${values[0]} received ${fireEllipse[prop]}`)
                 expect(fireEllipse[prop]).parts(values[idx], ppb)
             }
         }
@@ -117,7 +117,7 @@ describe('makeFireSize()', () => {
             expect(configs.logger.length()).toBe(0)
 
             for(let [prop, values] of Object.entries(bpFireSize)) {
-                console.log(`FM ${fuel[idx]} prop ${prop} expect ${values[0]} received ${fireSize[prop]}`)
+                // console.log(`FM ${fuel[idx]} prop ${prop} expect ${values[0]} received ${fireSize[prop]}`)
                 expect(fireSize[prop]).parts(values[idx], ppb)
             }
             expect(fireSize.area).parts(area[idx], ppm)

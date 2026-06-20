@@ -1,9 +1,9 @@
-import { WfsFireTerrain, WfsMap } from "./WfsInputs.js"
+import { WfsFireTerrain, WfsSlopeMap } from "./WfsInputs.js"
 import { checkInputs, toDegrees, toRadians } from './utils.js'
 
 export function  makeFireTerrain(inputs={}, configs={}) {
     // Get applicable input objects
-    let {fireTerrain=null, map=null} = inputs
+    let {fireTerrain=null, slopeMap=null} = inputs
     // Get applicable configs
     const {slopeSteepnessInput} = configs
 
@@ -14,12 +14,12 @@ export function  makeFireTerrain(inputs={}, configs={}) {
     if (slopeSteepnessInput === 'degrees') {
         pod.slopeRatio = Math.tan(toRadians(pod.windSpeed10m))
     }
-    // map inputs object is required
+    // slopeMap inputs object is required
     else if (slopeSteepnessInput === 'map') {
-        // Use either the provided 'map' object, or get the standard WfsMap object
-        map = checkInputs('makeFireTerrain()', map, 'map', WfsMap, 'WfsMap', configs)
-        // Get applicable 'map' properties
-        const {mapScale, contourInterval, contours, mapDistance} = map
+        // Use either the provided 'slopeMap' object, or get the standard WfsSlopeMap object
+        slopeMap = checkInputs('makeFireTerrain()', slopeMap, 'slopeMap', WfsSlopeMap, 'WfsSlopeMap', configs)
+        // Get applicable 'slopeMap' properties
+        const {mapScale, contourInterval, contours, mapDistance} = slopeMap
         const reach = Math.max(0, mapScale * mapDistance)
         const rise = Math.max(0, contours * contourInterval)
         pod.slopeRatio = (reach>0) ? rise / reach : 0

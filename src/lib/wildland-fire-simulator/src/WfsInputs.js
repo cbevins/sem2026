@@ -13,8 +13,6 @@ export const WfsBetaFromHead = 45
 export const WfsConfigs = {
     // Wfs system options
     detailLevel: 2,
-    includeFlameLength: true,           // flameLength properties included for fireBehavior, fireVectors
-    includeScorchHeight: true,          // scorchHeight length properties included for fireBehavior, fireVectors
     logger: null,
     validateInputs: true,               // not yet implemented
 
@@ -39,8 +37,8 @@ export const WfsConfigs = {
     // simulation computation option
     limitWindFactor: true,      // limit wind coefficient to 0.9 wind speed / reaction intensity
     limitSpreadRate: true,      // limit max spread rate to effective wind speed
-    includeFlameLengths: false, // include flame length computation in fire vectors
-    includeScorchHeightLengths: false, // include scorch height computation in fire vectors
+    includeFlameLength: true,   // include flame length computation in fire vectors
+    includeScorchHeight: true,  // include scorch height computation in fire vectors
 }
 
 // inputs required by makeFireSize()

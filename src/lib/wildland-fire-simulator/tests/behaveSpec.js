@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { makeBetaVector, makeBeta6Vector, makePsiVector} from '../Wfs.js'
 import { makeFireBehavior } from '../Wfs.js'
 import { makeFireEllipse } from '../Wfs.js'
@@ -67,12 +68,6 @@ let fuelKeys = fetchFuelKeys()
 
 // FOR EACH fuelKey1 {...
 
-// fuelModel must exist prior to makeFuelBed()
-let xfuelModel1 = makeFuelModel({fuelCatalog}, configs)
-done(configs)
-
-let xfuelModel2 = makeFuelModel({fuelCatalog, fuelKey: 'junk'}, configs)
-console.log(xfuelModel1)
 let fuelModel1 = makeFuelModel({fuelCatalog, fuelKey: fuelKeys.fuelKey1}, configs)
 let fuelModel2 = fuelModel1
 // Can have 2 fuel models

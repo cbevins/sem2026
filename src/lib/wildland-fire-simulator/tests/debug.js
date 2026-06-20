@@ -33,6 +33,11 @@ fuelCuring = makeFuelCuring({fuelCuring, fuelMoisture}, configs)
 let fuelModel = makeFuelModel({fuelCatalog, fuelKey: 124}, configs)
 let fuelBed = makeFuelBed({fuelModel, fuelCuring}, configs)
 
-// do not pass a fuelMoisture
-let fuelIgnition = makeFuelIgnition({fuelBed}, configs)
+let fuelIgnition = makeFuelIgnition({fuelBed, fuelMoisture}, configs)
 console.log(fuelIgnition)
+
+let fireWeather = {...Bp6FireWeather}
+let fireTerrain = {...Bp6FireTerrain}
+
+let fireBehavior = makeFireBehavior({fuelBed, fuelIgnition, fireWeather, fireTerrain}, configs)
+console.log(fireBehavior)

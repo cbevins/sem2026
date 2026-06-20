@@ -37,8 +37,8 @@ export const Bp6Configs = {
     // simulation computation option
     limitWindFactor: true,      // limit wind coefficient to 0.9 wind speed / reaction intensity
     limitSpreadRate: true,      // limit max spread rate to effective wind speed
-    includeFlameLengths: false, // include flame length computation in fire vectors
-    includeScorchHeightLengths: false, // include scorch height computation in fire vectors
+    includeFlameLength: true,   // include flame length computation in fire vectors
+    includeScorchHeight: true,  // include scorch height computation in fire vectors
 }
 
 // inputs required by makeFireSize()

@@ -22,7 +22,7 @@ fuelCuring = makeFuelCuring({fuelCuring, fuelMoisture}, configs)
 let fireWeather = {...Bp6FireWeather}
 let fireTerrain = {...Bp6FireTerrain}
 
-describe('FireBehavior Class', () => {
+describe('makeFireBehavior()', () => {
     it('throws an error if makeFireBehavior() is not passed an input.fuelBed property', () => {
         expect(() => noFuelBedArg()).toThrow()
     })

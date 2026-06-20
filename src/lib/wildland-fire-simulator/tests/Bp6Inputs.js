@@ -44,8 +44,8 @@ export const Bp6Configs = {
 // inputs required by makeFireSize()
 export const Bp6FirePosition = {
     elapsedTime: 60,            
-    ignEast: 1000,
-    ignNorth: 2000
+    ignEast: 0,
+    ignNorth: 0,
 }
 
 // input to makeFireBehavior

@@ -17,7 +17,7 @@ fuelMoisture = makeFuelMoisture({fuelMoisture}, configs)
 let fuelCuring = {...Bp6FuelCuring}
 fuelCuring = makeFuelCuring({fuelCuring, fuelMoisture}, configs)
 
-describe('FuelBed Class', () => {
+describe('makeFuelBed()', () => {
     it('throws an error if new FuelBed() is not passed a {fuelModel} property', () => {
         expect(() => noFuelModelArg()).toThrow()
     })

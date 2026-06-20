@@ -40,4 +40,5 @@ let fireWeather = {...Bp6FireWeather}
 let fireTerrain = {...Bp6FireTerrain}
 
 let fireBehavior = makeFireBehavior({fuelBed, fuelIgnition, fireWeather, fireTerrain}, configs)
-console.log(fireBehavior)
+let fireEllipse = makeFireEllipse({fireBehavior}, configs)
+console.log(fireEllipse)

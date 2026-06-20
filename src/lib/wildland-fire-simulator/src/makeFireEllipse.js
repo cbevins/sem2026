@@ -20,12 +20,16 @@
  * length, and perimeter position at any time. Finally, by providing an ignition point
  * location the ellipse can be placed into a geographical context of the user's choosing.
  */
-import { toRadians } from './utils.js'
+import { requireInputs, toRadians } from "./utils.js"
 
 // eslint-disable-next-line no-unused-vars
 export function makeFireEllipse(inputs={}, configs={}) {
     // Get applicable input objects
-    const {fireBehavior} = inputs
+    let {fireBehavior=null} = inputs
+    
+    // Require the fireBehavior object
+    fireBehavior = requireInputs('makeFireEllipse()', fireBehavior, 'fireBehavior')
+    
     // Get required fireBehavior input properties
     const {headingSpreadRate, bearing, lengthWidthRatio, flameLength} = fireBehavior
 
@@ -89,9 +93,11 @@ export function makeFireEllipse(inputs={}, configs={}) {
     const rotationSinInv = Math.sin(-rotationRad)
 
     let pod = {
+        headingSpreadRate,
+        lengthWidthRatio,
+        flameLength,
         bearing,
         eccentricity,
-        headingSpreadRate,
         backingSpreadRate,
         majorExpansionRate,
         minorExpansionRate,

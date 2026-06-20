@@ -12,7 +12,7 @@ let configs = {...Bp6Configs}
 configs.logger = makeLogger()
 let fuelCatalog = makeFuelCatalog(configs)
 
-describe('FuelBed Class', () => {
+describe('makeFuelModel()', () => {
     it('throws an error if makeFuelModel() is not passed a inputs.fuelCatalog property', () => {
         configs.logger.clear()
         expect(() => noFuelCatalogArg()).toThrow()

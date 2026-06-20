@@ -3,12 +3,21 @@
  * under a specific set of fuel moisture conditions to estimate its no-wind,
  * no-slope reaction intensity and spread rate.
  */
-import { clampFraction, requireInputs } from './utils.js'
+import { WfsFuelMoisture } from "./WfsInputs.js"
+import { checkInputs, clampFraction, requireInputs } from './utils.js'
 
 export function makeFuelIgnition(inputs={}, configs={}) {
+    // Get applicable input objects
     let {fuelBed=null, fuelMoisture=null} = inputs
 
+    // Get applicable configs
+    const {detailLevel=0} = configs
+
+    // Require the fuelBed object, as it is too complex to be reasonablly defaulted
     fuelBed = requireInputs('makeFireIgnition()', fuelBed, 'fuelBed')
+
+    // Use either the provided 'fireWeather' object, or get the standard WfsFireWeather object
+    fuelMoisture = checkInputs('makeFireIgnition()', fuelMoisture, 'fuelMoisture', WfsFuelMoisture, 'WfsFuelMoisture', configs)
     
     // Update life category moisture variables
     const cat = {dead: {}, live: {}}
@@ -84,7 +93,6 @@ export function makeFuelIgnition(inputs={}, configs={}) {
         noWindSpreadRate
     }
 
-    const {detailLevel=0} = configs
     // Only save these for informational purposes
     if (detailLevel >= 1) pod = {...pod,
         heatPreIgn,

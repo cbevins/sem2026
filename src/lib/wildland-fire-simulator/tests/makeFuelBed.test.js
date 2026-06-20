@@ -5,7 +5,7 @@ import { Bp6Configs, Bp6FuelCuring, Bp6FuelMoisture } from './Bp6Inputs.js'
 import { parts, ppb } from './assertions.js'
 expect.extend({ parts })
 
-// Dummy functions to test error
+// Dummy functions to test thrown error
 function noFuelModelArg() { makeFuelBed() }
 
 let configs = {...Bp6Configs}

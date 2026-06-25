@@ -15,8 +15,9 @@ import {
     makeFireWeather,
     makeFuelCanopy,
     makeFuelCuring,
-    makeFuelMoisture}
-from '../Wfs.js'
+    makeFuelMoisture,
+    makeMidflameWind,
+} from '../Wfs.js'
 
 export class WfsFire {
     constructor() {
@@ -68,9 +69,12 @@ export class WfsFire {
         // Update fuelCanopy (wind speed reduction) based on configs
         fuelCanopy = makeFuelCanopy({fuelCanopy}, configs)
 
-        // Update fire weather (wind bearing, midflame wind speed and reduction factor)
+        // Update fire weather (wind bearing and speed)
         fireWeather = makeFireWeather({fireWeather, fuelCanopy, fuelBed}, configs)
 
+        // Update fire weather midflame wind speed and reduction factors
+        fireWeather = makeMidflameWind({fireWeather, fuelCanopy, fuelBed}, configs)
+        
         // Update fire terrain (slope steepness)
         fireTerrain = makeFireTerrain({fireTerrain, slopeMap}, configs)
 

@@ -24,12 +24,12 @@ export const WfsConfigs = {
     deadFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     liveFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     midflameReductionInput: 'estimated',// 'input' or 'estimated' from fuel and canopy wind reduction
-    midflameWindSpeedInput: 'input',    // 'input' or 'estimated' from upper wind speed and reduction factor
+    midflameWindSpeedInput: 'input',    // 'input' or 'estimated' from 20ft/10m wind speed and reduction factor
     slopeDirectionInput: 'aspect',      // 'aspect' or 'upslope'
     slopeSteepnessInput: 'ratio',       // 'degrees', 'ratio', 'map'
     windDirectionInput: 'bearing',      // 'bearing' or 'source'
-    windSpeedInput: 'midflame',         // '20ft', '10m'
-    
+    windSpeedInput: '20ft',             // '20ft', '10m'
+
     // linkages:
     linkBehaviorEllipse: true,
     linkBehaviorSpotting: true,
@@ -67,14 +67,18 @@ export const WfsFireTerrain = {
 
 // input to makeFireBehavior(), may be modified by getMidflameWindSpeed()
 export const WfsFireWeather = {
+    // managed by makeFireWeather()
     airTemp: 95,            // only used by scorch height
-    midflameReduction: 1,   // output
-    midflameWindSpeed: 880, // required by makeFireBehavior()
     windBearing: 90,        // required by makeFireBehavior()
     windFromUpslope: 90,    // 
     windSource: 180,        // used/created by makeFireWeather
     windSpeed10m: 900,      // used/created by makeFireWeather
     windSpeed20ft: 880,     // used/created by makeFireWeather
+    // managed by makeMidflameWind()
+    fuelBedReduction: 1,
+    canopyReduction: 1,
+    midflameReduction: 1,   // output
+    midflameWindSpeed: 880, // required by makeFireBehavior()
 }
 
 // input to makeFuelCanopy()

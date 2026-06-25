@@ -16,7 +16,7 @@ export function makeFuelIgnition(inputs={}, configs={}) {
     // Require the fuelBed object, as it is too complex to be reasonablly defaulted
     fuelBed = requireInputs('makeFireIgnition()', fuelBed, 'fuelBed')
 
-    // Use either the provided 'fireWeather' object, or get the standard WfsFireWeather object
+    // Use either the provided 'fireMoisture' object, or get the standard WfsFuelMoisture object
     fuelMoisture = checkInputs('makeFireIgnition()', fuelMoisture, 'fuelMoisture', WfsFuelMoisture, 'WfsFuelMoisture', configs)
     
     // Update life category moisture variables

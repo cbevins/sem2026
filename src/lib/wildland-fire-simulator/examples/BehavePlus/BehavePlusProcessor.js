@@ -89,7 +89,7 @@ export class BehavePlusProcessor {
                 this.#setValue('moistureDeadFuels', value)
                 bp.fuelMoisture = makeFuelMoisture({fuelMoisture: bp.fuelMoisture}, bp.configs)
                 bp.fuelIgnition = makeFuelIgnition({fuelBed: bp.fuelBed, fuelMoisture: bp.fuelMoisture}, bp.configs)
-                this.processWindInputs()
+                this.processSlopeSteepnessInputs()
             }
         } else { // (bp.configs.liveFuelMoistureInput === 'particle') {
             for(let value1h of bp.props.moistureDead1h.values) {
@@ -100,13 +100,38 @@ export class BehavePlusProcessor {
                         this.#setValue('moistureDead100h', value100h)
                         bp.fuelMoisture = makeFuelMoisture({fuelMoisture: bp.fuelMoisture}, bp.configs)
                         bp.fuelIgnition = makeFuelIgnition({fuelBed: bp.fuelBed, fuelMoisture: bp.fuelMoisture}, bp.configs)
-                        this.processWindInputs()
+                        this.processSlopeSteepnessInputs()
                     }
                 }
             }
         }
     }
 
+    processSlopeSteepnessInputs() {
+        const bp = this.bp
+        if (bp.configs.slopeSteepnessInput === 'ratio') {
+            for(let value of bp.props.slopeRatio.values) {
+                this.#setValue('slopeRatio', value)
+                bp.fireTerrain = makeFireTerrain({fireTerrain: bp.fireTerrain}, bp.configs)
+                this.processSlopeDirectionInputs()
+            }
+        } else if (bp.configs.slopeSteepnessInput === 'degrees') {
+            for(let value of bp.props.slopeDegrees.values) {
+                this.#setValue('slopeDegrees', value)
+                bp.fireTerrain = makeFireTerrain({fireTerrain: bp.fireTerrain}, bp.configs)
+                this.processSlopeDirectionInputs()
+            }
+        } // else { // (bp.configs.slopeSteepnessInput === 'map') {
+    }
+
+    // processSlopeDirectionInputs
+    // processSlopeSteepnessInputs
+    // processWindDirectionInputs
+    // if midflameWindSpeedInputs estimated:
+    //      if midflameWindReductionInputs estimated:
+    //          processFuelCanopyInputs
+    //      processMidflameReductionInputs
+    // processWindSpeedInputs
     processWindInputs() {
         this.saveResults()
     }

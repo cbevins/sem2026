@@ -15,6 +15,7 @@ import { makeFireWeather } from '../Wfs.js'
 import { makeFuelCanopy } from '../Wfs.js'
 import { makeFuelCuring } from '../Wfs.js'
 import { makeFuelMoisture } from '../Wfs.js'
+import { makeMidflameWind } from '../Wfs.js'
 
 import {Bp6BetaFromHead, Bp6Configs, Bp6FirePosition, Bp6FireTerrain, Bp6FireWeather,
     Bp6FuelCanopy, Bp6FuelCuring, Bp6FuelKeys, Bp6FuelMoisture, Bp6ObservedFireBehavior, Bp6PsiFromHead
@@ -92,7 +93,7 @@ let fuelCuring = fetchFuelCuring()
 configs.fuelCuringInput = 'estimated'
 fuelCuring = makeFuelCuring({fuelCuring, fuelMoisture}, configs)
 
-// fuelCanopy must exist prior to makeFireWeather() if estimating midflame reduction factor
+// fuelCanopy must exist prior to makeMidflameWind() if estimating midflame reduction factor
 let fuelCanopy = fetchFuelCanopy()
 configs.canopyHeightInputs = 'height-base'  // 'height-base', 'height-ratio', height-length', 'length-base', 'length-ratio', 'base-ratio'
 fuelCanopy = makeFuelCanopy({fuelCanopy}, configs)
@@ -107,11 +108,14 @@ let fuelBed1 = makeFuelBed({fuelModel: fuelModel1, fuelCuring}, configs)
 // fuelIgnition has no configurable parameters
 let fuelIgnition1 = makeFuelIgnition({fuelBed: fuelBed1, fuelMoisture}, configs)
 
-// fireWeather must exist prior to calling makeFireBehavior()
+// fireWeather must exist prior to calling makeMidflameWind() or makeFireBehavior()
 let fireWeather = fetchFireWeather()
+fireWeather = makeFireWeather({fireWeather}, configs)
+
+// fireWeather midflame wind
 configs.midflameReductionInput = 'estimated'
 configs.midflameWindSpeedInput = 'input'
-fireWeather = makeFireWeather({fireWeather, fuelCanopy, fuelBed: fuelBed1}, configs)
+fireWeather = makeMidflameWind({fireWeather, fuelCanopy, fuelBed: fuelBed1}, configs)
 
 // fireTerrain must exist prior to calling makeFireBehavior()
 let fireTerrain = fetchFireTerrain()

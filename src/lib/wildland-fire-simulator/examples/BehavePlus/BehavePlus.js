@@ -79,6 +79,56 @@ export class BehavePlus {
         } else if (cfg === 'life') {
             inputs.add('moistureDeadFuels')
         } else throw new Error(`Unknown 'deadFuelMoistureInput' config '${cfg}'`)
+
+        cfg = this.configs.slopeSteepnessInput
+        if (cfg === 'ratio') {
+            inputs.add('slopeRatio')
+        } else if (cfg === 'degrees') {
+            inputs.add('slopeDegrees')
+        } else if (cfg === 'map') {
+            inputs.add('mapScale')
+            inputs.add('mapContourInterval')
+            inputs.add('mapContours')
+            inputs.add('mapDistance')
+        } else throw new Error(`Unknown 'slopeSteepnessInput' config '${cfg}'`)
+
+        cfg = this.configs.slopeDirectionInput
+        if (cfg === 'aspect') {
+            inputs.add('aspect')
+        } else if (cfg === 'upslope') {
+            inputs.add('upslope')
+        } else throw new Error(`Unknown 'slopeDirectionInput' config '${cfg}'`)
+
+        cfg = this.configs.windDirectionInput
+        if (cfg === 'bearing') {
+            inputs.add('windBearing')
+        } else if (cfg === 'source') {
+            inputs.add('windSource')
+        } else throw new Error(`Unknown 'windDirectionInput' config '${cfg}'`)
+
+        cfg = this.configs.windSpeedInput
+        if (cfg === '20ft') {
+            inputs.add('windSpeed20ft')
+        } else if (cfg === '10m') {
+            inputs.add('windSpeed10m')
+        } else throw new Error(`Unknown 'windSpeedInput' config '${cfg}'`)
+
+        cfg = this.configs.midflameWindSpeedInput
+        if (cfg === 'input') {
+            inputs.add('midflameWindSpeed')
+        } else if (cfg === 'estimated') {
+            inputs.add('windSpeed20ft')
+            const wsrf = this.configs.midflameReductionInput
+            if (wsrf === 'input') {
+                inputs.add('windSpeedReductionFactor')
+            } else if (wsrf === 'estimated') {
+                inputs.add('canopyBaseHeight')
+                inputs.add('canopyHeight')
+                inputs.add('canopyCover')
+                inputs.add('fuelKey1')
+            } else throw new Error(`Unknown 'midflameWindReductionInput' config '${wsrf}'`)
+        } else throw new Error(`Unknown 'midflameWindSpeedInput' config '${cfg}'`)
+
         return inputs
     }
 

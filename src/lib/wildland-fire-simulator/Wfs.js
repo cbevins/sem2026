@@ -16,6 +16,7 @@ export { makeFireWeather } from './src/makeFireWeather.js'
 export { makeFuelCanopy } from './src/makeFuelCanopy.js'
 export { makeFuelCuring } from './src/makeFuelCuring.js'
 export { makeFuelMoisture } from './src/makeFuelMoisture.js'
+export { makeMidflameWind } from './src/makeMidflameWind.js'
 
 // Standard WFS data object templates
 export { WfsBetaFromHead, WfsConfigs, WfsFirePosition, WfsFireTerrain, WfsFireWeather,

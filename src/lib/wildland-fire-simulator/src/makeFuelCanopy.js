@@ -44,7 +44,7 @@ export function makeFuelCanopy(inputs={}, configs={}) {
     }
     pod.canopyBaseHeight = base
     pod.canopyHeight = height
-    pod.canopylength = length
+    pod.canopyLength = length
     pod.canopyRatio = ratio
 
     pod.canopyFill = pod.canopyCover * ratio / 3

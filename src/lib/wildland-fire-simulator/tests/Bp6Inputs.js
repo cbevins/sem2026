@@ -25,9 +25,10 @@ export const Bp6Configs = {
     liveFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     midflameReductionInput: 'estimated',// 'input' or 'estimated' from fuel and canopy wind reduction
     midflameWindSpeedInput: 'input',    // 'input' or 'estimated' from upper wind speed and reduction factor
+    slopeDirectionInput: 'aspect',      // 'aspect' or 'upslope'
     slopeSteepnessInput: 'ratio',       // 'degrees', 'ratio', 'map'
     windDirectionInput: 'bearing',      // 'bearing' or 'source'
-    windSpeedInput: 'midflame',         // '20ft', '10m'
+    windSpeedInput: '20ft',             // '20ft', '10m'
 
     // linkages:
     linkBehaviorEllipse: true,
@@ -67,12 +68,15 @@ export const Bp6FireTerrain = {
 // input to makeFireBehavior(), may be modified by getMidflameWindSpeed()
 export const Bp6FireWeather = {
     airTemp: 95,            // only used by scorch height
-    midflameReduction: 1,   // output
-    midflameWindSpeed: 880, // required by makeFireBehavior()
     windBearing: 90,        // required by makeFireBehavior()
     windSource: 270,        // used/created by makeFireWeather
     windSpeed10m: 0,        // used/created by makeFireWeather
     windSpeed20ft: 880,     // used/created by makeFireWeather
+
+    fuelBedReduction: 1,
+    canopyReduction: 1,
+    midflameReduction: 1,   // output
+    midflameWindSpeed: 880, // required by makeFireBehavior()
 }
 
 export const Bp6FuelKeys = {

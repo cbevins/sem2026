@@ -101,6 +101,73 @@ export const BehavePlusProps = {
         type: 'fuelMoisture',
         values: [3],
     },
+    
+    // WfsFireTerrain
+    aspect: {
+        owner: 'fireTerrain',
+        key: 'aspect',
+        label: 'Aspect',
+        module: 'surface',
+        type: 'compassDegrees',
+        values: [180],
+    },
+    elevation: {
+        owner: 'fireTerrain',
+        key: 'elevation',
+        label: 'Elevation',
+        module: 'spotting',
+        type: 'elevation',
+        values: [0],
+    },
+    ridgeValleyDistance: {
+        owner: 'fireTerrain',
+        key: 'ridgeValleyDistance',
+        label: 'Ridge-to-valley Distance',
+        module: 'spotting',
+        type: 'fireDistance',
+        values: [0],
+    },
+    ridgeValleyElevation: {
+        owner: 'fireTerrain',
+        key: 'ridgeValleyElevation',
+        label: 'Ridge-to-valley Elevation',
+        module: 'spotting',
+        type: 'elevation',
+        values:[0]
+    },
+    slopeDegrees: {
+        owner: 'fireTerrain',
+        key: 'slopeDegrees',
+        label: 'Slope Degrees',
+        module: 'surface',
+        type: 'verticalDegrees',
+        values: [0],
+    },
+    slopeRatio: {
+        owner: 'fireTerrain',
+        key: 'slopeRatio',
+        label: 'Slope Rise/Reach',
+        module: 'surface',
+        type: 'ratio',
+        values: [0.25],
+    },
+    topography: {
+        owner: 'fireTerrain',
+        key: 'topography',
+        label: 'Location Topography',
+        module: 'spotting',
+        type: 'topography',
+        values: ['ridgetop'],
+    },
+    upslope: {
+        owner: 'fireTerrain',
+        key: 'upslope',
+        label: 'Upslope Direction from North',
+        module: 'surface',
+        type: 'compassDegrees',
+        values: [0],
+    },
+    // fuelIgnition
     noWindSpreadRate: {
         owner: 'fuelIgnition',
         key: 'noWindSpreadRate',

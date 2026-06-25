@@ -19,13 +19,14 @@ export const Bp6Configs = {
     // input options:
     canopyHeightInputs: 'height-base',  // 'height-base', 'height-ratio', height-length', 'length-base', 'length-ratio', 'base-ratio'
     fuelCuringInput: 'input',           // 'estimated' or 'input'
-    fuelModels: 1,                      // 1 or 2
+    fuelModelInput: 'one',              // 'one', 'two', 'chaparral', 'aspen', 'pg',
     fuelModelWeighting: 'arithmetic',   // 'arithmetic', 'harmonic', or 'primary'
     deadFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     liveFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     midflameReductionInput: 'estimated',// 'input' or 'estimated' from fuel and canopy wind reduction
     midflameWindSpeedInput: 'input',    // 'input' or 'estimated' from upper wind speed and reduction factor
     slopeSteepnessInput: 'ratio',       // 'degrees', 'ratio', 'map'
+    windDirectionInput: 'bearing',      // 'bearing' or 'source'
     windSpeedInput: 'midflame',         // '20ft', '10m'
 
     // linkages:
@@ -33,6 +34,9 @@ export const Bp6Configs = {
     linkBehaviorSpotting: true,
     linkBehaviorCrowning: true,
     linkBehaviorMortality: true,
+
+    // Modules
+    surfaceModuleActive: true,
 
     // simulation computation option
     limitWindFactor: true,      // limit wind coefficient to 0.9 wind speed / reaction intensity
@@ -121,6 +125,7 @@ export const Bp6FuelMoisture = {
     // required when configs.[dead|live]FuelMoistures = 'life'
     moistureDeadFuels: 0.05,
     moistureLiveFuels: 1.5,
+    moistureLiveCurable: 3,
 }
 
 // inputs to makeFireTerrain when slopeSteepnessInputs = 'map'

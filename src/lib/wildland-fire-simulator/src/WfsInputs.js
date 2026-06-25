@@ -19,13 +19,15 @@ export const WfsConfigs = {
     // input options:
     canopyHeightInputs: 'height-base',  // 'height-base', 'height-ratio', height-length', 'length-base', 'length-ratio', 'base-ratio'
     fuelCuringInput: 'input',           // 'estimated' or 'input'
-    fuelModels: 1,                      // 1 or 2
+    fuelModelInput: 'one',              // 'one', 'two', 'chaparral', 'aspen', 'pg',
     fuelModelWeighting: 'arithmetic',   // 'arithmetic', 'harmonic', or 'primary'
     deadFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     liveFuelMoistureInput: 'particle',  // input by 'particle' or by 'life' category
     midflameReductionInput: 'estimated',// 'input' or 'estimated' from fuel and canopy wind reduction
     midflameWindSpeedInput: 'input',    // 'input' or 'estimated' from upper wind speed and reduction factor
+    slopeDirectionInput: 'aspect',      // 'aspect' or 'upslope'
     slopeSteepnessInput: 'ratio',       // 'degrees', 'ratio', 'map'
+    windDirectionInput: 'bearing',      // 'bearing' or 'source'
     windSpeedInput: 'midflame',         // '20ft', '10m'
     
     // linkages:
@@ -34,6 +36,9 @@ export const WfsConfigs = {
     linkBehaviorCrowning: true,
     linkBehaviorMortality: true,
 
+    // Modules
+    surfaceModuleActive: true,
+    
     // simulation computation option
     limitWindFactor: true,      // limit wind coefficient to 0.9 wind speed / reaction intensity
     limitSpreadRate: true,      // limit max spread rate to effective wind speed
@@ -66,6 +71,7 @@ export const WfsFireWeather = {
     midflameReduction: 1,   // output
     midflameWindSpeed: 880, // required by makeFireBehavior()
     windBearing: 90,        // required by makeFireBehavior()
+    windFromUpslope: 90,    // 
     windSource: 180,        // used/created by makeFireWeather
     windSpeed10m: 900,      // used/created by makeFireWeather
     windSpeed20ft: 880,     // used/created by makeFireWeather
@@ -109,6 +115,7 @@ export const WfsFuelMoisture = {
     moistureLiveStem: 1.5,      // required input to makeFuelIgnition()
     moistureDeadFuels: 0.1,     // used when configs.deadFuelMoistures = 'category'
     moistureLiveFuels: 3,       // used when configs.liveFuelMoistures = 'category'
+    moistureLiveCurable: 3,
 }
 // Add custom fuel moisture classes like so:
 // Now FuelModel particle's can reference the 'moistureLiveCheatgrass' moisture class
@@ -116,14 +123,6 @@ export const WfsFuelMoisture = {
 // const myFuelMoisture = {...WfsFuelMoisture,
 //     moistureLiveCheatgrass: 0.5,    // an example custom fuel moisture class
 // }
-
-// inputs to makeFireTerrain when slopeSteepnessInputs = 'map'
-export const WfsSlopeMap = {
-    mapScale: 24000,            // map sacle factor (Greater than 1, i.e., 24000)
-    mapContourInterval: 20,     // map contour interval (ft)
-    mapContours: 0,             // number of contours crossed in mapDistance
-    mapDistance: 0,             // map distance covered in the measurement
-}
 
 // inputs into makeFireEllipse (all are present in fireBehavior object)
 // required when configs.fireEllipse = 'standalone'
@@ -142,3 +141,11 @@ export const WfsObservedFireBehavior = {
 export const WfsPsiFromHead = 45
 // Use as follows:
 // const psiVector = makePsiVector({fireSize, psiFromHead}, configs)
+
+// inputs to makeFireTerrain when slopeSteepnessInputs = 'map'
+export const WfsSlopeMap = {
+    mapScale: 24000,            // map sacle factor (Greater than 1, i.e., 24000)
+    mapContourInterval: 20,     // map contour interval (ft)
+    mapContours: 0,             // number of contours crossed in mapDistance
+    mapDistance: 0,             // map distance covered in the measurement
+}

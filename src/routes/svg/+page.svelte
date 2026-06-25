@@ -19,6 +19,10 @@
         title: 'EventfulSvg',
         brief: 'A component responds to both (a) mouse and keyboard events on its SVG '
             + 'and (b) input controls in its parent component.',
+    },{
+        route: '/svg/charts',
+        title: 'Some flow charts',
+        brief: 'Demo and test'
     }]
 </script>
 <MenuPage {items} {title}/>

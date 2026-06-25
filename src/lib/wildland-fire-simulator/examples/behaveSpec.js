@@ -59,7 +59,7 @@ const configs = fetchConfigs()
 configs.logger = makeLogger()
 
 // fuelCatalog must exist prior to makeFuelModel()
-let fuelCatalog = makeFuelCatalog(configs)
+let fuelCatalog = makeFuelCatalog()
 
 // fuelKeys must exist prior to makeFuelModel()
 let fuelKeys = fetchFuelKeys()

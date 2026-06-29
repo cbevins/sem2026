@@ -1,10 +1,13 @@
 // Distance between the *ignition point* and the fire head
-export function makeFireSize(fireEllipse, elapsedTime,
-    // eslint-disable-next-line no-unused-vars
-        ignEast=0, ignNorth=0, ignX=0, ignY=0, logger=null, propsLevel=0) {
+// eslint-disable-next-line no-unused-vars
+export function makeFireSize(fireEllipse, firePosition, propsLevel=0) {
+    // Get required inputs
+    let {elapsedTime=1, ignEast=0, ignNorth=0, ignX=0, ignY=0} = firePosition
+
+    // Distance (ft) between the *ignition point* and the fire ellipse head
     const headingDistance = fireEllipse.headingSpreadRate * elapsedTime
     
-    // Distance between the *ignition point* and the fire back
+    // Distance (ft) between the *ignition point* and the fire ellipse back
     const backingDistance = fireEllipse.backingSpreadRate * elapsedTime
 
     // Major semi-axis length (ft) [aka 'rx']
@@ -27,6 +30,7 @@ export function makeFireSize(fireEllipse, elapsedTime,
     
     // Ellipse area (ft2)
     const area = (Math.PI * length * width) / 4
+    const acres = area / (66*660)
 
     // Ellipse perimeter length (ft) using Ramanujan's approximation.
     const a = fDistance, b = hDistance
@@ -52,6 +56,7 @@ export function makeFireSize(fireEllipse, elapsedTime,
         length,
         width,
         area,
+        acres,
         perimeter,
         ignEast,
         ignNorth,

@@ -3,13 +3,21 @@ export { makeFireEllipse } from './makeFireEllipse.js'
 export { makeFireSize } from './makeFireSize.js'
 export { makeFuelBed } from './makeFuelBed.js'
 export { makeFuelCatalog } from './makeFuelCatalog.js'
-export { makeFuelCuring } from './makeFuelCuring.js'
 export { makeFuelIgnition } from './makeFuelIgnition.js'
 export { makeFuelModel } from './makeFuelModel.js'
-export { makeFuelMoisture } from './makeFuelMoisture.js'
 export { makeLogger } from './makeLogger.js'
 export { makeWeightedFireBehavior } from './makeWeightedFireBehavior.js'
-export { makeBetaVector, makeBeta6Vector, makePsiVector, calcPsiSpreadRate} from './makeFireVectors.js'
+
+export {
+    calcPsiSpreadRate,
+    makeBackVector,
+    makeBetaVector,
+    makeBeta6Vector,
+    makeHeadVector,
+    makeLeftFlankVector,
+    makePsiVector,
+    makeRightFlankVector,
+} from './makeFireVectors.js'
 
 export {
     calcBetaFromPsi,
@@ -20,17 +28,15 @@ export {
     calcThetaFromPsi,
 } from './getEllipseAngles.js'
 
-export {bearingToClockwiseFromHead,
-    checkInputs,
+export {
+    bearingToClockwiseFromHead,
     clamp,
-    clampFraction,
     clockwiseFromHeadToBearing,
     clockwiseFromHeadToRotation,
     divide,
     fraction,
     getFlameLength,
     getScorchHeight,
-    requireInputs,
     rotationToClockwiseFromHead,
     toDegrees,
     toRadians,

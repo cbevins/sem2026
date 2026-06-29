@@ -49,42 +49,37 @@ export class FuelModelCatalog {
         return (typeof key === 'string') ? key.toLowerCase() : key
     }
 
-    #clone(fuelModel) {
-        const particles = []
-        for(let particle of fuelModel.particles)
-            particles.push({...particle})
-        const {number, code, group, label, desc, depth, deadMext} = fuelModel
-        return {number, code, group, label, desc, depth, deadMext, particles}
-    }
-
-    /**
-     * @param {object} inputs A plain old data object with a 'fuelKey' property
-     * @returns A copy of the FuelModel plain-old data object,
-     * or FALSE if fuelKey doesn't exist
-     */
+    // Returns a reference to the fuel model, or throws an error
     get(fuelKey) {
         const fuelModel = this.catalog.get(this.#toKey(fuelKey)) 
-        return (fuelModel === undefined) ? null : this.#clone(fuelModel)
+        if (fuelModel === undefined) 
+            throw new Error(`FuelModelCatalog.get() fuel key '${fuelKey}' is invalid.`)
+        return fuelModel
     }
 
+    // Returns an array of all unique numeric fuel keys
     getNumberKeys() {
-        const keys = []
+        const keys = new Set()
         for (const key of this.catalog.keys()) {
-            if(Number.isFinite(key)) keys.push(key)
+            if(Number.isFinite(key)) keys.add(key)
         }
-        return keys
+        return [...keys]
     }
 
+    // Returns an array of all the particle curing classes
     getCuringClasses(fuelKeys=[]) {
         const {curing} = this.#getParticleClasses(fuelKeys)
         return [...curing]
     }
 
+    // Returns an array of all the particle moisture classes
     getMoistureClasses(fuelKeys=[]) {
         const {moisture} = this.#getParticleClasses(fuelKeys)
         return [...moisture]
     }
 
+    // Returns {curing, moisture} where 'curing' is a Set() of all particle curing
+    // classes and 'moisture' is a Set() of all fuel moisture classes
     #getParticleClasses(fuelKeys=[]) {
         const curing = new Set()
         const moisture = new Set()
@@ -99,16 +94,17 @@ export class FuelModelCatalog {
         return {moisture, curing}
     }
 
+    // Returns an array of all unique fuel model string keys
     getStringKeys() {
-        const keys = []
+        const keys = new Set()
         for (const key of this.catalog.keys()) {
-            if(typeof key === 'string') keys.push(key)
+            if(typeof key === 'string') keys.add(key)
         }
-        return keys
+        return [...keys]
     }
 
     /**
-     * @param {number|string} A fuelKey number or string
+     * @param {number|string} fuelKey A fuelKey number or string
      * @returns TRUE if the fuelKey exists in the catalog, FALSE if it doesn't exist
      */
     has(fuelKey) {
@@ -118,18 +114,14 @@ export class FuelModelCatalog {
     /**
      * Adds a custom fuel model to the catalog.
      * CAUTION: There is no testing for the validity of the 'fuelModel' object!
-     * @param {string|integer} fuelKey 
+     * The fuelModel is added twice to the catalog, once under the fuelModel.number
+     * and once under the fuelModel.code.
      * @param {object} FuelModel plain-old data object
      * @returns Reference to *this* (and NOT to the catalog Map())
      */
-    set(fuelKey, fuelModel) {
-        this.catalog.set(this.#toKey(fuelKey), fuelModel)
-        return this
-    }
-    
-    add(inputs={}) {
-        const {fuelKey, fuelModel} = inputs
-        this.catalog.set(this.#toKey(fuelKey), fuelModel)
+    set(fuelModel) {
+        this.catalog.set(fuelModel.code.toLowerCase(), fuelModel)
+        this.catalog.set(fuelModel.number, fuelModel)
         return this
     }
 }

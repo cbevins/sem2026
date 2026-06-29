@@ -4,10 +4,10 @@
  */
 import { fraction } from './utils.js'
 
-export function makeFuelBed(fuelModel, fuelCuring, logger=null, propsLevel=0) {
-    const dead = makeFuelBedLife('dead', fuelModel, fuelCuring, logger, propsLevel)
+export function makeFuelBed(fuelModel, fuelCuring, propsLevel=0) {
+    const dead = makeFuelBedLife('dead', fuelModel, fuelCuring, propsLevel)
     dead.mext = fuelModel.deadMext
-    const live = makeFuelBedLife('live', fuelModel, fuelCuring, logger, propsLevel)
+    const live = makeFuelBedLife('live', fuelModel, fuelCuring, propsLevel)
     live.mext = 5   // will be re-determined by the parent FuelBed
 
     // Accumulate fuel bed total surface area (ft2), ovendry load (lb/ft2), and volume (ft3)
@@ -161,7 +161,7 @@ export function makeFuelBed(fuelModel, fuelCuring, logger=null, propsLevel=0) {
  * described by Rothermel (1972) in the section titled 'Formulation
  * of Fire Spread Model'.
  */
-function makeFuelBedLife(category, fuelModel, fuelCuring, logger, propsLevel) {
+function makeFuelBedLife(category, fuelModel, fuelCuring, propsLevel) {
     // Since fuel updates are generally processed much less frequently
     // than moisture updates, do as much computation as possible here
     // NOTE that inputs is passed in since it may contain FuelParticle curingClass data
@@ -192,12 +192,9 @@ function makeFuelBedLife(category, fuelModel, fuelCuring, logger, propsLevel) {
             if (particle.life === "curable") {
                 // Only apply a curable's curedFraction if its curingClass is in the inputs
                 let curedFraction = 0
-                if (!Object.hasOwn(fuelCuring, particle.curingClass)) {
-                    if (logger)
-                        logger.log(`makeFuelBed() fuel model ${fuelModel.number} has a curingClass ${particle.curingClass} that was not provided as input: assuming a 0 percent cured.`)
-                } else {
-                    curedFraction = fuelCuring[particle.curingClass]
-                }
+                if (!Object.hasOwn(fuelCuring, particle.curingClass))
+                    throw new Error(`makeFuelBed() fuel model ${fuelModel.number} has a curingClass ${particle.curingClass} that is not defined in the fuelCuring input object.`)
+                curedFraction = fuelCuring[particle.curingClass]
                 loadFraction = (category === "dead") ? curedFraction : 1 - curedFraction
             }
             const ovendryLoad = loadFraction * particle.ovendryLoad

@@ -1,18 +1,13 @@
-export function makeFireBehavior(fuelBed, fuelIgnition,
-        midflameWindSpeed,  // ft/min
-        windBearing,        // degrees clockwise from north
-        slopeRatio,         // slope vertical rise/horizontal reach
-        aspect,             // downslope direction, degrees clockwise from north
+export function makeFireBehavior(fuelBed, fuelIgnition, windSlope, propsLevel=0,
         limitWindFactor=true,   // apply Rothermels wind coefficient limit
-        limitSpreadRate=true,   // apply Andrew's max spread rate to effective wind speed
-        // eslint-disable-next-line no-unused-vars
-        logger=null,            // reference to Logger
-        propsLevel=0) {         // 0=required only, 1=plus informational, 2=plus test/debug
+        limitSpreadRate=true) { // apply Andrew's max spread rate to effective wind speed
 
     // Get required fuelBed input properties
     let {slopeK, windB, windI, windK, residenceTime} = fuelBed
     // Get required fuelIgnition input properties
     let {noWindSpreadRate, reactionIntensity} = fuelIgnition
+    // Get required windSlope input properties
+    let {midflameWindSpeed, windBearing, slopeRatio, aspect} = windSlope
 
     //----------------------------------------------------------------------
     // OK, here we go...

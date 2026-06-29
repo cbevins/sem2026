@@ -1,6 +1,6 @@
 import { clockwiseFromHeadToBearing, clockwiseFromHeadToRotation,
     getFlameLength, toRadians } from './utils.js'
-import { calcPsiFromTheta, calcThetaFromBeta } from './getEllipseAngles.js'
+import { calcBetaFromTheta, calcPsiFromTheta, calcThetaFromBeta } from './getEllipseAngles.js'
 
 //------------------------------------------------------------------------------
 // makeBetaVector()
@@ -91,6 +91,23 @@ export function makePsiVector(fireSize, psiFromHead, includeFlameLength=true) {
     return pod
 }
 
+export function makeBackVector(fireEllipse) {
+    return makeBetaVector(fireEllipse, 180)
+}
+
+export function makeHeadVector(fireEllipse) {
+    return makeBetaVector(fireEllipse, 0)
+}
+
+export function makeLeftFlankVector(fireEllipse) {
+    const beta = calcBetaFromTheta(fireEllipse, 270)
+    return makeBetaVector(fireEllipse, beta)
+}
+
+export function makeRightFlankVector(fireEllipse) {
+    const beta = calcBetaFromTheta(fireEllipse, 90)
+    return makeBetaVector(fireEllipse, beta)
+}
 // Returns spread rate from the ellipse *perimeter* (or 'fire front')
 // at 'psiDegrees' *counter-clockwise* rotation from the heading direction
 // Catchpole et.al. (1982) Equation 7

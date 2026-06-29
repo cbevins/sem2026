@@ -1,7 +1,7 @@
 // Distance between the *ignition point* and the fire head
 export function makeFireSize(fireEllipse, elapsedTime,
     // eslint-disable-next-line no-unused-vars
-        ignEast=0, ignNorth=0, ignX=0, ignY=0, log=null, propsLevel=0) {
+        ignEast=0, ignNorth=0, ignX=0, ignY=0, logger=null, propsLevel=0) {
     const headingDistance = fireEllipse.headingSpreadRate * elapsedTime
     
     // Distance between the *ignition point* and the fire back

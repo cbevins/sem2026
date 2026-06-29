@@ -6,7 +6,7 @@ export function makeFireBehavior(fuelBed, fuelIgnition,
         limitWindFactor=true,   // apply Rothermels wind coefficient limit
         limitSpreadRate=true,   // apply Andrew's max spread rate to effective wind speed
         // eslint-disable-next-line no-unused-vars
-        log=null,               // function called to log messages
+        logger=null,            // reference to Logger
         propsLevel=0) {         // 0=required only, 1=plus informational, 2=plus test/debug
 
     // Get required fuelBed input properties

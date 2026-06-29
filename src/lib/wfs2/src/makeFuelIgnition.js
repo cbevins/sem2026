@@ -5,7 +5,7 @@
  */
 import { clampFraction } from './utils.js'
 
-export function makeFuelIgnition(fuelBed, fuelMoisture, log=null, propsLevel=0) {
+export function makeFuelIgnition(fuelBed, fuelMoisture, logger=null, propsLevel=0) {
     // Update life category moisture variables
     const cat = {dead: {}, live: {}}
     for(let life of ["dead", "live"]) {
@@ -18,8 +18,8 @@ export function makeFuelIgnition(fuelBed, fuelMoisture, log=null, propsLevel=0) 
             let moistureClass = particle.moistureClass
             if(! Object.hasOwn(fuelMoisture, moistureClass)) {
                 moistureClass = (life === 'dead') ? 'moistureDead1h' : 'moistureLiveHerb'
-                if(log)
-                    log(`makeFuelIgnition(): a fuel particle has a moisture class '${particle.moistureClass}' that is not in the fuelMoisture inputs object: assuming moisture class '${moistureClass}'.`)
+                if(logger)
+                    logger.log(`makeFuelIgnition(): a fuel particle has a moisture class '${particle.moistureClass}' that is not in the fuelMoisture inputs object: assuming moisture class '${moistureClass}'.`)
             }
             const moistureContent = fuelMoisture[moistureClass]
             cat[life].moisture += moistureContent * particle.surfaceAreaWtg    // wtd average

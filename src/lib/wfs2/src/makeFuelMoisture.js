@@ -3,7 +3,7 @@ export function makeFuelMoisture(
         moistureLiveHerb, moistureLiveStem, // live fuel moisture contents (fraction)
         others=[],  // any additional moisture class [key, value] pairs
         // eslint-disable-next-line no-unused-vars
-        log=null, propsLevel=0){
+        logger=null, propsLevel=0){
     const pod = {moistureDead1h, moistureDead10h, moistureDead100h,
         moistureLiveHerb, moistureLiveStem}
     // 'others' is an array of [moistureClassKey, moistureFraction] pairs

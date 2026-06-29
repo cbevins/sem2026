@@ -4,10 +4,10 @@
  */
 import { fraction } from './utils.js'
 
-export function makeFuelBed(fuelModel, fuelCuring, log=null, propsLevel=0) {
-    const dead = makeFuelBedLife('dead', fuelModel, fuelCuring, log, propsLevel)
+export function makeFuelBed(fuelModel, fuelCuring, logger=null, propsLevel=0) {
+    const dead = makeFuelBedLife('dead', fuelModel, fuelCuring, logger, propsLevel)
     dead.mext = fuelModel.deadMext
-    const live = makeFuelBedLife('live', fuelModel, fuelCuring, log, propsLevel)
+    const live = makeFuelBedLife('live', fuelModel, fuelCuring, logger, propsLevel)
     live.mext = 5   // will be re-determined by the parent FuelBed
 
     // Accumulate fuel bed total surface area (ft2), ovendry load (lb/ft2), and volume (ft3)
@@ -161,7 +161,7 @@ export function makeFuelBed(fuelModel, fuelCuring, log=null, propsLevel=0) {
  * described by Rothermel (1972) in the section titled 'Formulation
  * of Fire Spread Model'.
  */
-function makeFuelBedLife(category, fuelModel, fuelCuring, log, propsLevel) {
+function makeFuelBedLife(category, fuelModel, fuelCuring, logger, propsLevel) {
     // Since fuel updates are generally processed much less frequently
     // than moisture updates, do as much computation as possible here
     // NOTE that inputs is passed in since it may contain FuelParticle curingClass data
@@ -193,8 +193,8 @@ function makeFuelBedLife(category, fuelModel, fuelCuring, log, propsLevel) {
                 // Only apply a curable's curedFraction if its curingClass is in the inputs
                 let curedFraction = 0
                 if (!Object.hasOwn(fuelCuring, particle.curingClass)) {
-                    if (log)
-                        log(`makeFuelBed() fuel model ${fuelModel.number} has a curingClass ${particle.curingClass} that was not provided as input: assuming a 0 percent cured.`)
+                    if (logger)
+                        logger.log(`makeFuelBed() fuel model ${fuelModel.number} has a curingClass ${particle.curingClass} that was not provided as input: assuming a 0 percent cured.`)
                 } else {
                     curedFraction = fuelCuring[particle.curingClass]
                 }

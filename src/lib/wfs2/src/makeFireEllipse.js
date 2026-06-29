@@ -23,7 +23,7 @@
 import { toRadians } from "./utils.js"
 
 // eslint-disable-next-line no-unused-vars
-export function makeFireEllipse(fireBehavior, log=null, propsLevel=0) {
+export function makeFireEllipse(fireBehavior, logger=null, propsLevel=0) {
     // Get required fireBehavior input properties
     const {headingSpreadRate, bearing, lengthWidthRatio, flameLength} = fireBehavior
 

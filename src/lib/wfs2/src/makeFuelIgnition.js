@@ -3,7 +3,7 @@
  * under a specific set of fuel moisture conditions to estimate its no-wind,
  * no-slope reaction intensity and spread rate.
  */
-import { clampFraction } from './utils.js'
+import { fraction } from './utils.js'
 
 export function makeFuelIgnition(fuelBed, fuelMoisture, propsLevel=0) {
     // Update life category moisture variables
@@ -51,7 +51,7 @@ export function makeFuelIgnition(fuelBed, fuelMoisture, propsLevel=0) {
     for(let life of ["dead", "live"]) {
         // Fuel bed life category mineral damping coefficient
         let r = cat[life].moisture / cat[life].mext
-        cat[life].moistureDamping = clampFraction(1 - 2.59 * r + 5.11 * r * r - 3.52 * r * r * r)
+        cat[life].moistureDamping = fraction(1 - 2.59 * r + 5.11 * r * r - 3.52 * r * r * r)
 
         // Fuel bed life category reaction intensity under current moisture conditions (BTU/ft2/min)
         cat[life].reactionIntensity = fuelBed[life].reactionIntensityDry * cat[life].moistureDamping

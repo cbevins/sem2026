@@ -1,3 +1,6 @@
+// export { makeCanopyFuel } from './makeCanopyFuel.js'
+export { makeActiveCrownFire } from './makeActiveCrownFire.js'
+export { makeCanopyFuels } from './makeCanopyFuels.js'
 export { makeFireBehavior } from './makeFireBehavior.js'
 export { makeFireEllipse } from './makeFireEllipse.js'
 export { makeFireSize } from './makeFireSize.js'
@@ -6,6 +9,7 @@ export { makeFuelCatalog } from './makeFuelCatalog.js'
 export { makeFuelIgnition } from './makeFuelIgnition.js'
 export { makeFuelModel } from './makeFuelModel.js'
 export { makeLogger } from './makeLogger.js'
+export { makeMidflameWindSpeed } from './makeMidflameWindSpeed.js'
 export { makeWeightedFireBehavior } from './makeWeightedFireBehavior.js'
 
 export {

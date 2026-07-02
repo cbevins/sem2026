@@ -12,7 +12,7 @@ export const configs = {
 
     fuelCuringInput: input,                // 'input' or 'estimated'
     midflameWindSpeedInput: input,    // 'input', 'estimated'
-    midflameWsrfInput: 'estimated',         // 'input', 'estimated'
+    midflameWsrfInput: estimated,         // 'input', 'estimated'
     moistureDeadFuelsInput: 'particle',     // 'particle', 'life'
     moistureLiveFuelsInput: 'particle',     // 'particle', 'life'
     slopeDirectionInput: 'aspect',          // 'aspect', 'upslope'

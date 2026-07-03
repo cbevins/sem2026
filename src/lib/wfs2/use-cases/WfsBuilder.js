@@ -1,269 +1,267 @@
-export const WfsConfigs = {
-    surfaceFireModule: 'active',
-    surfaceSizeModule: 'active',
-    surfaceVectorModule: 'active',
-    surfaceActiveCrownFireModule: 'active',
-    // stand-alone size module
-    sizeModule: 'inactive',
-    sizeVectorModule: 'inactive',
-    // stand-alone active crown fire
-    activeCrownModule: 'inactive',
-    // input pre-processors
-    fuelCuringInput: 'input',                // 'input' or 'estimated'
-    midflameWindSpeedInput: 'estimated',    // 'input', 'estimated'
-    midflameWsrfInput: 'estimated',         // 'input', 'estimated'
-    moistureDeadFuelsInput: 'life',     // 'particle', 'life'
-    moistureLiveFuelsInput: 'life',     // 'particle', 'life'
-    slopeDirectionInput: 'upslope',          // 'aspect', 'upslope'
-    slopeSteepnessInput: 'degrees',     // 'ratio', 'degrees', or 'map'
-    windDirectionInput: 'source',          // 'bearing', 'source'
-    windSpeedInput: '10m',                  // '20ft', '10m'
-}
-
-export const WfsDependencies = {
-    canopyObj: [
-        'get canopyHeight',             // sets state.canopyObj.canopyHeight
-        'get canopyBase',               // sets state.canopyObj.canopyBase
-        'get canopyCover',              // sets state.canopyObj.Cover
-        'call canopyProcessor'],        // sets state.canopyObj.fill, ratio, etc
-    fireBehaviorObj1: [
-        'use fuelIgnitionObj1',
-        'use slopeDirectionObj',
-        'use windDirectionObj',
-        'use slopeSteepnessObj',
-        'use midflameWindSpeedObj',
-        'call fireBehaviorProcessor'],  // sets state.fireBehaviorObj1
-    fuelBedObj1: [
-        'use fuelModelObj1',
-        'use fuelCuringObj',
-        'call fuelBedProcessor'],       // sets state.fuelbedobj1
-    fuelCatalogObj: [
-        'call fuelCatalogProcessor'],   // sets state.fuelCatalogObj
-    fuelCuringObj: [
-        'cfg fuelCuringInput input fuelCuringInput',
-        'cfg fuelCuringInput estimated fuelCuringEstimated'],
-    fuelCuringEstimated: [
-        'use moistureLiveFuelObj',
-        'call fuelCuringProcessor'],    // sets state.curedHerb
-    fuelCuringInput: [
-        'get curedHerb',],              // sets state.fuelCuringObj.curedHerb
-    fuelIgnitionObj1: [
-        'use fuelBedObj1',
-        'use moistureLiveFuelObj',
-        'use moistureDeadFuelObj',
-        'call fuelIgnitionProcessor'],  // sets state.fuelIgnitionObj1
-    fuelKey1: [
-        'get fuelKey1'],                // sets state.fuelKey1
-    fuelModelObj1: [
-        'use fuelCatalogObj',
-        'use fuelKey1',
-        'call fuelModelProcesor'],      // sets state.fuelModelObj1
-    midflameWindSpeedObj: [
-        'cfg midflameWindSpeedInput input midflameWindSpeedInput',
-        'cfg midflameWindSpeedInput estimated midflameWindSpeedEstimated'],
-    midflameWindSpeedInput: [
-        'get midflameWindSpeed'],       // sets state.midflameWindSpeedObj.midflameWindSpeed
-    midflameWindSpeedEstimated: [
-        'use midflameWsrf',
-        'call midflameWindSpeedProcessor'], // sets state.midflameWindSpeedObj.midflameWindSpeed
-    midflameWsrf: [
-        'cfg midflameWsrfInput input midflameWsrfInput',
-        'cfg midflameWsrfInput estimated midflameWsrfEstimated'],
-    midflameWsrfInput: [
-        'get midflameWsrf'],            // sets state.midflameWindSpeedObj.midflameWsrf
-    midflameWsrfEstimated: [
-        'use canopyObj',
-        'use fuelBedObj1',
-        'call midflameWsrfProcessor'],  // sets state.midflameWindSpeedObj.midflameWsrf
-    moistureDeadFuelObj: [
-        'cfg moistureDeadFuelsInput particle moistureDeadFuelsParticle',
-        'cfg moistureDeadFuelsInput life moistureDeadFuelsLife'],
-    moistureDeadFuelsLife: [
-        'get moistureDeadFuels',        // sets state.moistureDeadFuelObj.moistureDeadFuels
-        'call moistureDeadFuelsProcessor'],  // sets state.moistureDeadFuelObj.moistureDeadFuel1h, etc
-    moistureDeadFuelsParticle: [
-        'get moistureDead100h',         // sets state.moistureDeadFuelObj.moistureDeadFuel100h, etc
-        'get moistureDead10h',          // sets state.moistureDeadFuelObj.moistureDeadFuel10h, etc
-        'get moistureDead1h'],          // sets state.moistureDeadFuelObj.moistureDeadFuel1h, etc
-    moistureLiveFuelObj: [
-        'cfg moistureLiveFuelsInput particle moistureLiveFuelsParticle',
-        'cfg moistureLiveFuelsInput life moistureLiveFuelsLife'],
-    moistureLiveFuelsLife: [
-        'get moistureLiveFuels',        // sets state.moistureLiveFuelObj.moistureLiveFuels
-        'call moistureLiveFuelsProcessor'],  // sets state.moistureLiveFuelObj.moistureLiveHerb, etc
-    moistureLiveFuelsParticle: [
-        'get moistureLiveStem',         // sets state.moistureLiveFuelObj.moistureLiveStem
-        'get moistureLiveHerb'],        // sets state.moistureLiveFuelObj.moistureLiveHerb
-    slopeDirectionObj: [
-        'cfg slopeDirectionInput aspect slopeDirectionAspect',
-        'cfg slopeDirectionInput upslope slopeDirectionUpslope'],
-    slopeDirectionAspect: [
-        'get aspect',                   // sets state.slopeDirectionObj.aspect
-        'call aspectProcessor'],        // sets state.slopeDirectionObj.upslope
-    slopeDirectionUpslope: [
-        'get upslope',                  // sets state.slopeDirectionObj.upslope
-        'call upslopeProcessor'],       // sets state.slopeDirectionObj.aspect
-    slopeSteepnessObj: [
-        'cfg slopeSteepnessInput ratio slopeSteepnessRatio',
-        'cfg slopeSteepnessInput degrees slopeSteepnessDegrees',
-        'cfg slopeSteepnessInput map slopeMap'],
-    slopeSteepnessDegrees: [
-        'get slopeDegrees',             // sets state.slopeSteepnessObj.slopeDegrees
-        'call slopeDegreesProcessor'],  // sets state.slopeSteepnessObj.slopeRatio
-    slopeMap: [
-        'get mapScale',                 // sets state.slopeMapObj.mapScale
-        'get mapContourInterval',
-        'get mapContoursCrossed',
-        'get mapDistance',
-        'call slopeMapProcessor'],      // sets state.slopeSteepnessObj.slopeRatio, slopeDegrees
-    slopeSteepnessRatio: [
-        'get slopeRatio',               // sets state.slopeSteepnessObj.slopeRatio
-        'call slopeRatioProcessor'],    // sets state.slopeSteepnessObj.slopeDegrees
-    windDirectionObj: [
-        'cfg windDirectionInput bearingDegrees windDirectionBearingDegrees',
-        'cfg windDirectionInput bearingCompass windDirectionBearingCompass',
-        'cfg windDirectionInput sourceCompass windDirectionSourceCompass',
-        'cfg windDirectionInput sourceDegrees windDirectionSourceDegrees'],
-    windDirectionBearingCompass: [],
-    windDirectionBearingDegrees: [
-        'get windBearing',              // sets state.windDirectionObj.windBearing
-        'call windBearingProcessor'],   // sets state.windDirectionObj.windSource
-    windDirectionSourceCompass: [],
-    windDirectionSourceDegrees: [
-        'get windSource',               // sets state.windDirectionObj.windSource
-        'call windSourceProcessor'],    // sets state.windDirectionObj.windBearing
-    windSpeedObj: [
-        'cfg windSpeedInput 20ft windSpeed20ft',
-        'cfg windSpeedInput 10m windSpeed10m'],
-    windSpeed10m: [
-        'get windSpeed10m',             // sets state.windSpeedObj.windSpeed10m
-        'call windSpeed10mProcessor'],  // sets state.windSpeedObj.windSpeed20ft
-    windSpeed20ft: [
-        'get windSpeed20ft',            // sets state.windSpeedObj.windSpeed20ft
-        'call windSpeed20ftProcessor'], // sets state.windSpeedObj.windSpeed10m
-}
+/**
+ * WfsBuilder builds an execution instruction stack from a configuration.
+ */
+import { WfsConfigs } from './WfsConfigs.js'
 
 export class WfsBuilder {
-    constructor(wfsDependencies, wfsConfigs) {
-        this.deps = wfsDependencies
-        this.configs = wfsConfigs
-        this.validate()
-        if (this.messages.length)
-            console.log('VALIDATION ERROR:', this.messages)
+    constructor() {
+        // client input
+        this.configs = WfsConfigs
+        this.inputValues = {}
+        this.callback = null
+        // outputs
+        this.stack = new Set()
+        this.inputProps = []
+        this.methods = []
+        this.state = {}
+        // internal
+        this.stackIds = []
     }
-    validate() {
-        this.messages = []
-        this.allGetSet = new Set()
-        this.allMethodSet = new Set()
-        this.useSet = new Set()
-        for(let [key, actions] of Object.entries(this.deps)) {
-            for(let action of actions) {
-                const args = action.split(' ')
-                const cmd = args[0]
-                if (cmd === 'get') {
-                    const prop = args[1]
-                    // The 'get' prop does not need a dependency entry
-                    this.allGetSet.add(prop)
-                } else if (cmd === 'use') {
-                    const prop = args[1]
-                    if (! Object.hasOwn(this.deps, prop))
-                        this.messages.push(`Key '${key}' action '${action}' has invalid reference '${prop}'.`)
-                    this.useSet.add(prop)
-                    
-                } else if (cmd === 'cfg') {
-                    const [, cfgKey, , prop] = args
-                    if (! Object.hasOwn(this.configs, cfgKey))
-                        this.messages.push(`Config '${cfgKey}' is not in the passed wfsCOnfigs object.`)
-                    if (! Object.hasOwn(this.deps, prop))
-                        this.messages.push(`Key '${key}' action '${action}' has invalid reference '${prop}'.`)
-                } else if (cmd === 'call') {
-                    const method = args[1]
-                    this.allMethodSet.add(method)
-                } else throw new Error(`Key ${key} has unknown action command ${cmd}`)
-            }
+    
+    build(configs) {
+        this.stack = new Set()
+        this.configs = configs
+        if (this.configs.surfaceModule === 'active')
+            this.addSurfaceModule()
+        // if (this.configs.crownModule === 'active')
+        //     this.addCrownModule()
+        // if (this.configs.sizeModule === 'active')
+        //     this.addSizeModule()
+    }
+
+    //-------------------------------------------------------------------
+    // Private
+    //-------------------------------------------------------------------
+
+    push(prop) {
+        const key = `get ${prop}`
+        if (!this.stack.has(key)) {
+            this.stack.add(key)
+            this.stackIds.push([prop, this.stack.size-1])
         }
     }
 
-    // Returns Set() with only 'get' and 'call' instructions
-    buildQueue(startKeys) {
-        this.q = new Set()
-        this.activeGetSet = new Set()
-        this.activeMethodSet = new Set()
-        this.log = []
-        for(let key of startKeys)
-            this.build(key)
+    pop(tag) {
+        for (let i=this.stackIds.length-1; i>=0; i--) {
+            const [prop, id] = this.stackIds.pop()
+            this.stack.add(`next ${prop} ${id}`)
+            if (prop === tag)
+                break
+        }
     }
 
-    build(key, depth=0) {
-        let pad = ''.padStart(4*depth)
-        this.log.push(`${pad}${key}`)
-        pad += '    '
-        const actions = this.deps[key]
-        for(let action of actions) {
-            const args = action.split(' ')
-            let cmd = args[0]
-            if (cmd === 'call') {
-                const method = args[1]
-                this.log.push(`${pad}calls ${method}`)
-                this.q.add(action)
-                this.activeMethodSet.add(method)
-            } else if (cmd === 'cfg') {
-                const [, cfgKey, cfgVal, prop] = args
-                if (this.configs[cfgKey] === cfgVal) {
-                    this.log.push(`${pad}${cfgKey} = ${cfgVal}`)
-                    this.build(prop, depth+1)
+    set(method) {
+        this.stack.add(`call ${method}`)
+    }
+
+    store(tag) {
+        this.stack.add(`store ${tag}`)
+    }
+
+    //-------------------------------------------------------------------
+
+    addSurfaceModule() {
+        if (this.configs.surfaceModule === 'active') {
+            this.set('fuelCatalog')
+            this.set('fuelCuringClasses')
+            this.set('fuelMoistureClasses')
+            
+            if (this.configs.surfaceCrownModule === 'active') {
+                this.set('surfaceCrownFuelModel')
+                this.set('surfaceCrownFuelBed')
+            }
+
+            // Fuel models
+            this.push('fuelKey1')
+            this.set('surfaceFuel1FuelModel')
+            if (this.configs.fuelModels === 'two') {
+                this.push('fuelKey2')
+                this.set('surfaceFuel2FuelModel')
+            }
+            
+            // Fuel curing
+            if (this.configs.fuelCuring === 'estimated') {
+                this.addLiveFuelMoisture()
+                this.set('fuelCuringFromMoisture')
+            } else {
+                this.push('curedHerb')
+                this.push('curedCheatgrass')
+                this.set('fuelCuringFromInput')
+            }
+
+            // Fuel bed
+            this.set('surfaceFuel1FuelBed')
+            if (this.configs.fuelModels === 'two') {
+                this.set('surfaceFuel2FuelBed')
+            }
+
+            // Fuel moistures
+            this.addLiveFuelMoisture()
+            this.addDeadFuelMoisture()
+
+            // Fuel ignition
+            this.set('surfaceFuel1FuelIgnition')
+            if (this.configs.fuelModels === 'two') {
+                this.set('surfaceFuel2FuelIgnition')
+            }
+            if (this.configs.surfaceCrownModule === 'active') {
+                this.set('crownFuelIgnition')
+            }
+
+            // Wind, slope
+            this.addWindDirection()
+            this.addSlopeDirection()
+            this.addSlopeSteepness()
+            this.addMidflameWindSpeed()
+
+            // Fire behavior
+            this.set('surfaceFuel1FireBehavior')
+            if (this.configs.fuelModels === 'two') {
+                this.set('surfaceFuel2FireBehavior')
+                this.push('fuel1Cover')
+                this.push('fuelWeightingMethod')
+                this.set('weightedFireBehavior')
+            } else {
+                this.set('unweightedFireBehavior')
+            }
+            if (this.configs.surfaceCrownModule === 'active') {
+                this.set('crownFireBehavior')
+            }
+
+            if (this.configs.surfaceSizeModule === 'active') {
+                this.push('ignEast')
+                this.push('ignNorth')
+                this.push('elapsedTime')
+                this.set('surfaceFireSize')
+
+                if(this.configs.surfaceVectorHeadModule === 'active')
+                    this.set('fireVectorHead')
+                if(this.configs.surfaceVectorBackModule === 'active')
+                    this.set('fireVectorBack')
+                if(this.configs.surfaceVectorRightModule === 'active')
+                    this.set('fireVectorRight')
+                if(this.configs.surfaceVectorLeftModule === 'active')
+                    this.set('fireVectorLeft')
+                if(this.configs.surfaceVectorBetaModule === 'active') {
+                    this.push('angleFromHead')
+                    this.set('fireVectorBeta')
                 }
-            } else if (cmd === 'get') {
-                this.log.push(`${pad}${action}`)
-                this.q.add(action)
-                this.activeGetSet.add(args[1])
-            } else if (cmd === 'use') {
-                const prop = args[1]
-                this.log.push(`${pad}uses ${prop}`)
-                this.build(prop, depth+1)
+                if(this.configs.surfaceVectorBeta6Module === 'active'
+                || this.configs.surfaceVectorBeta6Module === 'active'
+                || this.configs.surfaceVectorBeta6Module === 'active') {
+                    this.push('angleFromHead')
+                    if(this.configs.surfaceVectorBeta6Module === 'active')
+                        this.set('fireVectorBeta6')
+                    if(this.configs.surfaceVectorPsiModule === 'active')
+                        this.set('fireVectorPsi')
+                    if(this.configs.surfaceVectorThetaModule === 'active')
+                        this.set('fireVectorTheta')
+                    
+                    this.store('fireVectors')
+                    this.pop('angleFromHead')
+                }
+            }
+
+            this.store('surface')
+
+            // Add next up through the named this.push()
+            this.pop('fuelKey1')
+        }
+    }
+
+    addCanopy() {
+        this.push('canopyHeight')
+        this.push('canopyBase')
+        this.push('canopyCover')
+        this.set('canopyFromHeightBase')
+    }
+
+    addDeadFuelMoisture() {
+        if (this.configs.moistureDeadFuelsInput === 'particles') {
+            this.push('moistureDead1h')
+            this.push('moistureDead10h')
+            this.push('moistureDead100h')
+            this.set('moistureDeadFuelsFromParticle')
+        } else {
+            this.push('moistureDeadCategory')
+            this.set('moistureDeadFuelsFromCategory')
+        }
+    }
+
+    addLiveFuelMoisture() {
+        if (this.configs.moistureLiveFuelsInput === 'particles') {
+            this.push('moistureLiveStem')
+            this.push('moistureLiveHerb')
+            this.set('moistureLiveFuelsFromParticles')
+        } else {
+            this.push('moistureLiveCategory')
+            this.set('moistureLiveFuelsFromCategory')
+        }
+    }
+
+    addMidflameWindSpeed() {
+        if (this.configs.midflameWindSpeedInput === 'input') {
+            this.push('midflameWindSpeed')
+        } else {
+            this.addWindSpeed()
+            if(this.configs.midflameWsrfInput === 'input') {
+                this.push('midflameWsrf')
+                this.set('midflameWindSpeedFromWsrf')
+            } else {
+                this.push('fuelKey1')
+                this.set('surfaceFuel1FuelModel')
+                this.addCanopy()
+                this.set('midflameWsrf')
             }
         }
     }
-    buildStack(q=this.q) {
-        const stack = []
-        const getMap = new Map() // get subject -> stack index
-        const getStack = []
-        for(let action of [...q]) {
-            console.log(action)
-            const [cmd, key] = action.split(' ')
-            stack.push([cmd, key])
-            if (cmd === 'get') {
-                getMap.set(key, stack.length-1)
-                getStack.push(key)
-            }
+
+    addSlopeDirection() {
+        if (this.configs.slopeDirectionInput === 'aspect') {
+            this.push('slopeAspect')
+            this.set('slopeDirectionFromAspect')
+        } else if (this.configs.slopeDirectionInput === 'upslope') {
+            this.push('slopeUpslope')
+            this.set('slopeDirectionFromUpslope')
         }
-        // Add looping
-        getStack.reverse()
-        for(let key of getStack) {
-            stack.push(['next', key, getMap.get(key)])
+    }
+
+    addSlopeSteepness() {
+        if (this.configs.slopeSteepnessInput === 'degrees') {
+            this.push('slopeDegrees')
+            this.set('slopeSteepnessFromDegrees')
+        } else if (this.configs.slopeSteepnessInput === 'ratio') {
+            this.push('slopeRatio')
+            this.set('slopeSteepnessFromRatio')
+        } else if (this.configs.slopeSteepnessInput === 'map') {
+            this.push('mapScale')
+            this.push('mapContourInterval')
+            this.push('mapContoursCrossed')
+            this.push('mapDistance')
+            this.set('slopeSteepnessFromMap')
         }
-        this.stack = stack
-        return stack
+    }
+
+    addWindDirection() {
+        if (this.configs.windDirectionInput === 'bearing') {
+            this.push('windBearingDegrees')
+            this.set('windDirectionByBearingDegrees')
+        } else if (this.configs.windDirectionInput === 'source') {
+            this.push('windSourceDegrees')
+            this.set('windDirectionBySourcegDegrees')
+        } else if (this.configs.windDirectionInput === 'compass') {
+            this.push('windBearingCompass')
+            this.set('windDirectionByBearingCompass')
+        }
+    }
+
+    addWindSpeed() {
+        if (this.configs.windSpeedInput === '10m') {
+            this.push('windSpeed10m')
+            this.set('windSpeedAt10m')
+        } else if (this.configs.windSpeedInput === '20ft') {
+            this.push('windSpeed20ft')
+            this.set('windSpeedAt20ft')
+        }
     }
 }
-
-function sortedTable(title, status) {
-    const obj = {}
-    const keys = Object.keys(status).sort()
-    for(let key of keys)
-        obj[key] = status[key]
-    console.log(`${title} (${keys.length}):`)
-    console.table(obj)
-}
-
-console.log(new Date())
-const wfs = new WfsBuilder(WfsDependencies, WfsConfigs)
-wfs.buildQueue(['fireBehaviorObj1'])
-// sortedTable('ALL PROCESSORS:', [...wfs.allMethodSet])
-// sortedTable('ALL INPUTS:', [...wfs.allGetSet])
-// sortedTable('DEPENDENCY TRACE:', wfs.log)
-// sortedTable('PROCESS QUEUE:', [...wfs.q])
-// sortedTable('ACTIVE PROCESSORS:', [...wfs.activeMethodSet])
-// sortedTable('ACTIVE INPUTS:', [...wfs.activeGetSet])
-wfs.buildStack()
-sortedTable('COMMAND STACK:', wfs.stack)

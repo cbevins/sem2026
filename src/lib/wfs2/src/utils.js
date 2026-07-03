@@ -54,6 +54,15 @@ export function rotationToClockwiseFromHead(rotation) {
     return (360 - rotation) % 360
 }
 
+export function sortedTable(title, status) {
+    const obj = {}
+    const keys = Object.keys(status).sort()
+    for(let key of keys)
+        obj[key] = status[key]
+    console.log(`${title} (${keys.length}):`)
+    console.table(obj)
+}
+
 export function toDegrees(radians) {
     return radians * 180 / Math.PI
 }

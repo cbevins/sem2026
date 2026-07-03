@@ -42,6 +42,7 @@ export {
     getFlameLength,
     getScorchHeight,
     rotationToClockwiseFromHead,
+    sortedTable,
     toDegrees,
     toRadians,
 } from './utils.js'

@@ -1,4 +1,5 @@
 import { WfsBuilder } from './WfsBuilder.js'
+import * as Processor from './WfsProcessors.js'
 
 export class WfsRunner {
     constructor(configs) {
@@ -15,10 +16,10 @@ export class WfsRunner {
     // const inputValue = {
     //     propertyKey: [val0, val1, val2 ...],
     //}
-    execute(inputValues={}, callback=null) {
+    execute(inputValues={}, callback=null, trace=false) {
         this.inputValues = inputValues
         this.callback = callback
-        const state = {}
+        const state = {msg:''}
 
         // ensure inputValues has all necessary inputs
         for(let key of this.requiredInputs) {
@@ -39,6 +40,7 @@ export class WfsRunner {
                 ptr++
             } else if (cmd === 'call') {
                 msg = `apply(${prop}, this.state)`
+                Processor[prop].call(state)
                 ptr++
             } else if (cmd === 'store') {
                 msg = `apply(callback, this.state)`
@@ -52,7 +54,7 @@ export class WfsRunner {
                     msg = `done ${prop} at ${id}`
                 }
             }
-            console.log(msg)
+            if (trace) console.log(msg)
         }
     }
 

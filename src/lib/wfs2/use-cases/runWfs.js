@@ -35,4 +35,5 @@ for(let item of wfs.stack) {
 }
 sortedTable('EXECUTION STACK', data)
 sortedTable('Required Inputs', wfs.requiredInputs)
+sortedTable('Required Methods', wfs.requiredMethods)
 wfs.execute(input)

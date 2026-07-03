@@ -105,7 +105,7 @@ export class WfsBuilder {
                 this.set('surfaceFuel2FuelIgnition')
             }
             if (this.configs.surfaceCrownModule === 'active') {
-                this.set('crownFuelIgnition')
+                this.set('surfaceCrownFuelIgnition')
             }
 
             // Wind, slope
@@ -125,7 +125,7 @@ export class WfsBuilder {
                 this.set('unweightedFireBehavior')
             }
             if (this.configs.surfaceCrownModule === 'active') {
-                this.set('crownFireBehavior')
+                this.set('surfaceCrownFireBehavior')
             }
 
             if (this.configs.surfaceSizeModule === 'active') {
@@ -211,7 +211,7 @@ export class WfsBuilder {
                 this.push('fuelKey1')
                 this.set('surfaceFuel1FuelModel')
                 this.addCanopy()
-                this.set('midflameWsrf')
+                this.set('midflameWsrfFromCanopyFuel')
             }
         }
     }

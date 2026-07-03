@@ -19,13 +19,28 @@ export class WfsRunner {
     execute(inputValues={}, callback=null, trace=false) {
         this.inputValues = inputValues
         this.callback = callback
-        const state = {msg:''}
+        const state = {
+            canopy: {},
+            fuelCuring: {},
+            fuelMoisture: {},
+            input: {},
+            msg:'',
+            slopeDirection: {},
+            slopeSteepness: {},
+            surface: {
+                crown: {},
+                fuel1: {},
+                fuel2: {},
+            },
+            windDirection: {},
+            windSpeed: {},
+        }
 
         // ensure inputValues has all necessary inputs
         for(let key of this.requiredInputs) {
             if (! Object.hasOwn(inputValues, key))
                 throw new Error(`WfsRunner inputValues is missing required property '${key}'.`)
-            state[key] = inputValues[key]
+            state.input[key] = inputValues[key]
         }
 
         let input = {...inputValues}  // this will be mutated
@@ -35,11 +50,13 @@ export class WfsRunner {
             const [cmd, prop, id=0] = this.stack[ptr].split(' ')
             let msg = ''
             if (cmd === 'get') {
-                state[prop] = input[prop].shift()
+                state.input[prop] = input[prop].shift()
                 msg = `${prop} set to '${state[prop]}'`
                 ptr++
             } else if (cmd === 'call') {
                 msg = `apply(${prop}, this.state)`
+                if (!Object.hasOwn(Processor, prop))
+                    throw new Error(`Processor has no function '${prop}'`)
                 Processor[prop].call(state)
                 ptr++
             } else if (cmd === 'store') {

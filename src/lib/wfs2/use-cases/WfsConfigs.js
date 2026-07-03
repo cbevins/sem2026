@@ -45,4 +45,7 @@ export const WfsConfigs = {
     slopeSteepnessInput: 'ratio',
     windDirectionInput: 'bearing',
     windSpeedInput: '20ft',
+
+    // others
+    propsLevel: 2,
 }

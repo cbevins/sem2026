@@ -1,61 +1,72 @@
 export class RulesCompiler {
     constructor() {
         this.stack = new Set()
+        this.reqInputs = new Set()
+        this.reqMethods = new Set()
+        this.reqModules = new Set()
     }
 
-    /**
-     * @param {object} rules A rules object
-     * @param {*} startModule Starting key of the rules object
-     */
     compile(rules, configs, startModule) {
         this.stack = new Set()
+        this.reqInputs = new Set()
+        this.reqMethods = new Set()
+        this.reqModules = new Set()
         this._compile(rules, configs, startModule)
     }
 
-    _compile(rules, configs, module) {
+    _compile(rules, configs, moduleKey) {
+        this.reqModules.add(moduleKey)
         const block = [true]
-        if(!Object.hasOwn(rules, module))
-            throw new Error(`There is no module '${module}'.`)
-        for(let line of rules[module]) {
+        let active = true
+        if(!Object.hasOwn(rules, moduleKey))
+            throw new Error(`There is no module '${moduleKey}'.`)
+        for(let line of rules[moduleKey]) {
             const args = line.split(' ')
             const cmd = args[0]
+
+            // 'if config value' pushes the block stack
+            // and if config===value, the block is set active
+            // otherwise the block lines are ignored until the enclosing 'endif'
             if (cmd === 'if') {
                 const [, cfgKey, cfgVal] = args
                 if(!Object.hasOwn(configs, cfgKey))
-                    throw new Error(`Module '${module}' line '${line}' has invalid config key '${cfgKey}'.`)
-                block.push(configs[cfgKey] === cfgVal)
+                    throw new Error(`Module '${moduleKey}' line '${line}' has invalid config key '${cfgKey}'.`)
+                active = configs[cfgKey] === cfgVal
+                block.push(active)
             }
+
+            // 'endif' pops the block stack
             else if (cmd === 'endif') {
                 block.pop()
+                active = block[block.length-1]
             }
+
+            // 'call method' calls Function[moduleKey].method()
             else if (cmd === 'call') {
-                if (block[block.length-1]) {
-                    const who = args[1].split('.')
-                    if (who.length < 2)
-                        throw new Error(`Module '${module}' line '${line}' must call object.method.`)
-                    let [mod, method] = who
-                    mod = (mod==='self') ? module : mod
-                    this.stack.add(`call ${mod}.${method}()`)
+                if (active) {
+                    const method = moduleKey + '.' + args[1]
+                    this.stack.add(`call ${method}()`)
+                    this.reqMethods.add(method)
                 }
             }
-            else if (cmd === 'get') {
-                if (block[block.length-1]) {
-                    const who = args[1].split('.')
-                    if (who.length < 2)
-                        throw new Error(`Module '${module}' line '${line}' must get object.prop.`)
-                    let [mod, prop, inputKey=''] = who
-                    mod = (mod==='self') ? module : mod
-                    prop = (prop==='self') ? module : prop
-                    if (inputKey==='')  inputKey = prop
-                    this.stack.add(`get ${mod}.${prop} from input.${inputKey}`)
+
+            // 'input' sets moduleKey.moduleKey = input.moduleKey
+            else if (cmd === 'input') {
+                if (active) {
+                    this.stack.add(`input ${moduleKey}`)
+                    this.reqInputs.add(moduleKey)
                 }
             }
+
+            // 'use moduleKey' compiles rules.moduleKey
             else if (cmd === 'use') {
-                if (block[block.length-1]) {
+                if (active) {
                     this._compile(rules, configs, args[1])
                 }
-            } else {
-                throw new Error(`Module '${module}' has invalid command '${cmd}'.`)
+            }
+            
+            else {
+                throw new Error(`Module '${moduleKey}' has invalid command '${cmd}'.`)
             }
         }
     }

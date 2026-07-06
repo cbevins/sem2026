@@ -9,9 +9,7 @@ export { WindSpeed } from './modules/WindSpeed.js'
 
 // src/simulator
 export { BehaveRules, BehaveConfigs } from './simulator/BehaveRules.js'
-export { BehaveRules2, BehaveConfigs2 } from './simulator/BehaveRules2.js'
 export { RulesCompiler } from './simulator/RulesCompiler.js'
-export { RulesCompiler2 } from './simulator/RulesCompiler2.js'
 export { State } from './simulator/State.js'
 
 // src/utils

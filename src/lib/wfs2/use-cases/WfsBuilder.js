@@ -1,6 +1,6 @@
-/**
- * WfsBuilder builds an execution instruction stack from a configuration.
+/* WfsBuilder builds an execution instruction stack from a configuration.
  */
+
 import { WfsConfigs } from './WfsConfigs.js'
 
 export class WfsBuilder {
@@ -217,23 +217,23 @@ export class WfsBuilder {
     }
 
     addSlopeDirection() {
-        if (this.configs.slopeDirectionInput === 'aspect') {
+        if (this.configs.slopeDirectionInput === 'slopeAspect') {
             this.push('slopeAspect')
             this.set('slopeDirectionFromAspect')
-        } else if (this.configs.slopeDirectionInput === 'upslope') {
+        } else if (this.configs.slopeDirectionInput === 'slopeUpslope') {
             this.push('slopeUpslope')
             this.set('slopeDirectionFromUpslope')
         }
     }
 
     addSlopeSteepness() {
-        if (this.configs.slopeSteepnessInput === 'degrees') {
+        if (this.configs.slopeSteepnessInput === 'slopeDegrees') {
             this.push('slopeDegrees')
             this.set('slopeSteepnessFromDegrees')
-        } else if (this.configs.slopeSteepnessInput === 'ratio') {
+        } else if (this.configs.slopeSteepnessInput === 'slopeRatio') {
             this.push('slopeRatio')
             this.set('slopeSteepnessFromRatio')
-        } else if (this.configs.slopeSteepnessInput === 'map') {
+        } else if (this.configs.slopeSteepnessInput === 'slopeMap') {
             this.push('mapScale')
             this.push('mapContourInterval')
             this.push('mapContoursCrossed')
@@ -243,23 +243,23 @@ export class WfsBuilder {
     }
 
     addWindDirection() {
-        if (this.configs.windDirectionInput === 'bearing') {
+        if (this.configs.windDirectionInput === 'windBearing') {
             this.push('windBearingDegrees')
             this.set('windDirectionByBearingDegrees')
-        } else if (this.configs.windDirectionInput === 'source') {
+        } else if (this.configs.windDirectionInput === 'windSource') {
             this.push('windSourceDegrees')
             this.set('windDirectionBySourcegDegrees')
-        } else if (this.configs.windDirectionInput === 'compass') {
+        } else if (this.configs.windDirectionInput === 'windCompass') {
             this.push('windBearingCompass')
             this.set('windDirectionByBearingCompass')
         }
     }
 
     addWindSpeed() {
-        if (this.configs.windSpeedInput === '10m') {
+        if (this.configs.windSpeedInput === 'windSpeed10m') {
             this.push('windSpeed10m')
             this.set('windSpeedAt10m')
-        } else if (this.configs.windSpeedInput === '20ft') {
+        } else if (this.configs.windSpeedInput === 'windSpeed20ft') {
             this.push('windSpeed20ft')
             this.set('windSpeedAt20ft')
         }

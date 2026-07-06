@@ -1,0 +1,150 @@
+
+export const Commands = {
+    canopy: [],
+    crownFireBehavior: [],
+    crownFuelBed: [],
+    crownFuelIgnition: [],
+    crownFuelModel: [],
+    surfaceFireBehavior: [
+        'init surfaceFireBehavior',
+        'add fuel1FireBehavior',
+        'if fuelModelInput one',
+            'set surfaceFireBehavior fuel1FireBehavior',
+        'endif',
+        'if fuelModelInput two',
+            'add fuel2FireBehavior',
+            'add weightedFireBehavior',
+            'set surfaceFireBehavior weightedFireBehavior',
+        'endif',
+    ],
+    weightedFireBehavior: [
+        'init weightedFireBehavior',
+        'calc surfaceFireBehavior.weightedFireBehavior',
+    ],
+    fuelKeys: [
+        'init fuelKeys',        // sets fuelKeys.crown = 10, fuelKeys.fuelCover1 = 1
+        'get fuelKeys.fuelKey1',
+        'if fuelModelInput two',
+            'get fuelKeys.fuelKey2',
+            'get fuelKeys.fuelCover1',   // MOVE THIS DOWN TO FireBehavior SECTION!!!
+        'endif',
+    ],
+    fuel1FireBehavior: [
+        'init fire1FireBehavior',
+        'add fire1FuelIgnition',
+        'calc fire1FireBehavior.fireBehavior',
+    ],
+    fuel1FuelBed: [
+        'init fuel1FuelBed',
+        'add fuel1FuelModel',
+        'calc fuel1FuelBed.fuelBed',
+    ],
+    fuel1FuelModel: [
+        'init fuel1FuelModel',
+        'add fuelKeys',
+        'calc fuel1FuelModel',
+    ],
+    fuel1FuelIgnition: [
+        'init fuel1FuelIgnition',
+        'add fire1FuelBed',
+        'calc fuel1FuelIgnition.fuelIgnition',
+    ],
+
+    fuelMoistureDead: [],
+    fuelMoistureLive: [
+        'init fuelMoisture',
+        'if fuelMoistureLiveInput category',
+            'get fuelMoisture.fuelMoistureLiveCategory',
+            'set fuelMoisture.fuelMoistureLiveHerb fuelMoisture.fuelMoistureLiveCategory',
+            'set fuelMoisture.fuelMoistureLiveStem fuelMoisture.fuelMoistureLiveCategory',
+        'endif',
+        'if fuelMoistureLiveInput particles',
+            'get fuelMoisture.fuelMoistureLiveHerb',
+            'get fuelMoisture.fuelMoistureLiveStem',
+        'endif',
+    ],
+    fuelCuring: [
+        'init fuelCuring',
+        'if fuelCuringInput input',
+            'get fuelCuring.curedHerb',
+            'get fuelCuring.curedCheatgrass',
+        'endif',
+        'if fuelCuringInput estimated',
+            'add fuelMoistureLive',
+            'calc fuelCuring.curedHerb',
+            'calc fuelCuring.curedCheatgrass',
+        'endif',
+    ],
+    midflameWind: [
+        'init midflameWind',
+        'if midflameWindSpeedInput input',
+            'get midflameWind.midflameWindSpeed',
+        'endif',
+        'if midflameWindSpeedInput estimated',
+            'add windSpeed',
+            'if midflameWsrfInput input',
+                'get midflameWind.midflameWsrf',
+            'endif',
+            'if midflameWsrfInput estimated',
+                'add fuel1FuelModel',   // access the fuel depth and/or wsrf
+                'add fuelCanopy',       // access the canopy wsrf
+                'calc midflameWind.midflameWsrf',
+            'endif',
+            'calc midflameWind.midflameWindSpeed',
+        'endif',
+    ],
+    slopeDirection: [
+        'init slopeDirection',
+        'if slopeDirectionInput slopeAspect',
+            'get slopeDirection.slopeAspect',
+            'calc slopeDirection.slopeUpslope',
+        'endif',
+        'if slopeDirectionInput slopeUpslope',
+            'get slopeDirection.slopeUpslope',
+            'calc slopeDirection.slopeAspect',
+        'endif',
+    ],
+    slopeMap: [],
+    slopeSteepness: [
+        'init slopeSteepness',
+        'if slopeSteepnessInput slopeDegrees',
+            'get slopeSteepness.slopeDegrees',
+            'calc slopeSteepness.slopeRatio',   // uses slopeDegrees
+        'endif',
+        'if slopeSteepnessInput slopeRatio',
+            'get slopeSteepness.slopeRatio',
+            'calc slopeSteepness.slopeDegrees',   // uses slopeRatio
+        'endif',
+        'if slopeSteepnessinput slopeMap',
+            'add slopeMap',
+            'calc slopeSteepness.slopeMap', // uses slopeMap as input
+        'endif',
+    ],
+    windDirection: [
+        'init windDirection',
+        'if windDirectionInput windBearing',
+            'get windDirection.windBearing',
+            'calc windDirection.windSource',    // uses windBearing
+        'endif',
+        'if windDirectionInput windSource',
+            'get windDirection.windSource',
+            'calc windDirection.windBearing',   // uses windSource
+        'endif',
+        'if windDirectionInput windCompass',
+            'get windDirection.windCompass',
+            'calc windDirection.windSourceCompass',// uses windCompass to derive windSource
+            'calc windDirection.windBearing',   // uses windSource
+        'endif',
+    ],
+    windSpeed: [
+        'init windSpeed',
+        'if windSpeedInput windSpeed20ft',
+            'get windSpeed.windSpeed20ft',
+            'calc windSpeed.windSpeed10m',
+        'endif',
+        'if windSpeedInput windSpeed10m',
+            'get windSpeed.windSpeed10m',
+            'calc windSpeed.windSpeed20ft',
+        'endif',
+    ],
+}

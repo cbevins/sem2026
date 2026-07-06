@@ -41,10 +41,10 @@ export const WfsConfigs = {
     midflameWsrfInput: 'estimated',
     moistureLiveFuelsInput: 'particles',
     moistureDeadFuelsInput: 'particles',
-    slopeDirectionInput: 'aspect',
-    slopeSteepnessInput: 'ratio',
-    windDirectionInput: 'bearing',
-    windSpeedInput: '20ft',
+    slopeDirectionInput: 'slopeAspect',
+    slopeSteepnessInput: 'slopeRatio',
+    windDirectionInput: 'windBearing',
+    windSpeedInput: 'windSpeed20ft',
 
     // others
     propsLevel: 2,

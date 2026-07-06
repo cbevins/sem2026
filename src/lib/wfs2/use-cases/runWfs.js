@@ -33,7 +33,8 @@ for(let item of wfs.stack) {
     const [action, subject, goto=''] = item.split(' ')
     data.push({action, subject, goto})
 }
+sortedTable('Configuration', Object.entries(configs).sort())
 sortedTable('EXECUTION STACK', data)
-sortedTable('Required Inputs', wfs.requiredInputs)
-sortedTable('Required Methods', wfs.requiredMethods)
+sortedTable('Required Inputs', wfs.requiredInputs.sort())
+sortedTable('Required Methods', wfs.requiredMethods.sort())
 wfs.execute(input)

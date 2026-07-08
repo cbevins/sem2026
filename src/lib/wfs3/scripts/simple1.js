@@ -6,10 +6,10 @@ import * as Mod from '../Simulator/Modules.js'
 function run() {
     const compiler = new Wfs.RulesCompiler()
     // console.log(compiler.getConfigs(BehaveRules))
-    compiler.compile(Wfs.BehaveRules, Wfs.BehaveConfigs, 'fireBehavior')
-    // console.log(compiler.stack)
+    compiler.compile(Wfs.BehaveRules, Wfs.BehaveConfigs, 'fireBehaviors')
+    console.log(compiler.stack)
     // sortedTable('Required Inputs', [...compiler.reqInputs])
-    Wfs.sortedTable('Required Methods', [...compiler.reqMethods])
+    // Wfs.sortedTable('Required Methods', [...compiler.reqMethods])
     // Wfs.sortedTable('Required Modules', [...compiler.reqModules])
 }
 

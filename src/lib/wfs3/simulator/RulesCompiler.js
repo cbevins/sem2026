@@ -50,11 +50,11 @@ export class RulesCompiler {
                 }
             }
 
-            // 'input' sets moduleKey.moduleKey = input.moduleKey
+            // 'input propKey' sets input.propKey
             else if (cmd === 'input') {
                 if (active) {
-                    this.stack.add(`input ${moduleKey}`)
-                    this.reqInputs.add(moduleKey)
+                    this.stack.add(`input ${args[1]}`)
+                    this.reqInputs.add(args[1])
                 }
             }
 

@@ -80,22 +80,24 @@ export class fuelIgnitions {
 }
 export class fuelKeyOne {
     constructor(){}
-    input(){}
+    updateFromFuelModelAndCuring() {
+
+    }
 }
 export class fuelKeyTwo {
     constructor(){}
     input(){}
 }
-export class fuelModelOne {
-    constructor(){}
+export class fuelModels {
+    constructor() {
+        this.fuelModelOne = null
+        this.fuelModelTwo = null
+    }
     updateFromFuelKey(){}
 }
 export class fuelModelTwo {
-    constructor(){}
+    constructor() {}
     updateFromFuelKey(){}
-}
-export class fuelModels {
-    constructor(){}
 }
 export class mapContourInterval {
     constructor(){}

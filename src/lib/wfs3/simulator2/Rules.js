@@ -1,33 +1,4 @@
 export const Rules = {
-    // modules: [
-    //     'if surfaceFireBehaviors active',
-    //         'apply fireBehaviors',
-    //         'if surfaceFireSize active',
-    //             'apply fireEllipse',
-    //             'apply fireSize',
-    //             'if surfaceFireVectors active',
-    //                 'apply fireVectors',
-    //             'endif',
-    //         'endif',
-    //     'elseif surfaceIgnitions active',
-    //         'apply fireIgnitions',
-    //     'elseif surfaceFuelBeds active',
-    //         'apply fuelBeds',
-    //     'elseif surfaceFuelModels active',
-    //         'apply fireModels',
-    //     'endif',
-
-    //     'if standaloneFireSize active',
-    //     'endif',
-
-    //     'if standaloneCrownFire active',
-    //     'endif',
-        
-    //     'if standaloneSpotting active',
-    //     'endif',
-
-    // ],
-
     surfaceFire: [
         'if surfaceFireModule active',
             'apply fireBehaviors',
@@ -60,6 +31,7 @@ export const Rules = {
             'endif',
         'endif',
     ],
+
     deadFuelMoistures: [
         'if deadFuelMoisturesBy particle',
             'next fuelMoistures.dead100h',
@@ -67,8 +39,8 @@ export const Rules = {
             'next fuelMoistures.dead1h',
         'elseif deadFuelMoisturesBy category',
             'next fuelMoistures.deadCategory',
+            'call updateFromCategory',
         'endif',
-        // nothing needs to be updated
     ],
 
     fuelCuring: [
@@ -160,19 +132,19 @@ export const Rules = {
         'call fireVectors.updateLeftVector',
     ],
     betaVectorModule: [
-        'next angleFromHead',
+        'next fireVectors.angleFromHead',
         'call fireVectors.updateBetaVector',
     ],
     beta6VectorModule: [
-        'next angleFromHead',
+        'next fireVectors.angleFromHead',
         'call fireVectors.updateBeta6Vector',
     ],
     psiVectorModule: [
-        'next angleFromHead',
+        'next fireVectors.angleFromHead',
         'call fireVectors.updatePsiVector',
     ],
     thetaVectorModule: [
-        'next angleFromHead',
+        'next fireVectors.angleFromHead',
         'call fireVectors.updateThetaVector',
     ],
     liveFuelMoistures: [
@@ -181,8 +153,8 @@ export const Rules = {
             'next fuelMoistures.liveHerb',
         'elseif liveFuelMoisturesBy category',
             'next fuelMoistures.liveCategory',
+            'call updateFromCategory',
         'endif',
-        // nothing needs to be updated
     ],
     midflameWindSpeed: [
         'if midflameWindSpeedFrom input',
@@ -271,9 +243,15 @@ export const Rules = {
         'if windSpeedFrom windSpeed10m',
             'next wind.speed.at10m',
             'call wind.updateFrom10m',
+            // TRY calling State methods instead of module methods ???
+            // 'next windSpeed.at20ft windSpeed20ft',
+            // 'call updateWindSpeedFrom10m',
         'elseif windSpeedFrom windSpeed20ft',
             'next wind.speed.at20ft',
             'call wind.updateFrom20ft',
+            // TRY calling State methods instead of module methods ???
+            // 'next windSpeed.at20ft windSpeed20ft',
+            // 'call updateWindSpeedFrom20ft',
         'endif'
     ],
 }

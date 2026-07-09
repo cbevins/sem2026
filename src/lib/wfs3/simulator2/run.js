@@ -6,27 +6,35 @@ import { sortedTable } from '../Wfs.js'
 const compiler = new RulesCompiler()
 
 function showConfigs(rules) {
-    sortedTable('ALl Configuration keys and Values Mentioned In Rules',
+    sortedTable('All Configuration keys and Values Mentioned In Rules',
         compiler.getConfigs(rules))
 }
 
-function showInputs(configs) {
-    compiler.compile(Rules, configs, 'surfaceFire')
+function showInputs(configs, startKey) {
+    compiler.compile(Rules, configs, startKey)
     sortedTable('Required Inputs', [...compiler.reqInputs])
 }
 
-function showMethods(configs) {
-    compiler.compile(Rules, configs, 'surfaceFire')
+function showMethods(configs, startKey) {
+    compiler.compile(Rules, configs, startKey)
     sortedTable('Required Methods', [...compiler.reqMethods].sort())
 }
 
-function showStack(configs) {
-    compiler.compile(Rules, configs, 'surfaceFire')
+function showStack(configs, startKey) {
+    compiler.compile(Rules, configs, startKey)
     console.table([...compiler.stack])
 }
 
+function showStateSkeleton(configs, startKey) {
+    compiler.compile(Rules, configs, startKey)
+    console.log(compiler.getStateSkeleton())
+}
+
 const configs = FullSurfaceConfig
+const startKey = 'surfaceFire'
+
 // showConfigs(Rules)
-showStack(configs)
-showInputs(configs)
-// showMethods(configs)
+showInputs(configs, startKey)
+showMethods(configs, startKey)
+showStack(configs, startKey)
+showStateSkeleton(configs, startKey)

@@ -64,7 +64,7 @@ export class RulesCompiler {
                 // Test object.method presence and existence here?
                 const fullName = `${object}.${method}`
                 if (active) {
-                    this.stack.add(`call ${fullName}()`)
+                    this.stack.add(`call ${fullName}`)
                     this.reqMethods.add(fullName)
                 }
             }
@@ -124,5 +124,25 @@ export class RulesCompiler {
             }
         }
         return [...configSet].sort()
+    }
+
+    getStateSkeleton() {
+        const propSet = new Set()
+        for(let item of this.stack) {
+            const [cmd, objectProp] = item.split(' ')
+            if (cmd === 'call') {
+                const keys = objectProp.split('.')
+                propSet.add(keys[0])
+            } else if (cmd === 'next') {
+                const keys = objectProp.split('.')
+                propSet.add(keys[0])
+            }
+        }
+        const props = [...propSet].sort()
+        const state = {}
+        for (let prop of props) {
+            state[prop] = {}
+        } 
+        return state
     }
 }

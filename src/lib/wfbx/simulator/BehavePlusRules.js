@@ -2,24 +2,41 @@
 export const BehavePlusRules = {
     surfaceFire: [
         'if surfaceFireModule active',
-            // start at the module with greatest depth and move to the top
+            // Start at the module at the end of the chain and move to the start,
+            // as the latter modules always 'appy' the modules before them.
+            // fireVectorModule will 'apply' fireSize, fireBehavior, fuelIgnition, fuelBed, fuelModel
             'if surfaceFireVectorModule active',
                 'apply fireVector',
             'elseif surfaceFireSizeModule active',
                 'apply fireSize',
-            // 'elseif surfaceFireBehaviorModule active',
-            //     'apply fireBehaviors',
-            // 'elseif surfaceFuelIgnitionModule active',
-            //     'apply fuelIgnitions',
-            // 'elseif surfaceFuelBedModule active',
-            //     'apply fuelBeds',
-            // 'elseif surfaceFuelModelModule active',
-            //     'apply fuelModels',
-            // 'endif',
-            'apply fireBehaviors',
+            'elseif surfaceFireBehaviorModule active',
+                'apply fireBehaviors',
+            'elseif surfaceFuelIgnitionModule active',
+                'apply fuelIgnitions',
+            'elseif surfaceFuelBedModule active',
+                'apply fuelBeds',
+            'elseif surfaceFuelModelModule active',
+                'apply fuelModels',
+            'endif',
+        'elseif fireSizeModule active',     // stand-alone fire ellipse/size module
+            'apply fireSize',
+        'elseif fireVectorModule active',     // stand-alone fire ellipse/size module
+            'apply fireVector',
+        'elseif activeCrownFireModule active',  // stand-alone crown fire module
+            'apply activeCrownFire',
         'endif',
     ],
 
+    activeCrownFire: [  // stand-alone
+        'call makeActiveCrownFireFuelBed',
+        // Even the stand-alone crown fire has to have a surface fuel and fire for HPUA
+        'apply fuelBeds',
+        'apply fuelIgnitions',
+        'call makeActiveCrownFireFuelIgnition',
+        'apply windDirection',
+        'apply windSpeed',
+        'call makeActiveCrownFireBehavior',
+    ],
     deadFuelMoisture: [
         'if deadFuelMoistureFrom Particles',
             'each fuelMoistureDead100h',
@@ -30,7 +47,6 @@ export const BehavePlusRules = {
             'call updateDeadFuelMoistureFromCategory',
         'endif',
     ],
-
     fuelCatalog: [
         // create the fuelCatalog and update its curingClasses and moistureClasses
         'call makeFuelCatalog',
@@ -57,22 +73,22 @@ export const BehavePlusRules = {
             'each fuelKeyTwo',
         'endif',
         // create new fuelModels = {one, two, curingClasses, moistureClasses}
-        'call updateFuelModelsFromFuelKeys',
+        'call makeFuelModelsFromFuelKeys',
     ],
     fuelBeds: [
         'apply fuelModels',
         'apply fuelCuring',
         // create new fuelBeds = {one, two}
-        'call updateFuelBedsFromFuelModelsAndCuring'
+        'call makeFuelBedsFromFuelModelsAndCuring'
     ],
     fuelIgnitions: [
         'apply fuelBeds',
         'apply liveFuelMoisture',
         'apply deadFuelMoisture',
         // create new fuelIgnitions = {one, two}
-        'call updateFuelIgnitionsFromFuelMoisture',
+        'call makeFuelIgnitionsFromFuelMoisture',
         'if activeCrownFireModule active',
-            'call updateActiveCrownFireFuelIgnition',
+            'call makeActiveCrownFireFuelIgnition',
         'endif',
     ],
     fireBehaviors: [
@@ -82,52 +98,53 @@ export const BehavePlusRules = {
         'apply windDirection',
         'apply slopeSteepness',
         'apply midflameWindSpeed',
-        'call updateFireBehavior',
+        'call makeFireBehavior',
         'if activeCrownFireModule active',
-            'call updateActiveCrownFireBehavior',
+            'apply windSpeed',
+            'call makeActiveCrownFireBehavior',
         'endif',
     ],
     fireEllipse: [  // or 'fireShape'?
-        'if standAloneFireSizeModule active',
+        'if surfaceFireModule active', // if linked to surface
+            'apply fireBehaviors',
+            // the method should update fireEllipse vectorProp where
+            // vector = 'head', 'back', 'right', and 'left'
+            // prop = 'spreadRate', 'bearing', 'angleFromHead'
+            'call makeFireEllipseFromSurfaceFire',
+        'elseif fireSizeModule active', // if stand-alone
             'each observedHeadSpreadRate',
             'each observedHeadBearing',
             'each observedLengthWidthRatio',
             'each observedFlameLength',
-            'call updateFireEllipseFromObservedFire',
-        'else if surfaceFireSizeModule active',
-            'apply fireBehaviors',
-            // update <vector><Prop> where
-            // vector = 'head', 'back', 'right', and 'left'
-            // prop = 'spreadRate', 'bearing', 'angleFromHead'
-            'call updateFireEllipseFromSurfaceFire',
+            'call makeFireEllipseFromObservedFire',
         'endif',
     ],
     fireSize: [
         'apply fireEllipse',
         'each ignitionElapsedTime',
-        // update <vector><Prop> where
+        // the method should update fireEllipse update vectorProp where
         // vector = 'head', 'back', 'right', and 'left'
         // prop = 'distance', 'easting', 'northing'
-        'call updateFireSizeFromElapsedTime',
+        'call makeFireSizeFromElapsedTime',
         'each ignitionEasting',
         'each ignitionNorthing',
-        'call updateFirePositionFromElapsedTime',
+        'call makeFirePositionFromElapsedTime',
     ],
     fireVector: [
         'apply fireSize',
         // Could add a fireVectorBearing config option
         'each fireVectorAngleFromHead',
         'if fireVectorBeta active',
-            'call updateFireVectorBeta',
+            'call makeFireVectorBeta',
         'endif',
         'if fireVectorBeta6 active',
-            'call updateFireVectorBeta6',
+            'call makeFireVectorBeta6',
         'endif',
         'if fireVectorPsi active',
-            'call updateFireVectorPsi',
+            'call makeFireVectorPsi',
         'endif',
         'if fireVectorTheta active',
-            'call updateFireVectorTheta',
+            'call makeFireVectorTheta',
         'endif',
     ],
     liveFuelMoisture: [

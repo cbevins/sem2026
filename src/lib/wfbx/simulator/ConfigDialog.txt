@@ -1,0 +1,44 @@
+make FuelCatalog
+make fuelCuringClasses
+make fuelMoistureClasses
+
+if activeCrownFire Module active
+  make ActiveCrownFireFuelBed
+endif
+
+each fuelKeyOne
+  call makeFuelModelsFromFuelKeys
+  each fuelCuringCuredHerb
+    each fuelCuringCuredCheatgrass
+      call makeFuelBedsFromFuelModelsAndCuring
+      each fuelMoistureLiveStem
+        each fuelMoistureLiveHerb
+          each fuelMoistureDead100h
+            each fuelMoistureDead10h
+              each fuelMoistureDead1h
+                call makeFuelIgnitionsFromFuelMoisture
+                call makeActiveCrownFireFuelIgnition
+                each slopeDirectionFromAspect
+                  call updateSlopeDirectionFromAspect
+                  each windDirectionFromBearingDegrees
+                    call updateWindDirectionFromBearingDegrees
+                    each slopeSteepnessFromRatio
+                      call updateSlopeSteepnessFromRatio
+                      each midflameWindSpeed
+                        call makeFireBehavior
+                        call makeActiveCrownFireBehavior
+                        each windSpeedFrom20ft
+                          call updateWindSpeedFrom20ft
+                        next windSpeedFrom20ft 23
+                      next midflameWindSpeed 20
+                    next slopeSteepnessFromRatio 18
+                  next windDirectionFromBearingDegrees 16
+                next slopeDirectionFromAspect 14
+              next fuelMoistureDead1h 11
+            next fuelMoistureDead10h 10
+          next fuelMoistureDead100h 9
+        next fuelMoistureLiveHerb 8
+      next fuelMoistureLiveStem 7
+    next fuelCuringCuredCheatgrass 5
+  next fuelCuringCuredHerb 4
+next fuelKeyOne 2

@@ -35,9 +35,13 @@ export class ScriptCompiler {
                 if(!Object.hasOwn(configs, key))
                     throw new Error(`Rule set '${rulesKey}' line '${line}' has invalid config key '${key}'.`)
                 // 'elseif' pops the current block before pushing a new block
-                if (cmd === 'elseif')
+                if (cmd === 'elseif') {
                     block.pop()
-                active = (configs[key] === value)
+                    active = block[block.length-1]
+                }
+                // All nested blocks of a skipped block are also skipped!!
+                if (active)
+                    active = (configs[key] === value)
                 block.push(active)
             }
 
@@ -77,9 +81,6 @@ export class ScriptCompiler {
             else if (cmd === 'apply') {
                 if(!Object.hasOwn(rules, key)) {
                     throw new Error(`Rule set '${rulesKey}' line '${line}' references unknown rule '${key}'.`)
-                }
-                if (key === 'fireVector') {
-                    let x = 1
                 }
                 if (active) {
                     this.#compile(rules, configs, key)

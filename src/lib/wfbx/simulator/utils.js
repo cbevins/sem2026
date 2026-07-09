@@ -58,7 +58,7 @@ export function logRuleMethods(rules) {
     }
     console.log(str)
 }
-export function logScript(script) {
+export function logScript(script, title='') {
     const color = {
         each: "\x1b[32m", // green
         call: "\x1b[36m", // cyan
@@ -66,7 +66,7 @@ export function logScript(script) {
     }
     let idx = 0
     let depth = 0
-    let str = '\nExecution Script\n'
+    let str = `\nExecution Script: ${title}\n`
     for(let line of script) {
         let [cmd] = line.split(' ')
         if (cmd==='next') depth--

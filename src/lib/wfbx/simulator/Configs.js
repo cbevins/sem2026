@@ -21,8 +21,8 @@ export const BaseConfig = {
     surfaceFuelModelModule: 'inactive',
 
     // These may be stand-alone or linked to suface
-    activeCrownFireModule: 'inactive',
-    fireSizeModule: 'inactive',
+    activeCrownFireModule: 'active',
+    fireSizeModule: 'active',
     fireVectorModule: 'active',
 
     // These only have effect when surfaceFireVectorModule or fireVectorModule is 'active'

@@ -1,6 +1,7 @@
 // The rules mimic the behavior of BehavePlus Version 6-beta
 export const BehavePlusRules = {
     surfaceFire: [
+        // Only ONE of these will be executed:
         'if surfaceFireModule active',
             // Start at the module at the end of the chain and move to the start,
             // as the latter modules always 'appy' the modules before them.

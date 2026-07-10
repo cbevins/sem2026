@@ -5,7 +5,7 @@ import { logRuleConfigs, logRuleInputs, logRuleMethods, logScript } from './util
 
 // logRuleMethods(BehavePlusRules)
 // logRuleConfigs(BehavePlusRules)
-// logRuleInputs(BehavePlusRules)
+logRuleInputs(BehavePlusRules)
 const compiler = new ScriptCompiler()
 compiler.compile(BehavePlusRules, BaseConfig, 'surfaceFire')
-logScript(compiler.script, BaseConfig.summary)
+// logScript(compiler.script, BaseConfig.summary)

@@ -20,17 +20,97 @@ export class State {
             dead10h: 0.1,
             dead100h: 0.1,
         }
-        this.fuelBed = {
+
+        this.surface = {
             one: {
-                depth: 1,
-                midflameWsrf: 1,
-            },
-            two: {
-                depth: 1,
-                midflameWsrf: 1,
+                key: 0,
+                fuelModel: null,
+                fuelBed: null,
+                fuelIgnition: null,
+                fireBehavior: null,
             }
         }
-        this.fuelCatalog = null// new FuelCatalog()
+        this.surface.two = {...this.surface.one}
+
+        this.fuelBedOne = {
+            depth: 1,
+            midflameWsrf: 1,
+        }
+
+        this.fuelModelOne = {
+            depth: 1,
+            deadMext: 0.12,
+        }
+
+        this.fuelIgnitionOne = {
+            heatSink: 0,
+            heatSource: 0,
+            noWindSlopeSpreadRate: 0,
+            reactionIntensity: 0,
+        }
+
+        this.fireBehaviorOne = {
+            headBearing: 0,
+            headFirelineIntensity: 0,
+            headFlameLength: 0,
+            headSpreadRate: 0,
+            lengthWidthRatio: 1,
+        }
+
+        this.fireBehaviorObserved = {
+            headBearing: 0,
+            headFirelineIntensity: 0,
+            headFlameLength: 0,
+            headSpreadRate: 0,
+            lengthWidthRatio: 1,
+        }
+        
+        const fireVector = {
+            angleFromHead: 0,
+            bearing: 0,
+            distance: 0,
+            easting: 0,
+            firelineIntensity: 0,
+            flameLength: 0,
+            northing: 0,
+            spreadRate: 0,
+        }
+
+        // Creates vectors with valid 'spreadRate' props
+        this.fireEllipse = {
+            back: {...fireVector},
+            center: {...fireVector},
+            eccentricity: 0,
+            rotation: 0,
+            head: {...fireVector},
+            left: {...fireVector},
+            right: {...fireVector},
+        }
+
+        // Updates vector 'distance' props
+        this.fireSize = {
+            elapsedTime: 0,     // INPUT
+            area: 0,
+            acres: 0,
+            perimeter: 0,
+        }
+
+        //
+        this.firePosition = {
+            ignEast: 0,
+            ignNorth: 0,
+        }
+
+        // Adds beta, beta6, psi, and theta vectors
+        this.fireVectors = {
+            angleFromHead: 0,   // INPUT
+            beta: {...fireVector},
+            beta6: {...fireVector},
+            psi: {...fireVector},
+            theta: {...fireVector},
+        }
+
+        this.fuelCatalog = new FuelCatalog()
         this.fuelCuring = {
             curedHerb: 0,
         }
@@ -48,10 +128,10 @@ export class State {
             upslope: 0,
         }
         this.slopeMap = {
-            mapScale: 24000,
-            mapContourInterval: 100,
-            mapContoursCrossed: 0,
-            mapDistance: 0,
+            scale: 24000,
+            contourInterval: 100,
+            contoursCrossed: 0,
+            distance: 0,
             slopeRatio: 0,
             slopeDegrees: 0,
         }
@@ -65,13 +145,27 @@ export class State {
             sourceDegrees: 180,
         }
         this.windSpeed = {
-            windSpeed10m: 0,
-            windSpeed20ft: 0,
+            at10m: 0,
+            at20ft: 0,
         }
         this.compassPts = {
             N: 0, NNE: 1, NE: 2,  ENE: 3,  E: 4,  ESE: 5,  SE: 6,  SSE: 7, 
             S: 8, SSW: 9, SW: 10, WSW: 11, W: 12, WNW: 13, NW: 14, NNW: 15
         }
+    }
+    addCrownFire() {
+        this.fuelModelCrown = {...this.fuelModelOne}
+        this.fuelBedCrown = {...this.fuelBedOne}
+        this.fuelIgnitionCrown = {...this.fuelIgnitionOne}
+        this.fireBehaviorCrown = {...this.fireBehaviorCrown}
+
+    }
+    addFuelTwo() {
+        this.fuelModelTwo = {...this.fuelModelOne}
+        this.fuelBedTwo = {...this.fuelBedOne}
+        this.fuelIgnitionTwo = {...this.fuelIgnitionOne}
+        this.fireBehaviorTwo = {...this.fireBehaviorOne}
+        this.fireBehaviorWeighted = {...this.fireBehaviorOne}
     }
     // utils
     fraction(value) { return Math.max(0, Math.min(1, value)) }
@@ -148,7 +242,7 @@ export class State {
         obj.stem = obj.category
     }
     updateMidflameWindSpeedFromWsrfAnd20ftWind() {
-        this.midflame.windSpeed = this.midflame.wsrf * this.windSpeed.windSpeed20ft
+        this.midflame.windSpeed = this.midflame.wsrf * this.windSpeed.at20ft
     }
     updateMidflameWsrfFromCanopyAndFuelBed() {
         this.midflame.wsrf = Math.min(
@@ -164,8 +258,8 @@ export class State {
     }
     updateSlopeMap() {
         const obj = this.slopeMap
-        const reach = Math.max(0, obj.mapScale * obj.mapDistance)
-        const rise = Math.max(0, obj.mapContoursCrossed * obj.mapContourInterval)
+        const reach = Math.max(0, obj.scale * obj.distance)
+        const rise = Math.max(0, obj.contoursCrossed * obj.contourInterval)
         obj.slopeRatio = (reach > 0) ? (rise / reach) : 0
         obj.slopeDegrees = this.toDegrees(Math.atan(obj.slopeRatio))
     }
@@ -198,10 +292,10 @@ export class State {
     }
     updateWindSpeedFrom10m() {
         const obj = this.windSpeed
-        obj.windSpeed20ft = obj.windSpeed10m / 1.13
+        obj.at20ft = obj.at10m / 1.13
     }
     updateWindSpeedFrom20ft() {
         const obj = this.windSpeed
-        obj.windSpeed10m = 1.13 * obj.windSpeed10m
+        obj.at10m = 1.13 * obj.at10m
     }
 }

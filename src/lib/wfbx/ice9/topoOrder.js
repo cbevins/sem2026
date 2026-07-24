@@ -91,21 +91,21 @@ Wind Speed Reduction Factor
 Midflame Wind Speed
 (must input this or wsrf if crown fire active, as 20ft wind is also input)
 
-Slope Upslope Degrees
-or Slope Aspect Compass
-
+Slope Upslope Degrees-------------->|
+or Slope Aspect Compass------------>|
+                                    |
                                 SLOPE DIRECTION MODULE
                                 Slope upslope degrees
                                 Slope aspect degrees
                                 Slope aspect compass
+                                    |
+Slope Aspect Degrees <--------------|
 
-Slope Aspect Degrees
-
-Map Scale
-Map Contour Interval
-Map Contours Crossed
-MapDistance
-
+Map Scale-------------------------->+
+Map Contour Interval--------------->+
+Map Contours Crossed--------------->+
+MapDistance------------------------>+
+                                    |
                                 SLOPE MAP MODULE
                                 Map scale
                                 Map contour interval
@@ -113,14 +113,15 @@ MapDistance
                                 Map distance
                                 Slope degrees
                                 Slope ratio
-
-Slope Degrees
-
+                                    |
+Slope Degrees <---------------------+
+                |
+                ------------------->+
                                 SLOPE STEEPNESS MODULE
                                 Slope degrees
                                 Slope ratio
-
-Slope Ratio
+                                    |
+Slope Ratio <-----------------------+
 
                                 PREDICTED SURFACE FIRE MODULE (Fuel1, Fuel2, Weighted)
                                 Predicted Head Spread Rate

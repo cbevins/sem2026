@@ -11,7 +11,7 @@ export class WfbxConfigs {
         this.liveMoistureFrom = 'particles'       // particles, category
         this.midflameWindSpeedFrom = 'wsrf20ft'     // input, wsrf20ft
         this.midflameWsrfFrom = 'canopyFuel'      // input, canopyFuel
-        this.slopeDirectionFrom = 'aspect'      // aspect, upslope
+        this.slopeDirectionFrom = 'aspectDegrees'   // aspectDegrees, aspectCompass, upslopeDegrees, upslopeCompass
         this.slopeSteepnessFrom = 'slopeMap'     // slopeDegrees, slopeMap, slopeRatio
         this.windDirectionFrom = 'sourceCompass' // bearingDegrees, sourceCompass, sourceDegrees
         this.windSpeedFrom = 'windSpeed10m'     // windSpeed20ft, windSpeed10m
@@ -51,15 +51,17 @@ export class WfbxConfigs {
         slopeDirectionFrom: {
             label: 'The terrain slope direction is',
             options: [
-                {key: 'aspect', label: 'entered as the aspect (down-slope direction, degrees clockwise from north).'},
-                {key: 'upslope', label: 'entered as the upslope direction (degreess clockwise from north).'}]
+                {key: 'aspectDegrees', label: 'input as the aspect (down-slope) direction (degrees clockwise from north).'},
+                {key: 'upslopeDegrees', label: 'input as the upslope direction (degreess clockwise from north).'},
+                {key: 'aspectCompass', label: 'input as the aspect (down-slope) direction compass point (N, NNE, NE, ENE, E, etc).'},
+                {key: 'upslopeCompass', label: 'input as the upslope direction compass point (N, NNE, NE, ENE, E, etc).'}],
             },
         slopeSteepnessFrom: {
             label: 'The terrain slope steepness is',
             options: [
                 {key: 'slopeRatio', label: 'input as ratio of vertical rise to horizontal reach.'},
                 {key: 'slopeDegrees', label: 'input as degrees above the horizontal plane.'},
-                {key: 'slopeMap', label: 'estimated from m ap measurements.'}]
+                {key: 'slopeMap', label: 'estimated from map measurements.'}]
         },
         windDirectionFrom: {
             label: 'The wind direction is',

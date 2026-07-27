@@ -68,7 +68,7 @@ export function makeFuelBed(fuelModel, fuelCuring, propsLevel=0) {
 
     // Open-canopy midflame wind speed reduction factor
     const f = Math.min(6, Math.max(fuelModel.depth, 0.1))
-    const fuelMidflameWsrf = 1.83 / Math.log((20 + 0.36 * f) / (0.13 * f))
+    const midflameWsrf = 1.83 / Math.log((20 + 0.36 * f) / (0.13 * f))
 
     //----------------------------------------------------------------------------------
     // The following are used by FireBehavior and therefore are saved as properties
@@ -134,7 +134,7 @@ export function makeFuelBed(fuelModel, fuelCuring, propsLevel=0) {
         windB,
         windI,
         windK,
-        fuelMidflameWsrf,
+        midflameWsrf,
     }
     if (propsLevel >= 1) pod = {...pod,
         ovendryLoad,

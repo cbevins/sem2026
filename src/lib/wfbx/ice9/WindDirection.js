@@ -22,7 +22,7 @@ export class WindDirection {
     }
     // WfbxRunner already set this.bearingCompass; so just update the other 3
     updateWindDirectionFromBearingCompass() {
-        this.bearingDegrees = WindDirection.CompassDegrees[this.bearing.compass]
+        this.bearingDegrees = WindDirection.CompassDegrees[this.bearingCompass]
         this.sourceDegrees = (this.bearingDegrees + 180) % 360
         this.sourceCompass = this.degreesToCompass(this.sourceDegrees)
     }
@@ -34,7 +34,7 @@ export class WindDirection {
     }
     // WfbxRunner already set this.sourceCompass; so just update the other 3
     updateWindDirectionFromSourceCompass() {
-        this.sourceDegrees = WindDirection.CompassDegrees[this.source.compass]
+        this.sourceDegrees = WindDirection.CompassDegrees[this.sourceCompass]
         this.bearingDegrees = (this.sourceDegrees + 180) % 360
         this.bearingCompass = this.degreesToCompass(this.bearingDegrees)
     }

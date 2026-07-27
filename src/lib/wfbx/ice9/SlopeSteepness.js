@@ -10,7 +10,7 @@ export class SlopeSteepness {
         this.ratio = 0
     }
     // WfbxRunner already updated the SlopeMap, so just get its values.
-    updateFromSlopeMap(slopeMap) {
+    updateSlopeSteepnessFromMap(slopeMap) {
         this.degrees = slopeMap.slopeDegrees
         this.ratio = slopeMap.slopeRatio
     }

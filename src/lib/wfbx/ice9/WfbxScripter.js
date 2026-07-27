@@ -257,12 +257,13 @@ export class WfbxScripter {
         }
     }
     processMidflameWindSpeedFromCanopyFuel() {
+        // NOTE that canopyStructure has input options in addition to height-base
+        // that are not yet implemented here
         this.each('canopyHeight', 'canopyStructure.height')
         this.each('canopyBase', 'canopyStructure.base')
         this.each('canopyCover', 'canopyStructure.cover')
         this.call('updateCanopyStructureFromHeightBase')
         this.call('updateMidflameWsrfFromCanopyFuel')
-        this.call('updateMidflameWindSpeedFromWsrf20ft')
         this.postProcessMidflameWindSpeed()
     }
     // Invoked only by processMidflameWindSpeed(), processMidflameWindSpeedFromWsrf20ft(), or
@@ -330,14 +331,14 @@ export class WfbxScripter {
     }
     // -------------------------------------------------------------------------
     processSlopeDirection() {
-        if(this.configs.slopeDirectionFrom === 'aspect') {
-            this.each('slopeAspect', 'slopeDirection.aspect')
-            this.call('updateSlopeDirectionFromAspect')
+        if(this.configs.slopeDirectionFrom === 'aspectDegrees') {
+            this.each('slopeAspect', 'slopeDirection.aspectDegrees')
+            this.call('updateSlopeDirectionFromAspectDegrees')
             this.postProcessSlopeDirection()
         }
-        else if(this.configs.slopeDirectionFrom === 'upslope') {
-            this.each('slopeUpslope', 'slopeDirection.upslope')
-            this.call('updateSlopeDirectionFromUslope')
+        else if(this.configs.slopeDirectionFrom === 'upslopeDegrees') {
+            this.each('slopeUpslope', 'slopeDirection.upslopeDegrees')
+            this.call('updateSlopeDirectionFromUpslopeDegrees')
             this.postProcessSlopeDirection()
         } else {
             this.error(`Config 'slopeDirectionFrom' has invalid option '${this.configs.slopeDirectionFrom}'.`)

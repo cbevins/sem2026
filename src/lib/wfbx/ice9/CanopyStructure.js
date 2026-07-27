@@ -5,7 +5,7 @@ export class CanopyStructure {
         this.base = 0
         this.ratio = 1
         this.cover = 0
-        this.cill = 0
+        this.fill = 0
         this.sheltersFuel = false
         this.midflameWsrf = 1
     }

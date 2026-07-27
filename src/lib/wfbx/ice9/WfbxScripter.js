@@ -15,11 +15,34 @@ export class WfbxScripter {
 
     // -------------------------------------------------------------------------
     // -------------------------------------------------------------------------
+
     call(methodKey) {
+        // Ensure the state has a method with thi name
+        if (this.state[methodKey] === undefined) {
+            this.error(`this.state has no method named '${methodKey}'.`)
+        }
         this.script.push(['call', methodKey, ''])
     }
 
-    error(msg) { throw new Error(`\x1b[33m${msg}\x1b[0m\n`) }
+    // Close the most recent 'each' block
+    close() {
+        const stack = [...this.inputSet]
+        const item = stack.pop()
+        const [inputKey,] = item.split('=')
+        this.script.push(['next', inputKey, this.inputIdx[inputKey]])
+        this.inputSet.delete(item)
+        delete this.inputIdx[inputKey]
+    }
+
+    // Close all open 'each' blocks
+    closeOpenInputs() {
+        const stack = [...this.inputSet]
+        while(stack.length) {
+            const item = stack.pop()
+            const [inputKey,] = item.split('=')
+            this.script.push(['next', inputKey, this.inputIdx[inputKey]])
+        }
+    }
 
     each(inputKey, stateProp) {
         // Ensure the inputKey exists in this.inputs
@@ -34,8 +57,8 @@ export class WfbxScripter {
             if (ref === undefined)
                 this.error(`Input key '${inputKey}' storage variable state.${stateProp} is undefined for property '${chain[i]}'.`)
         }
-        // Save it
-        const key = {inputKey, stateProp}
+        // Add to the execution stack, to the input set, and to the input index
+        const key = inputKey + '=' + stateProp
         if (! this.inputSet.has(key)) {
             this.inputSet.add(key)
             this.script.push(['each', inputKey, this.script.length])
@@ -43,30 +66,7 @@ export class WfbxScripter {
         }
     }
 
-    run() {
-        this.messages = []
-        this.inputSet = new Set()
-        this.inputIdx = {}
-        if (this.modules.fuelCuring || this.modules.surfaceFireBehavior) {
-            this.processFuelCuring()
-        } else if (this.modules.fuelModel) {
-            this.processFuelModel1()
-        } else if (this.modules.fuelBed) {
-            this.processFuelCuring()
-        } else if (this.modules.fuelIgnition) {
-            this.processFuelCuring()
-        }
-        this.closeOpenInputs()
-    }
-
-    // Close all open 'each' blocks
-    closeOpenInputs() {
-        const stack = [...this.inputSet]
-        while(stack.length) {
-            const {inputKey} = stack.pop()
-            this.script.push(['next', inputKey, this.inputIdx[inputKey]])
-        }
-    }
+    error(msg) { throw new Error(`\x1b[33m${msg}\x1b[0m\n`) }
 
     logScript() {
         let depth = 0
@@ -89,6 +89,22 @@ export class WfbxScripter {
                 str += (i+'').padStart(3) + ' ' + key + '\n'
         }
         return str
+    }
+
+    run() {
+        this.messages = []
+        this.inputSet = new Set()
+        this.inputIdx = {}
+        if (this.modules.fuelCuring || this.modules.surfaceFireBehavior) {
+            this.processFuelCuring()
+        } else if (this.modules.fuelModel) {
+            this.processFuelModel1()
+        } else if (this.modules.fuelBed) {
+            this.processFuelCuring()
+        } else if (this.modules.fuelIgnition) {
+            this.processFuelCuring()
+        }
+        this.closeOpenInputs()
     }
 
     // -------------------------------------------------------------------------
@@ -199,11 +215,11 @@ export class WfbxScripter {
         // Do we need windSpeedAt20ft, or just the modflame wind speed?
         if (this.modules.crownFireBehavior || this.configs.midflameWindSpeedFrom === 'wsrf20ft') {
             if(this.configs.windSpeedFrom === 'windSpeed20ft') {
-                this.each('windSpeed20ft', 'windSpeed.windSpeed20ft')
+                this.each('windSpeed20ft', 'windSpeed.at20ft')
                 this.call('updateWindSpeedFrom20ft')
                 this.postProcessWindSpeed()
             } else if(this.configs.windSpeedFrom === 'windSpeed10m') {
-                this.each('windSpeed10m', 'windSpeed.windSpeed10m')
+                this.each('windSpeed10m', 'windSpeed.at10m')
                 this.call('updateWindSpeedFrom10m')
                 this.postProcessWindSpeed()
             }
@@ -244,7 +260,7 @@ export class WfbxScripter {
         this.each('canopyHeight', 'canopyStructure.height')
         this.each('canopyBase', 'canopyStructure.base')
         this.each('canopyCover', 'canopyStructure.cover')
-        this.call('makeCanopyStructure')
+        this.call('updateCanopyStructureFromHeightBase')
         this.call('updateMidflameWsrfFromCanopyFuel')
         this.call('updateMidflameWindSpeedFromWsrf20ft')
         this.postProcessMidflameWindSpeed()
@@ -288,12 +304,12 @@ export class WfbxScripter {
     // -------------------------------------------------------------------------
     processSlopeSteepness() {
         if(this.configs.slopeSteepnessFrom === 'slopeDegrees') {
-            this.each('slopeDegrees', 'slopeSteepness.slopeDegrees')
+            this.each('slopeDegrees', 'slopeSteepness.degrees')
             this.call('updateSlopeSteepnessFromDegrees')
             this.postProcessSlopeSteepness()
         }
         else if(this.configs.slopeSteepnessFrom === 'slopeRatio') {
-            this.each('slopeRatio', 'slopeSteepness.slopeRatio')
+            this.each('slopeRatio', 'slopeSteepness.ratio')
             this.call('updateSlopeSteepnessFromRatio')
             this.postProcessSlopeSteepness()
         } else if(this.configs.slopeSteepnessFrom === 'slopeMap') {
@@ -301,6 +317,7 @@ export class WfbxScripter {
             this.each('mapContourInterval', 'slopeMap.contourInterval')
             this.each('mapContoursCrossed', 'slopeMap.contoursCrossed')
             this.each('mapDistance', 'slopeMap.distance')
+            this.call('updateSlopeMap')
             this.call('updateSlopeSteepnessFromMap')
             this.postProcessSlopeSteepness()
         } else {
@@ -314,12 +331,12 @@ export class WfbxScripter {
     // -------------------------------------------------------------------------
     processSlopeDirection() {
         if(this.configs.slopeDirectionFrom === 'aspect') {
-            this.each('slopeAspect', 'slopeDirection.slopeAspect')
+            this.each('slopeAspect', 'slopeDirection.aspect')
             this.call('updateSlopeDirectionFromAspect')
             this.postProcessSlopeDirection()
         }
         else if(this.configs.slopeDirectionFrom === 'upslope') {
-            this.each('slopeUpslope', 'slopeDirection.slopeUpslope')
+            this.each('slopeUpslope', 'slopeDirection.upslope')
             this.call('updateSlopeDirectionFromUslope')
             this.postProcessSlopeDirection()
         } else {
@@ -342,11 +359,26 @@ export class WfbxScripter {
             this.call('makeSingleSurfaceFireBehavior')
         }
         if(this.modules.crownFireBehavior) {
-            this.call('makeActiveCrownFireBehavior')
+            this.processCrownFire()
         }
         if (this.modules.fireShape) {
             this.processFireShape()
         }
+    }
+    // -------------------------------------------------------------------------
+    processCrownFire() {
+        this.call('makeActiveCrownFireSpreadRate')
+        this.each('canopyHeight', 'canopyStructure.height')
+        this.each('canopyBase', 'canopyStructure.base')
+        this.call('updateCanopyStructureFromHeightBase')
+        this.each('canopyBulkDensity', 'canopyFuels.bulkDensity')
+        this.each('canopyHeatContent', 'canopyFuels.heatContent')
+        this.call('updateCanopyFuels')
+        this.call('makeActiveCrownFireIntensity')
+        this.close('canopyHeatContent')
+        this.close('canopyBulkDensity')
+        this.close('canopyBase')
+        this.close('canopyHeight')
     }
     // -------------------------------------------------------------------------
     processFireShape() {

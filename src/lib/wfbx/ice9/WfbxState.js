@@ -10,14 +10,16 @@ import { SlopeDirection } from './SlopeDirection.js'
 import { SlopeSteepness } from './SlopeSteepness.js'
 import { WindDirection } from './WindDirection.js'
 import { WindSpeed } from './WindSpeed.js'
+import { makeFireBehavior } from './makeFireBehavior.js'
 import { makeFuelBed } from './makeFuelBed.js'
 import { makeFuelIgnition } from './makeFuelIgnition.js'
+import { makeWeightedFireBehavior } from './makeWeightedFireBehavior.js'
 
 export class WfbxState {
     constructor() {
         this.fuelCatalog = new FuelModelCatalog()
         this.fuelCuring = new FuelCuring()
-        this.fuelKeys = {fuelKey1: 0, fuelKey2: 0}
+        this.fuelKeys = {fuelKey1: 0, fuelKey2: 0, fuelCover1: 1}
         this.fuelMoisture = new FuelMoisture()
         this.midflame = new MidflameWindSpeed()
         this.slopeDirection = new SlopeDirection()
@@ -29,6 +31,10 @@ export class WfbxState {
         this.canopyFuels = new CanopyFuels()
         this.observedFire = new ObservedFireBehavior()
         // these simple scalar parameters don't have modules (yet?)
+        this.airTemperature = 77
+        this.limitWindSpeedFactor = true
+        this.limitSpreadRateToWindSpeed = true
+        this.fuelModelWeighting = 'arithmetic'      // arithmetic, harmonic
         this.elapsedTime = 0
         this.ignEast = 0
         this.ignNorth = 0
@@ -43,6 +49,9 @@ export class WfbxState {
         this.fuelIgnition1 = {}
         this.fuelIgnition2 = {}
         this.fuelIgnitionCrown = {}
+        this.fireBehavior1 = {}
+        this.fireBehavior2 = {}
+        this.weightedFireBehavior = {}
         this.propsLevel = 3
     }
     makeFuelModel1() {
@@ -71,6 +80,31 @@ export class WfbxState {
     }
     makeFuelIgnitionCrown() {
         this.fuelIgnitionCrown = makeFuelIgnition(this.fuelBedCrown, this.fuelMoisture, this.propsLevel)
+    }
+    makeSurfaceFireBehavior1() {
+        this.fireBehavior1 = makeFireBehavior(this.fuelBed1, this.fuelIgnition1,
+            this.midflame.windSpeed,
+            this.windDirection.bearingDegrees,
+            this.slopeSteepness.ratio,
+            this.slopeDirection.aspectDegrees,
+            this.limitWindSpeedCoefficitent,
+            this.limitSpreadRateToWindSpeed,
+            this.propsLevel)
+    }
+    makeSurfaceFireBehavior2() {
+        this.fireBehavior2 = makeFireBehavior(this.fuelBed2, this.fuelIgnition2,
+            this.midflame.windSpeed,
+            this.windDirection.bearingDegrees,
+            this.slopeSteepness.ratio,
+            this.slopeDirection.aspectDegrees,
+            this.limitWindSpeedCoefficitent,
+            this.limitSpreadRateToWindSpeed,
+            this.propsLevel)
+    }
+    makeWeightedSurfaceFireBehavior() {
+        this.weightedFireBehavior = makeWeightedFireBehavior(
+            this.fireBehavior1, this.fireBehavior2,
+            this.fuelKeys.fuelCover1, this.fuelModelWeighting)
     }
     updateCanopyFuels() {
         this.canopyFuels.updateCanopyFuels(this.canopyStructure.length)

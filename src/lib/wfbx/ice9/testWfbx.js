@@ -1,8 +1,8 @@
 import {WfbxState} from './WfbxState.js'
 const state = new WfbxState()
 
-function test() {
-    
+export function testWfbx() {
+    console.log(new Date())
     //--------------------------------------------------------------------------
     // FuelMoisture and FuelCuring
     //--------------------------------------------------------------------------
@@ -31,6 +31,7 @@ function test() {
     //--------------------------------------------------------------------------
     // FuelModel
     //--------------------------------------------------------------------------
+
     state.fuelKeys.fuelKey1 = 10
     state.makeFuelModel1()
     // console.log('state.fuelModel1 =', state.fuelModel1)
@@ -123,10 +124,6 @@ function test() {
 
     // console.log('state.slopeSteepness (initial) =', state.slopeSteepness)
 
-    state.slopeSteepness.ratio = 0.25
-    state.updateSlopeSteepnessFromRatio()
-    // console.log('state.slopeSteepness (input ratio) =', state.slopeSteepness)
-
     state.slopeSteepness.degrees = 45
     state.updateSlopeSteepnessFromDegrees()
     // console.log('state.slopeSteepness (input degrees) =', state.slopeSteepness)
@@ -141,6 +138,10 @@ function test() {
     // console.log('state.slopeMap (input contours, distance) =', state.slopeMap)
     state.updateSlopeSteepnessFromMap()
     // console.log('state.slopeSteepness (from slopeMap) =', state.slopeSteepness)
+
+    state.slopeSteepness.ratio = 0.25
+    state.updateSlopeSteepnessFromRatio()
+    // console.log('state.slopeSteepness (input ratio) =', state.slopeSteepness)
 
     //--------------------------------------------------------------------------
     // SlopeDirection
@@ -162,7 +163,20 @@ function test() {
     
     state.slopeDirection.aspectCompass = 'wsw'
     state.updateSlopeDirectionFromAspectCompass()
-    console.log('state.slopeDirection (input aspectCompass) =', state.slopeDirection)
+    // console.log('state.slopeDirection (input aspectCompass) =', state.slopeDirection)
+
+    //--------------------------------------------------------------------------
+    // FireBehavior
+    //--------------------------------------------------------------------------
+
+    state.midflame.windSpeed = 880
+    state.makeSurfaceFireBehavior1()
+    state.makeSurfaceFireBehavior2()
+    state.makeWeightedSurfaceFireBehavior()
+    console.log('state.fireBehavior1 =', state.fireBehavior1)
+    console.log('state.fireBehavior2 =', state.fireBehavior2)
+    console.log('state.weightedFireBehavior =', state.weightedFireBehavior)
+
 }
 
-test()
+testWfbx()

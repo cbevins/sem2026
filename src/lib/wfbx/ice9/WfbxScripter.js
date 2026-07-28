@@ -143,6 +143,7 @@ export class WfbxScripter {
     }
     processFuelModel2() {
         this.each('fuelKey2', 'fuelKeys.fuelKey2')
+        this.each('fuelCover1', 'fuelKeys.fuelCover1')
         this.call('makeFuelModel2')
         this.call('makeFuelBed2')
         this.postProcessFuelModels()
@@ -345,6 +346,9 @@ export class WfbxScripter {
         }
     }
     postProcessSlopeDirection() {
+        if (this.modules.scorchHeight) {
+            this.each('airTemperature', 'airTemperature')
+        }
         if (this.modules.surfaceFireBehavior)
             this.processSurfaceFireBehavior()
     }

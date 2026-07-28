@@ -6,15 +6,18 @@
  */
 export class WfbxConfigs {
     constructor() {
-        this.fuelCuringFrom = 'liveMoisture'     // input, liveMoisture
-        this.deadMoistureFrom = 'particles'      // particles, category
-        this.liveMoistureFrom = 'particles'       // particles, category
+        this.fuelCuringFrom = 'liveMoisture'        // input, liveMoisture
+        this.deadMoistureFrom = 'particles'         // particles, category
+        this.liveMoistureFrom = 'particles'         // particles, category
         this.midflameWindSpeedFrom = 'wsrf20ft'     // input, wsrf20ft
-        this.midflameWsrfFrom = 'canopyFuel'      // input, canopyFuel
+        this.midflameWsrfFrom = 'canopyFuel'        // input, canopyFuel
         this.slopeDirectionFrom = 'aspectDegrees'   // aspectDegrees, aspectCompass, upslopeDegrees, upslopeCompass
-        this.slopeSteepnessFrom = 'slopeMap'     // slopeDegrees, slopeMap, slopeRatio
-        this.windDirectionFrom = 'sourceCompass' // bearingDegrees, sourceCompass, sourceDegrees
-        this.windSpeedFrom = 'windSpeed10m'     // windSpeed20ft, windSpeed10m
+        this.slopeSteepnessFrom = 'slopeMap'        // slopeDegrees, slopeMap, slopeRatio
+        this.windDirectionFrom = 'sourceCompass'    // bearingDegrees, sourceCompass, sourceDegrees
+        this.windSpeedFrom = 'windSpeed10m'         // windSpeed20ft, windSpeed10m
+        this.limitWindSpeedFactor =true             // apply Rothermels wind coefficient limit
+        this.limitSpreadRateToWindSpeed =true       // apply Andrew's max spread rate to effective wind speed
+
     }
     
     static Options = {
@@ -76,6 +79,18 @@ export class WfbxConfigs {
             options: [
                 {key: 'windSpeed10m', label: 'input at 10-m above the surface.'},
                 {key: 'windSpeed20ft', label: 'input at 20-ft above the surface.'}]
+        },
+        limitWindSpeedFactor: {
+            label: "Rothermel's limit to prevent the fire spread rate wind speed factor from exceeding the fire force is",
+            options: [
+                {key: 'applied', label: 'applied.'},
+                {key: 'ignored', label: 'ignored.'},]
+        },
+        limitSpreadRateToWindSpeed: {
+            label: "Andrew's limit to prevent spread rate from exceeding effective wind speed is",
+            options: [
+                {key: 'applied', label: 'applied.'},
+                {key: 'ignored', label: 'ignored.'},]
         },
     }
 }

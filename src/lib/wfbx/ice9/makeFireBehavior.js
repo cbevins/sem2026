@@ -1,11 +1,13 @@
-export function makeFireBehavior(fuelBed, fuelIgnition, 
-        midflameWindSpeed,
-        windBearing,
-        slopeRatio,
-        aspect,
+export function makeFireBehavior(
+        fuelBed,                // object returned by makeFuelBed()
+        fuelIgnition,           // object returned by makeFuelIgnition()
+        midflameWindSpeed,      // midflame wind speed (ft/min)
+        windBearing,            // fire bearing, degrees clockwise from north
+        slopeRatio,             // slope steepness rise/reach
+        aspect,                 // slope aspect, degeres clockwise from north
         propsLevel=0,
-        limitWindFactor=true,   // apply Rothermels wind coefficient limit
-        limitSpreadRate=true) { // apply Andrew's max spread rate to effective wind speed
+        limitWindSpeedFactor=true,   // apply Rothermels wind coefficient limit
+        limitSpreadRateToWindSpeed=true) { // apply Andrew's max spread rate to effective wind speed
 
     // Get required fuelBed input properties
     let {slopeK, windB, windI, windK, residenceTime} = fuelBed
@@ -118,11 +120,11 @@ export function makeFireBehavior(fuelBed, fuelIgnition,
     //----------------------------------------------------------------------
     let p
     // limit wind coefficient to 0.9 * (windSpeed / reactionIntensity)
-    if (limitWindFactor) 
+    if (limitWindSpeedFactor) 
         // limit max spread rate to effective wind speed
-        p = limitSpreadRate ? p7 : p5
+        p = limitSpreadRateToWindSpeed ? p7 : p5
     else
-        p = limitSpreadRate ? p6 : p3
+        p = limitSpreadRateToWindSpeed ? p6 : p3
 
     // Fire heat per unit area. (BTU/ft2)
     const heatPerUnitArea = reactionIntensity * residenceTime

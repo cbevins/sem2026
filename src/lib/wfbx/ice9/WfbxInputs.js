@@ -5,6 +5,7 @@ export class WfbxInputs {
     constructor() {
         this.fuelKey1 = [0]
         this.fuelKey2 = [0]
+        this.fuelCover1 = [1]
         this.curedHerb = [0]
         this.moistureDead1h = [1]
         this.moistureDead10h = [1]
@@ -39,6 +40,9 @@ export class WfbxInputs {
         this.observedHeadBearing = [0]
         this.observedHeadFlameLength = [0]
         this.observedLengthWidthRatio = [1]
+        this.limitWindSpeedFactor = [true]
+        this.limitSpreadRateToWindSpeed = [true]
+        this.airTemperature = [77]
         this.elapsedTime = [0]
         this.ignEast = [0]
         this.ignNorth = [0]

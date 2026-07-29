@@ -71,7 +71,7 @@ export function testWfbx() {
     // console.log('state.fuelIgnitionCrown =', state.fuelIgnitionCrown)
 
     //--------------------------------------------------------------------------
-    // MidflameWindSpeed, MidflameWsrf, CanopyStructure, WindSpeed
+    // MidflameWindSpeed, MidflameWsrf, CanopyStructure, CanopyFuels, WindSpeed
     //--------------------------------------------------------------------------
 
     state.windSpeed.at20ft = 880
@@ -92,6 +92,10 @@ export function testWfbx() {
     state.canopyStructure.cover = 0.5
     state.updateCanopyStructureFromHeightBase()
     // console.log('state.canopyStructure = ', state.canopyStructure)
+    state.canopyFuels.bulkDensity = 0.02
+    state.canopyFuels.heatContent = 8000
+    state.updateCanopyFuels()
+    // console.log('state.canopyFuels = ', state.canopyFuels)
 
     state.updateMidflameWsrfFromCanopyFuel()
     // console.log('state.midflame (20ft and estimated wsrf) =', state.midflame)
@@ -173,9 +177,22 @@ export function testWfbx() {
     state.makeSurfaceFireBehavior1()
     state.makeSurfaceFireBehavior2()
     state.makeWeightedSurfaceFireBehavior()
-    console.log('state.fireBehavior1 =', state.fireBehavior1)
-    console.log('state.fireBehavior2 =', state.fireBehavior2)
-    console.log('state.weightedFireBehavior =', state.weightedFireBehavior)
+    // console.log('state.fireBehavior1 =', state.fireBehavior1)
+    // console.log('state.fireBehavior2 =', state.fireBehavior2)
+    // console.log('state.weightedFireBehavior =', state.fireBehaviorWeighted)
+    // console.log('state.fireBehaviorSurface =', state.fireBehaviorSurface)
+    
+
+    //--------------------------------------------------------------------------
+    // ActiveCrownFire
+    //--------------------------------------------------------------------------
+
+    state.makeSurfaceFireBehaviorCrown()
+    console.log('state.canopyStructure =', state.canopyStructure)
+    console.log('state.canopyFuels =', state.canopyFuels)
+    console.log('state.fireBehaviorCrown =', state.fireBehaviorCrown)
+    state.makeActiveCrownFire()
+    console.log('state.activeCrownFire =', state.activeCrownFire)
 
 }
 

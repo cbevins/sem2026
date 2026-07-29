@@ -361,7 +361,6 @@ export class WfbxScripter {
             this.call('makeWeightedSurfaceFireBehavior')
         } else {
             this.call('makeSurfaceFireBehavior1')
-            this.call('makeSingleSurfaceFireBehavior')
         }
         if(this.modules.crownFireBehavior) {
             this.processCrownFire()
@@ -372,14 +371,14 @@ export class WfbxScripter {
     }
     // -------------------------------------------------------------------------
     processCrownFire() {
-        this.call('makeActiveCrownFireSpreadRate')
+        this.call('makeSurfaceFireBehaviorCrown')
         this.each('canopyHeight', 'canopyStructure.height')
         this.each('canopyBase', 'canopyStructure.base')
         this.call('updateCanopyStructureFromHeightBase')
         this.each('canopyBulkDensity', 'canopyFuels.bulkDensity')
         this.each('canopyHeatContent', 'canopyFuels.heatContent')
         this.call('updateCanopyFuels')
-        this.call('makeActiveCrownFireIntensity')
+        this.call('makeActiveCrown')
         this.close('canopyHeatContent')
         this.close('canopyBulkDensity')
         this.close('canopyBase')

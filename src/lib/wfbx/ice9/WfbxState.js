@@ -10,6 +10,7 @@ import { SlopeDirection } from './SlopeDirection.js'
 import { SlopeSteepness } from './SlopeSteepness.js'
 import { WindDirection } from './WindDirection.js'
 import { WindSpeed } from './WindSpeed.js'
+import { makeActiveCrownFire } from './makeActiveCrownFire.js'
 import { makeFireBehavior } from './makeFireBehavior.js'
 import { makeFuelBed } from './makeFuelBed.js'
 import { makeFuelIgnition } from './makeFuelIgnition.js'
@@ -51,8 +52,18 @@ export class WfbxState {
         this.fuelIgnitionCrown = {}
         this.fireBehavior1 = {}
         this.fireBehavior2 = {}
-        this.weightedFireBehavior = {}
+        this.fireBehaviorWeighted = {}
+        this.fireBehaviorSurface = {}   // will refer to fireBehavior1 OR fireBehaviorWeighted
+        this.fireBehaviorCrown = {}
+        this.activeCrownFire = {}
         this.propsLevel = 3
+    }
+    makeActiveCrownFire() {
+        this.activeCrownFire = makeActiveCrownFire(
+            this.fireBehaviorCrown,
+            this.fireBehaviorSurface,
+            this.canopyFuels,
+            this.windSpeed.at20ft, this.propsLevel)
     }
     makeFuelModel1() {
         this.fuelModel1 = this.fuelCatalog.get(this.fuelKeys.fuelKey1)
@@ -90,6 +101,8 @@ export class WfbxState {
             this.limitWindSpeedCoefficitent,
             this.limitSpreadRateToWindSpeed,
             this.propsLevel)
+        // This IS the surface fire behavior, UNLESS overridden by the weighted fire behavior
+        this.fireBehaviorSurface = this.fireBehavior1
     }
     makeSurfaceFireBehavior2() {
         this.fireBehavior2 = makeFireBehavior(this.fuelBed2, this.fuelIgnition2,
@@ -102,9 +115,15 @@ export class WfbxState {
             this.propsLevel)
     }
     makeWeightedSurfaceFireBehavior() {
-        this.weightedFireBehavior = makeWeightedFireBehavior(
+        this.fireBehaviorWeighted = makeWeightedFireBehavior(
             this.fireBehavior1, this.fireBehavior2,
             this.fuelKeys.fuelCover1, this.fuelModelWeighting)
+        this.fireBehaviorSurface = this.fireBehaviorWeighted
+    }
+    makeSurfaceFireBehaviorCrown() {
+        this.fireBehaviorCrown = makeFireBehavior(this.fuelBedCrown, this.fuelIgnitionCrown,
+            this.windSpeed.at20ft, this.windDirection.bearingDegrees,
+            0, 0, false, false, this.propsLevel)
     }
     updateCanopyFuels() {
         this.canopyFuels.updateCanopyFuels(this.canopyStructure.length)

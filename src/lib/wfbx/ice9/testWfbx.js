@@ -3,6 +3,7 @@ const state = new WfbxState()
 
 export function testWfbx() {
     console.log(new Date())
+
     //--------------------------------------------------------------------------
     // FuelMoisture and FuelCuring
     //--------------------------------------------------------------------------
@@ -139,9 +140,9 @@ export function testWfbx() {
     state.slopeMap.contoursCrossed = 60     // 6,000-ft
     state.slopeMap.distance = 2             // 12,000-ft
     state.updateSlopeMap()
-    // console.log('state.slopeMap (input contours, distance) =', state.slopeMap)
+    console.log('state.slopeMap (input contours, distance) =', state.slopeMap)
     state.updateSlopeSteepnessFromMap()
-    // console.log('state.slopeSteepness (from slopeMap) =', state.slopeSteepness)
+    console.log('state.slopeSteepness (from slopeMap) =', state.slopeSteepness)
 
     state.slopeSteepness.ratio = 0.25
     state.updateSlopeSteepnessFromRatio()
@@ -188,11 +189,11 @@ export function testWfbx() {
     //--------------------------------------------------------------------------
 
     state.makeSurfaceFireBehaviorCrown()
-    console.log('state.canopyStructure =', state.canopyStructure)
-    console.log('state.canopyFuels =', state.canopyFuels)
-    console.log('state.fireBehaviorCrown =', state.fireBehaviorCrown)
+    // console.log('state.canopyStructure =', state.canopyStructure)
+    // console.log('state.canopyFuels =', state.canopyFuels)
+    // console.log('state.fireBehaviorCrown =', state.fireBehaviorCrown)
     state.makeActiveCrownFire()
-    console.log('state.activeCrownFire =', state.activeCrownFire)
+    // console.log('state.activeCrownFire =', state.activeCrownFire)
 
 }
 

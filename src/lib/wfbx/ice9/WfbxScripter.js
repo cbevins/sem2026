@@ -347,7 +347,7 @@ export class WfbxScripter {
     }
     postProcessSlopeDirection() {
         if (this.modules.scorchHeight) {
-            this.each('airTemperature', 'airTemperature')
+            this.each('airTemperature', 'air.temperature')
         }
         if (this.modules.surfaceFireBehavior)
             this.processSurfaceFireBehavior()
@@ -378,7 +378,7 @@ export class WfbxScripter {
         this.each('canopyBulkDensity', 'canopyFuels.bulkDensity')
         this.each('canopyHeatContent', 'canopyFuels.heatContent')
         this.call('updateCanopyFuels')
-        this.call('makeActiveCrown')
+        this.call('makeActiveCrownFire')
         this.close('canopyHeatContent')
         this.close('canopyBulkDensity')
         this.close('canopyBase')
@@ -405,31 +405,22 @@ export class WfbxScripter {
     }
     // -------------------------------------------------------------------------
     processFireSize() {
-        this.each('elapsedTime', 'elapsedTime')
+        this.each('elapsedTime', 'firePosition.elapsedTime')
+        this.each('ignEast', 'firePosition.ignEast')
+        this.each('ignNorth', 'firePosition.ignNorth')
         this.call('makeFireSize')
-        if(this.modules.firePosition) {
-            this.processFirePosition()
-        }
-    }
-    // -------------------------------------------------------------------------
-    processFirePosition() {
-        this.each('ignEast', 'ignEast')
-        this.each('ignNorth', 'ignNorth')
-        this.call('makeFirePosition')
         if(this.modules.fireVectors) {
             this.processFireVectors()
         }
     }
     // -------------------------------------------------------------------------
     processFireVectors() {
-        this.each('angleFromHead', 'angleFromHead')
+        this.each('angleFromHead', 'firePosition.angleFromHead')
         if(this.modules.fireVectorBeta)
             this.call('makeFireVectorBeta')
         if(this.modules.fireVectorBeta6)
             this.call('makeFireVectorBeta6')
         if(this.modules.fireVectorPsi)
             this.call('makeFireVectorPsi')
-        if(this.modules.fireVectorTheta)
-            this.call('makeFireVectorTheta')
     }
 }

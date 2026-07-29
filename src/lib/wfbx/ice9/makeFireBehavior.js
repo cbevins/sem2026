@@ -5,9 +5,9 @@ export function makeFireBehavior(
         windBearing,            // fire bearing, degrees clockwise from north
         slopeRatio,             // slope steepness rise/reach
         aspect,                 // slope aspect, degeres clockwise from north
-        propsLevel=0,
         limitWindSpeedFactor=true,   // apply Rothermels wind coefficient limit
-        limitSpreadRateToWindSpeed=true) { // apply Andrew's max spread rate to effective wind speed
+        limitSpreadRateToWindSpeed=true,  // apply Andrew's max spread rate to effective wind speed
+        propsLevel=0) {
 
     // Get required fuelBed input properties
     let {slopeK, windB, windI, windK, residenceTime} = fuelBed

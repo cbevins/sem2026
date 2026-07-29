@@ -46,7 +46,7 @@ function mod(key) {
 }
 
 export function demo1b() {
-    console.log('demo1a - All Modules, Standard Input Config', new Date())
+    console.log('\n\ndemo1b - All Modules, Standard Input Config', new Date())
     
     // FuelModels for primary surface fire, secondarysurface fire, and active crown spread rate
     mod('Fuel Models')

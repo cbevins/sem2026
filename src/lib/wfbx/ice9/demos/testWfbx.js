@@ -1,9 +1,7 @@
-import {WfbxState} from './WfbxState.js'
-const state = new WfbxState()
+import {WfbxState} from '../WfbxState.js'
+import {magenta, reset} from './terminal.js'
 
 export function testWfbx() {
-    console.log(new Date())
-
     //--------------------------------------------------------------------------
     // FuelMoisture and FuelCuring
     //--------------------------------------------------------------------------
@@ -183,7 +181,6 @@ export function testWfbx() {
     // console.log('state.weightedFireBehavior =', state.fireBehaviorWeighted)
     // console.log('state.fireBehaviorSurface =', state.fireBehaviorSurface)
     
-
     //--------------------------------------------------------------------------
     // ActiveCrownFire
     //--------------------------------------------------------------------------
@@ -197,4 +194,13 @@ export function testWfbx() {
 
 }
 
+console.log(magenta+'\ntestWfbx is a sandbox for exercising '
+        + 'all the WfbxState configs, modules, and inputs '
+        + 'with the option to display module properties.\n'+reset, new Date(), '\n')
+const start = performance.now()
+
+const state = new WfbxState()
 testWfbx()
+
+const msec = (performance.now() - start).toFixed(2)
+console.log(magenta+'\nExecution time = '+msec+' msec'+reset)

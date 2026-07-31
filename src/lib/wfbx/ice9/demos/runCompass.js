@@ -16,4 +16,6 @@ for(let degrees=0; degrees<360; degrees+=5) {
     const point = CompassDegrees[compass]
     results.push({degrees, compass, point})
 }
+
+console.log('\nrunCompass: displays relationship between compass points and degrees')
 console.table(results)

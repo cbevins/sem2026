@@ -1,5 +1,5 @@
-import {WfbxState} from './WfbxState.js'
-const state = new WfbxState()
+import {WfbxState} from '../WfbxState.js'
+import {magenta, reset} from './terminal.js'
 
 // Specify the modules to run
 const modules = {
@@ -12,7 +12,8 @@ const modules = {
     fireVectorRightFlank: true,
     fireVectorBeta: true,
     fireVectorBeta6: true,
-    fireVectorPsi: true
+    fireVectorPsi: true,
+    surfaceSpotting: true,
 }
 
 // Set higher level modules
@@ -62,8 +63,6 @@ function mod(key) {
 }
 
 export function demo1b() {
-    console.log('\n\ndemo1b - All Modules, Standard Input Config', new Date())
-    
     // FuelModels for primary surface fire, secondarysurface fire, and active crown spread rate
     mod('Fuel Models')
     input('fuelKeys.fuelKey1', 10)
@@ -134,6 +133,7 @@ export function demo1b() {
 
     // 20-ft wind speed is required when the crown fire module is active,
     // and/or when the midflame wind speed is estimated
+    // and/or when the spotting module is active
     mod('Wind Speed')
     input('windSpeed.at20ft', 880)
 
@@ -469,9 +469,31 @@ export function demo1b() {
         if (modules.fireVectorBeta6) output('fireVectorBeta6.scorchHeight')
         if (modules.fireVectorPsi) output('fireVectorPsi.scorchHeight')
     }
+
+    if (modules.surfaceSpotting) {
+        mod('Surface Fire Spotting Distance')
+        input('spotting.downwindCoverHt', 100)
+        input('spotting.downwindOpenCanopy', true)
+        // input('spotting.windSpeedAt20ft', state.windSpeed.at20ft)
+        // input('spotting.flameLength', state.fireVectorHead.flameLength)
+        state.makeSurfaceSpottingLevel()
+        output('surfaceSpotting.coverHt')
+        output('surfaceSpotting.firebrandHt')
+        output('surfaceSpotting.driftDistance')
+        output('surfaceSpotting.flatDistance')
+        output('surfaceSpotting.spotDistance')
+    }
 }
+
+// front matter
+console.log(new Date())
 const start = performance.now()
+
+// meat
+const state = new WfbxState()
 demo1b()
-const stop = performance.now()
+
+// back matter
+const msec = (performance.now() - start).toFixed(2)
 console.table(table)
-console.log(`Execution time was ${(stop-start).toFixed(2)} milliseconds.`)
+console.log(magenta+'\nExecution time = '+msec+' msec'+reset)

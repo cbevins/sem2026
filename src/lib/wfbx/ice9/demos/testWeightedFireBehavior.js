@@ -2,7 +2,7 @@
  * Applies the BehavePlus6 test values to the Wfbx surface fire behavior modules.
  * using the BehavePlus6 test fuels, moistures, winds, slopes, etc.
  */
-import {WfbxState} from './WfbxState.js'
+import {WfbxState} from '../WfbxState.js'
 const state = new WfbxState()
 
 export function testWeightedFireBehavior() {

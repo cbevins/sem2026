@@ -21,6 +21,12 @@ import { makeFuelBed } from './makeFuelBed.js'
 import { makeFuelIgnition } from './makeFuelIgnition.js'
 import { makeWeightedFireBehavior } from './makeWeightedFireBehavior.js'
 import { getScorchHeight } from './utils.js'
+import {
+    // makeSpotDistanceFromBurningPile,
+    makeSpotDistanceFromSurfaceFire,
+    // makeSpotDistanceFromTorchingTrees,
+    getSpotDistanceMountainTerrain,
+} from './Spotting.js'
 
 export class WfbxState {
     constructor() {
@@ -43,6 +49,22 @@ export class WfbxState {
             species: 'ABBA',
             height: 60,
             dbh: 1,
+        }
+        this.spotting = {
+            // required by all 3 types
+            downwindCoverHt: 0,
+            downwindOpenCanopy: true,
+            windSpeedAt20ft: 0,
+            flameLength: 0,         // Surface fire flame length
+            flameHt: 0,             // Burning pile flame height
+            torchingTrees: 0,       // Number of torching trees
+            treeSpecies: 'PSME',    // Species code
+            treeHt: 100,            // tree height (ft)
+            treeDbh: 24,            // tree dbh (in)
+            // required for mountaineous terrain spotting distance
+            source: 'valleyBottom', // 'midslopeWindward', 'valleyBottom', 'midslopeLeeward', or 'ridgeTop'
+            ridgeToValleyDist: 0,   // Horizontal distance from ridge top to valley bottom (ft)
+            ridgeToValleyElev: 0,   // Vertical distance from ridge top to valley bottom (ft)
         }
 
         // run time options
@@ -78,6 +100,7 @@ export class WfbxState {
         this.fireVectorBeta = {}
         this.fireVectorBeta6 = {}
         this.fireVectorPsi = {}
+        this.surfaceSpotting = {}
     }
     makeActiveCrownFire() {
         this.activeCrownFire = makeActiveCrownFire(
@@ -181,6 +204,11 @@ export class WfbxState {
     }
     makeFireVectorRightFlank() {
         this.fireVectorRightFlank = makeRightFlankVector(this.fireSize, this.options.fireVectorFlameLengths)
+    }
+    makeSurfaceSpottingLevel() {
+        this.surfaceSpotting = makeSpotDistanceFromSurfaceFire(
+            this.spotting.downwindCoverHt, this.spotting.downwindOpenCanopy,
+            this.windSpeed.at20ft, this.fireVectorHead.flameLength, this.options.propsLevel)
     }
     updateCanopyFuels() {
         this.canopyFuels.updateCanopyFuels(this.canopyStructure.length)

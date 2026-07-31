@@ -1,8 +1,8 @@
-import { WfbxInputs } from './WfbxInputs.js'
-import { WfbxConfigs } from './WfbxConfigs.js'
-import { WfbxModules } from './WfbxModules.js'
-import { WfbxState } from './WfbxState.js'
-import { WfbxScripter } from './WfbxScripter.js'
+import { WfbxInputs } from '../WfbxInputs.js'
+import { WfbxConfigs } from '../WfbxConfigs.js'
+import { WfbxModules } from '../WfbxModules.js'
+import { WfbxState } from '../WfbxState.js'
+import { WfbxScripter } from '../WfbxScripter.js'
 
 const modules = new WfbxModules()
 const configs = new WfbxConfigs()

@@ -1,4 +1,5 @@
-import {WfbxState} from './WfbxState.js'
+import {WfbxState} from '../WfbxState.js'
+
 const state = new WfbxState()
 const table = []
 

@@ -49,8 +49,8 @@ export function makeFuelIgnition(fuelBed, fuelMoisture, propsLevel=0) {
 
     let reactionIntensity = 0
     for(let life of ["dead", "live"]) {
-        // Fuel bed life category mineral damping coefficient
-        let r = cat[life].moisture / cat[life].mext
+        // Fuel bed life category moisture damping coefficient
+        let r = (cat[life].mext > 0) ? cat[life].moisture / cat[life].mext : 0
         cat[life].moistureDamping = fraction(1 - 2.59 * r + 5.11 * r * r - 3.52 * r * r * r)
 
         // Fuel bed life category reaction intensity under current moisture conditions (BTU/ft2/min)

@@ -57,14 +57,14 @@ export function makeFuelBed(fuelModel, fuelCuring, propsLevel=0) {
     dead.reactionIntensityDry = reactionVelocityOpt * dead.heatSource
     live.reactionIntensityDry = reactionVelocityOpt * live.heatSource
 
-    // The live fuel moisture content of extinction factor represents the ratio
-    // of dead-to-live fuel mass that must be raised to ignition.  It is constant
-    // within a fuel bed, and applies ONLY to the LIVE fuel bed life category.
+    // The live fuel moisture content of extinction factor represents
+    // the ratio of dead-to-live fuel mass that must be raised to ignition.
+    // It is constant within a fuel bed, and applies ONLY to the LIVE fuel bed life category.
     // It was first described by Rothermel (1972) on page 35 and subsequently
     // refined in BEHAVE and BehavePlus to use the 'effective fuel load' and
     // 'effective heating number' to determine the ratio of fine dead to fine live fuels.
     // See Rothermel (1972) eq 88 on page 35.
-    const liveMextFactor = 2.9 * (dead.fineFuelLoad / live.fineFuelLoad)
+    const liveMextFactor = (live.fineFuelLoad > 0) ? 2.9 * (dead.fineFuelLoad / live.fineFuelLoad) : 0
 
     // Open-canopy midflame wind speed reduction factor
     const f = Math.min(6, Math.max(fuelModel.depth, 0.1))
@@ -151,6 +151,8 @@ export function makeFuelBed(fuelModel, fuelCuring, propsLevel=0) {
         savr15,
         windC,
         windE,
+    }
+    if (propsLevel >= 3) pod = {...pod,
     }
     return pod
 }

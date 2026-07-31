@@ -346,9 +346,6 @@ export class WfbxScripter {
         }
     }
     postProcessSlopeDirection() {
-        if (this.modules.scorchHeight) {
-            this.each('airTemperature', 'air.temperature')
-        }
         if (this.modules.surfaceFireBehavior)
             this.processSurfaceFireBehavior()
     }
@@ -409,12 +406,29 @@ export class WfbxScripter {
         this.each('ignEast', 'firePosition.ignEast')
         this.each('ignNorth', 'firePosition.ignNorth')
         this.call('makeFireSize')
+        if(this.modules.fireVectorHead)
+            this.call('makeFireVectorHead')
+        if(this.modules.fireVectorBack)
+            this.call('makeFireVectorBack')
+        if(this.modules.fireVectorRightFlank)
+            this.call('makeFireVectorRightFlank')
+        if(this.modules.fireVectorLeftFlank)
+            this.call('makeFireVectorLeftFlank')
+
+        if (this.modules.scorchHeight) {
+            this.each('airTemperature', 'air.temperature')
+            if(this.modules.treeMortality) {
+                this.each('treeSpecies', 'tree.species')
+            }
+            this.call('updateFixedFireVectorScorchHeights')
+        }
         if(this.modules.fireVectors) {
             this.processFireVectors()
         }
     }
     // -------------------------------------------------------------------------
     processFireVectors() {
+
         this.each('angleFromHead', 'firePosition.angleFromHead')
         if(this.modules.fireVectorBeta)
             this.call('makeFireVectorBeta')
@@ -422,5 +436,12 @@ export class WfbxScripter {
             this.call('makeFireVectorBeta6')
         if(this.modules.fireVectorPsi)
             this.call('makeFireVectorPsi')
+        if (this.modules.scorchHeight) {
+            this.each('airTemperature', 'air.temperature')
+            if(this.modules.treeMortality) {
+                this.each('treeSpecies', 'tree.species')
+            }
+            this.call('updateAngleFireVectorScorchHeights')
+        }
     }
 }

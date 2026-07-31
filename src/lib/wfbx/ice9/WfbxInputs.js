@@ -47,5 +47,6 @@ export class WfbxInputs {
         this.ignEast = [0]
         this.ignNorth = [0]
         this.angleFromHead = [0]
+        this.treeSpecies = ['ABBA']
     }
 }

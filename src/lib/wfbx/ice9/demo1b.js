@@ -1,10 +1,26 @@
 import {WfbxState} from './WfbxState.js'
 const state = new WfbxState()
+
+// Specify the modules to run
 const modules = {
     twoFuels: true,
     crownFireBehavior: true,
     scorchHeight: true,
+    fireVectorHead: true,
+    fireVectorBack: true,
+    fireVectorLeftFlank: true,
+    fireVectorRightFlank: true,
+    fireVectorBeta: true,
+    fireVectorBeta6: true,
+    fireVectorPsi: true
 }
+
+// Set higher level modules
+modules.angleFireVectors = modules.fireVectorBeta || modules.fireVectorBeta6 || modules.fireVectorPsi
+modules.fixedFireVectors = modules.fireVectorHead || modules.fireVectorBack || modules.fireVectorLeftFlank || modules.fireVectorRightFlank
+modules.fireVectors = modules.angleFireVectors || modules.fixedFireVectors
+
+// Output stuff
 const table = []
 const widKey = 46
 const widVal = 28
@@ -82,8 +98,10 @@ export function demo1b() {
     output('fuelBed1.packingRatioOpt')
     output('fuelBed1.residenceTime')
     output('fuelBed1.midflameWsrf')
-    if (modules.twoFuels) state.makeFuelBed2()
-    if (modules.crownFireBehavior) state.makeFuelBedCrown()
+    if (modules.twoFuels)
+        state.makeFuelBed2()
+    if (modules.crownFireBehavior)
+        state.makeFuelBedCrown()
 
     // Fuel moistures may be input as individual particle moisture contents
     mod('Fuel Moistures')
@@ -109,8 +127,10 @@ export function demo1b() {
     output('fuelIgnition1.heatSource')
     output('fuelIgnition1.heatSink')
     output('fuelIgnition1.noWindSpreadRate')
-    if (modules.twoFuels) state.makeFuelIgnition2()
-    if (modules.crownFireBehavior) state.makeFuelIgnitionCrown()
+    if (modules.twoFuels)
+        state.makeFuelIgnition2()
+    if (modules.crownFireBehavior)
+        state.makeFuelIgnitionCrown()
 
     // 20-ft wind speed is required when the crown fire module is active,
     // and/or when the midflame wind speed is estimated
@@ -161,11 +181,6 @@ export function demo1b() {
     output('slopeDirection.upslopeDegrees')
     output('slopeDirection.upslopeCompass')
 
-    if (modules.scorchHeight) {
-        mod('Air')
-        input('air.temperature', 95)
-    }
-
     // SlopeSteepness can be input OR estimated from map measurements
     mod('SlopeMap')
     // state.slopeSteepness.ratio = 0.25
@@ -176,12 +191,13 @@ export function demo1b() {
     state.updateSlopeMap()
     output('slopeMap.slopeRatio')
     output('slopeMap.slopeDegrees')
+    
     mod('SlopeSteepness')
     state.updateSlopeSteepnessFromMap()
     output('slopeSteepness.ratio')
     output('slopeSteepness.degrees')
 
-    // FireBehavior -  One Fuel
+    // FireBehavior: Primary
     mod('FireBehavior: Primary')
     state.makeSurfaceFireBehavior1()
     output('fireBehavior1.headingSpreadRate')
@@ -204,17 +220,11 @@ export function demo1b() {
     output('fireBehavior1.effWindFactor')
     output('fireBehavior1.upslopeFromNorth')
     output('fireBehavior1.windHeadingFromUpslope')
-    if (modules.scorchHeight) {
-        state.updateScorchHeight1()
-        output('fireBehavior1.scorchHeight')
-    }
 
-    // FireBehavior - Two Fuels
+    // FireBehavior: Secondary
     if (modules.twoFuels) {
         mod('FireBehavior: Secondary')
         state.makeSurfaceFireBehavior2()
-        if (modules.scorchHeight) state.updateScorchHeight2()
-        mod('FireBehavior: Secondary')
         output('fireBehavior2.headingSpreadRate')
         output('fireBehavior2.bearing')
         output('fireBehavior2.effWindFactor')
@@ -232,10 +242,6 @@ export function demo1b() {
         output('fireBehavior2.residenceTime')
         output('fireBehavior2.slopeFactor')
         output('fireBehavior2.windFactor')
-        if (modules.scorchHeight) {
-            state.updateScorchHeight2()
-            output('fireBehavior2.scorchHeight')
-        }
 
         mod('FireBehavior: Weighted')
         state.makeWeightedSurfaceFireBehavior()
@@ -253,11 +259,8 @@ export function demo1b() {
         output('fireBehaviorWeighted.effWindSpeedLimit')
         output('fireBehaviorWeighted.arithmeticMeanSpreadRate')
         output('fireBehaviorWeighted.harmonicMeanSpreadRate')
-        if (modules.scorchHeight) {
-            state.updateScorchHeightWeighted()
-            output('fireBehaviorWeighted.scorchHeight')
-        }
     }
+
     if (modules.crownFireBehavior) {
         mod('Active Crown Fire')
         state.makeSurfaceFireBehaviorCrown()
@@ -325,109 +328,147 @@ export function demo1b() {
     output('fireSize.centerE')
     output('fireSize.centerN')
 
-    mod('FireVectorHead')
-    state.makeFireVectorHead()
-    output('vectorHead.angleFromHead')
-    output('vectorHead.bearing')
-    output('vectorHead.spreadRate')
-    output('vectorHead.distance')
-    output('vectorHead.ratio')
-    output('vectorHead.firelineIntensity')
-    output('vectorHead.x')
-    output('vectorHead.y')
-    output('vectorHead.east')
-    output('vectorHead.north')
-    output('vectorHead.flameLength')
+    if(modules.fireVectorHead) {
+        mod('FireVectorHead')
+        state.makeFireVectorHead()
+        output('fireVectorHead.angleFromHead')
+        output('fireVectorHead.bearing')
+        output('fireVectorHead.spreadRate')
+        output('fireVectorHead.distance')
+        output('fireVectorHead.ratio')
+        output('fireVectorHead.firelineIntensity')
+        output('fireVectorHead.x')
+        output('fireVectorHead.y')
+        output('fireVectorHead.east')
+        output('fireVectorHead.north')
+        output('fireVectorHead.flameLength')
+    }
 
-    mod('FireVectorBack')
-    state.makeFireVectorBack()
-    output('vectorBack.angleFromHead')
-    output('vectorBack.bearing')
-    output('vectorBack.spreadRate')
-    output('vectorBack.distance')
-    output('vectorBack.ratio')
-    output('vectorBack.firelineIntensity')
-    output('vectorBack.x')
-    output('vectorBack.y')
-    output('vectorBack.east')
-    output('vectorBack.north')
-    output('vectorBack.flameLength')
+    if(modules.fireVectorBack) {
+        mod('FireVectorBack')
+        state.makeFireVectorBack()
+        output('fireVectorBack.angleFromHead')
+        output('fireVectorBack.bearing')
+        output('fireVectorBack.spreadRate')
+        output('fireVectorBack.distance')
+        output('fireVectorBack.ratio')
+        output('fireVectorBack.firelineIntensity')
+        output('fireVectorBack.x')
+        output('fireVectorBack.y')
+        output('fireVectorBack.east')
+        output('fireVectorBack.north')
+        output('fireVectorBack.flameLength')
+    }
 
-    mod('FireVectorLeftFlank')
-    state.makeFireVectorLeftFlank()
-    output('vectorLeftFlank.angleFromHead')
-    output('vectorLeftFlank.bearing')
-    output('vectorLeftFlank.spreadRate')
-    output('vectorLeftFlank.distance')
-    output('vectorLeftFlank.ratio')
-    output('vectorLeftFlank.firelineIntensity')
-    output('vectorLeftFlank.x')
-    output('vectorLeftFlank.y')
-    output('vectorLeftFlank.east')
-    output('vectorLeftFlank.north')
-    output('vectorLeftFlank.flameLength')
+    if(modules.fireVectorLeftFlank) {
+        mod('FireVectorLeftFlank')
+        state.makeFireVectorLeftFlank()
+        output('fireVectorLeftFlank.angleFromHead')
+        output('fireVectorLeftFlank.bearing')
+        output('fireVectorLeftFlank.spreadRate')
+        output('fireVectorLeftFlank.distance')
+        output('fireVectorLeftFlank.ratio')
+        output('fireVectorLeftFlank.firelineIntensity')
+        output('fireVectorLeftFlank.x')
+        output('fireVectorLeftFlank.y')
+        output('fireVectorLeftFlank.east')
+        output('fireVectorLeftFlank.north')
+        output('fireVectorLeftFlank.flameLength')
+    }
 
-    mod('FireVectorRightFlank')
-    state.makeFireVectorRightFlank()
-    output('vectorRightFlank.angleFromHead')
-    output('vectorRightFlank.bearing')
-    output('vectorRightFlank.spreadRate')
-    output('vectorRightFlank.distance')
-    output('vectorRightFlank.ratio')
-    output('vectorRightFlank.firelineIntensity')
-    output('vectorRightFlank.x')
-    output('vectorRightFlank.y')
-    output('vectorRightFlank.east')
-    output('vectorRightFlank.north')
-    output('vectorRightFlank.flameLength')
+    if(modules.fireVectorRightFlank) {
+        mod('FireVectorRightFlank')
+        state.makeFireVectorRightFlank()
+        output('fireVectorRightFlank.angleFromHead')
+        output('fireVectorRightFlank.bearing')
+        output('fireVectorRightFlank.spreadRate')
+        output('fireVectorRightFlank.distance')
+        output('fireVectorRightFlank.ratio')
+        output('fireVectorRightFlank.firelineIntensity')
+        output('fireVectorRightFlank.x')
+        output('fireVectorRightFlank.y')
+        output('fireVectorRightFlank.east')
+        output('fireVectorRightFlank.north')
+        output('fireVectorRightFlank.flameLength')
+    }
 
-    mod('VectorAngle')
-    input('firePosition.angleFromHead', 45)
+    if (modules.scorchHeight && modules.fireVectors) {
+        mod('Air')
+        input('air.temperature', 95)
+    }
 
-    mod('FireVectorBeta')
-    state.makeFireVectorBeta()
-    output('vectorBeta.angleFromHead')
-    output('vectorBeta.bearing')
-    output('vectorBeta.spreadRate')
-    output('vectorBeta.distance')
-    output('vectorBeta.ratio')
-    output('vectorBeta.firelineIntensity')
-    output('vectorBeta.x')
-    output('vectorBeta.y')
-    output('vectorBeta.east')
-    output('vectorBeta.north')
-    output('vectorBeta.flameLength')
+    if (modules.scorchHeight && modules.fixedFireVectors) {
+        mod('Fixed FireVector ScorchHeight')
+        state.updateFixedFireVectorScorchHeights()
+        if (modules.fireVectorHead) output('fireVectorHead.scorchHeight')
+        if (modules.fireVectorBack) output('fireVectorBack.scorchHeight')
+        if (modules.fireVectorRightFlank) output('fireVectorRightFlank.scorchHeight')
+        if (modules.fireVectorLeftFlank) output('fireVectorLeftFlank.scorchHeight')
+    }
+    
+    if (modules.angleFireVectors) {
+        mod('VectorAngle')
+        input('firePosition.angleFromHead', 45)
+    }
 
-    mod('FireVectorBeta6')
-    state.makeFireVectorBeta6()
-    output('vectorBeta6.angleFromHead')
-    output('vectorBeta6.theta')
-    output('vectorBeta6.psi')
-    output('vectorBeta6.psiRos')
-    output('vectorBeta6.bearing')
-    output('vectorBeta6.spreadRate')
-    output('vectorBeta6.distance')
-    output('vectorBeta6.ratio')
-    output('vectorBeta6.firelineIntensity')
-    output('vectorBeta6.x')
-    output('vectorBeta6.y')
-    output('vectorBeta6.east')
-    output('vectorBeta6.north')
-    output('vectorBeta6.flameLength')
+    if(modules.fireVectorBeta) {
+        mod('FireVectorBeta')
+        state.makeFireVectorBeta()
+        output('fireVectorBeta.angleFromHead')
+        output('fireVectorBeta.bearing')
+        output('fireVectorBeta.spreadRate')
+        output('fireVectorBeta.distance')
+        output('fireVectorBeta.ratio')
+        output('fireVectorBeta.firelineIntensity')
+        output('fireVectorBeta.x')
+        output('fireVectorBeta.y')
+        output('fireVectorBeta.east')
+        output('fireVectorBeta.north')
+        output('fireVectorBeta.flameLength')
+    }
 
-    mod('FireVectorPsi')
-    state.makeFireVectorPsi()
-    output('vectorPsi.angleFromHead')
-    output('vectorPsi.bearing')
-    output('vectorPsi.spreadRate')
-    output('vectorPsi.distance')
-    output('vectorPsi.ratio')
-    output('vectorPsi.firelineIntensity')
-    output('vectorPsi.x')
-    output('vectorPsi.y')
-    output('vectorPsi.east')
-    output('vectorPsi.north')
-    output('vectorPsi.flameLength')
+    if(modules.fireVectorBeta6) {
+        mod('FireVectorBeta6')
+        state.makeFireVectorBeta6()
+        output('fireVectorBeta6.angleFromHead')
+        output('fireVectorBeta6.theta')
+        output('fireVectorBeta6.psi')
+        output('fireVectorBeta6.psiRos')
+        output('fireVectorBeta6.bearing')
+        output('fireVectorBeta6.spreadRate')
+        output('fireVectorBeta6.distance')
+        output('fireVectorBeta6.ratio')
+        output('fireVectorBeta6.firelineIntensity')
+        output('fireVectorBeta6.x')
+        output('fireVectorBeta6.y')
+        output('fireVectorBeta6.east')
+        output('fireVectorBeta6.north')
+        output('fireVectorBeta6.flameLength')
+    }
+
+    if(modules.fireVectorPsi) {
+        mod('FireVectorPsi')
+        state.makeFireVectorPsi()
+        output('fireVectorPsi.angleFromHead')
+        output('fireVectorPsi.bearing')
+        output('fireVectorPsi.spreadRate')
+        output('fireVectorPsi.distance')
+        output('fireVectorPsi.ratio')
+        output('fireVectorPsi.firelineIntensity')
+        output('fireVectorPsi.x')
+        output('fireVectorPsi.y')
+        output('fireVectorPsi.east')
+        output('fireVectorPsi.north')
+        output('fireVectorPsi.flameLength')
+    }
+
+    if (modules.scorchHeight && modules.angleFireVectors) {
+        mod('Angle FireVector ScorchHeight')
+        state.updateAngleFireVectorScorchHeights()
+        if (modules.fireVectorBeta) output('fireVectorBeta.scorchHeight')
+        if (modules.fireVectorBeta6) output('fireVectorBeta6.scorchHeight')
+        if (modules.fireVectorPsi) output('fireVectorPsi.scorchHeight')
+    }
 }
 const start = performance.now()
 demo1b()

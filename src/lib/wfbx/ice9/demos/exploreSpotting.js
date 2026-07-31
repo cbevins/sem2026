@@ -22,8 +22,8 @@ function addSurfaceFireSpotting(flameLength) {
         table.push({type: 'surface', flame: flameLength, location,
             firebrandHt: flat.firebrandHt.toFixed(2),
             driftDist: flat.driftDistance.toFixed(2),
-            flatDist: flat.flatDistance.toFixed(2),
-            spotDist: mtn.toFixed(2)})
+            levelDist: flat.levelDistance.toFixed(2),
+            terrainDist: mtn.toFixed(2)})
     }
 }
 
@@ -34,8 +34,8 @@ function addBurningPileSpotting(flameHt) {
         table.push({type: 'pile', flame: flameHt, location,
             firebrandHt: flat.firebrandHt.toFixed(2),
             driftDist: flat.driftDistance.toFixed(2),
-            flatDist: flat.flatDistance.toFixed(2),
-            spotDist: mtn.toFixed(2)})
+            levelDist: flat.levelDistance.toFixed(2),
+            terrainDist: mtn.toFixed(2)})
     }
 }
 
@@ -48,8 +48,8 @@ function addTorchingTreesSpotting(torchingTrees, treeDbh, treeHt, treeSpecies) {
         table.push({type: 'trees', flame, location,
             firebrandHt: flat.firebrandHt.toFixed(2),
             driftDist: flat.driftDistance.toFixed(2),
-            flatDist: flat.flatDistance.toFixed(2),
-            spotDist: mtn.toFixed(2)})
+            levelDist: flat.levelDistance.toFixed(2),
+            terrainDist: mtn.toFixed(2)})
     }
 }
 

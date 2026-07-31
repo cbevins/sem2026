@@ -11,7 +11,7 @@ export function makeSpotDistanceFromBurningPile(
     let criticalHt  = 0
     let flatDistance = 0
     let driftDistance = 0
-    let spotDistance  = 0
+    let levelDistance  = 0
     let adjustedDownwindCoverHt = downwindCoverHt
     let coverHt = 0
 
@@ -32,10 +32,10 @@ export function makeSpotDistanceFromBurningPile(
         // Flat terrain spotting distance
         flatDistance = getSpotDistanceFlatTerrain(firebrandHt, coverHt, windSpeedAt20Ft)
 
-        spotDistance = flatDistance + driftDistance
+        levelDistance = flatDistance + driftDistance
     }
     let pod = {
-        spotDistance,   //Maximum spotting distance over mountainous terrain (ft)
+        levelDistance,   //Maximum spotting distance over level terrain (ft)
     }
     if (propsLevel > 0) pod = {...pod,
         firebrandHt,    // Initial maximum firebrand height (ft).
@@ -67,7 +67,7 @@ export function makeSpotDistanceFromSurfaceFire(
     let criticalHt  = 0
     let flatDistance = 0
     let driftDistance = 0
-    let spotDistance  = 0
+    let levelDistance  = 0
     let adjustedDownwindCoverHt = downwindCoverHt
     let coverHt = 0
     const mph = windSpeedAt20Ft / 88
@@ -98,11 +98,11 @@ export function makeSpotDistanceFromSurfaceFire(
 
         flatDistance = getSpotDistanceFlatTerrain(firebrandHt, coverHt, windSpeedAt20Ft)
 
-        spotDistance = flatDistance + driftDistance
+        levelDistance = flatDistance + driftDistance
     }
 
     let pod = {
-        spotDistance,   //Maximum spotting distance over mountainous terrain (ft)
+        levelDistance,   //Maximum spotting distance over level terrain (ft)
     }
     if (propsLevel > 0) pod = {...pod,
         firebrandHt,    // Initial maximum firebrand height (ft).
@@ -188,7 +188,7 @@ export function makeSpotDistanceFromTorchingTrees(
     let criticalHt = 0
     let flatDistance = 0
     let driftDistance = 0
-    let spotDistance = 0
+    let levelDistance = 0
     let adjustedDownwindCoverHt = downwindCoverHt
     let coverHt = 0
 
@@ -228,16 +228,16 @@ export function makeSpotDistanceFromTorchingTrees(
 
         flatDistance = getSpotDistanceFlatTerrain(firebrandHt, coverHt, windSpeedAt20Ft)
 
-        spotDistance = flatDistance + driftDistance
+        levelDistance = flatDistance + driftDistance
     }
 
     let pod = {
-        spotDistance,   //Maximum spotting distance over mountainous terrain (ft)
+        levelDistance,   //Maximum spotting distance over level terrain (ft)
     }
     if (propsLevel > 0) pod = {...pod,
-        flameHt,    // Steady state flame ht (ft)
-        flameDur,   // Flame duration (min)
-        flameRatio, // Ratio of tree height to steady flame height (ft/ft)
+        flameHt,        // Steady state flame ht (ft)
+        flameDur,       // Flame duration (min)
+        flameRatio,     // Ratio of tree height to steady flame height (ft/ft)
         firebrandHt,    // Initial maximum firebrand height (ft).
         flatDistance,   // Maximum spotting distance over flat terrain (ft)
         driftDistance,  // Drift distance (ft)

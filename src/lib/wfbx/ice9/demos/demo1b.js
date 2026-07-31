@@ -481,7 +481,13 @@ export function demo1b() {
         output('surfaceSpotting.firebrandHt')
         output('surfaceSpotting.driftDistance')
         output('surfaceSpotting.flatDistance')
-        output('surfaceSpotting.spotDistance')
+        output('surfaceSpotting.levelDistance')
+
+        input('spotting.source', 'ridgeTop')
+        input('spotting.ridgeToValleyDist', 2*5280)
+        input('spotting.ridgeToValleyElev', 1000)
+        state.updateSurfaceSpottingTerrain()
+        output('surfaceSpotting.terrainDistance')
     }
 }
 

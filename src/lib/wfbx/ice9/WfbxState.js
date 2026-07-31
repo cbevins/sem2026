@@ -210,6 +210,13 @@ export class WfbxState {
             this.spotting.downwindCoverHt, this.spotting.downwindOpenCanopy,
             this.windSpeed.at20ft, this.fireVectorHead.flameLength, this.options.propsLevel)
     }
+    updateSurfaceSpottingTerrain() {
+        this.surfaceSpotting.terrainDistance = getSpotDistanceMountainTerrain(
+            this.surfaceSpotting.levelDistance,
+            this.spotting.source,
+            this.spotting.ridgeToValleyDist,
+            this.spotting.ridgeToValleyElev)
+    }
     updateCanopyFuels() {
         this.canopyFuels.updateCanopyFuels(this.canopyStructure.length)
     }

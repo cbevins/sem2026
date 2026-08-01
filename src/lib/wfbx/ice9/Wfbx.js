@@ -9,6 +9,14 @@ export { ObservedFireBehavior } from './ObservedFireBehavior.js'
 export { SlopeMap } from './SlopeMap.js'
 export { SlopeDirection } from './SlopeDirection.js'
 export { SlopeSteepness } from './SlopeSteepness.js'
+export {
+    SpotDistance,
+    SpotDistanceFromBurningPile,
+    SpotDistanceFromSurfaceFire,
+    SpotDistanceFromTorchingTrees,
+    SpotSourceLocations,
+} from './SpotDistance.js'
+export { SpotDistanceActiveCrownFire } from './SpotDistanceActiveCrownFire.js'
 export { WindDirection } from './WindDirection.js'
 export { WindSpeed } from './WindSpeed.js'
 export { makeActiveCrownFire } from './makeActiveCrownFire.js'

@@ -21,12 +21,7 @@ import { makeFuelBed } from './makeFuelBed.js'
 import { makeFuelIgnition } from './makeFuelIgnition.js'
 import { makeWeightedFireBehavior } from './makeWeightedFireBehavior.js'
 import { getScorchHeight } from './utils.js'
-import {
-    // makeSpotDistanceFromBurningPile,
-    makeSpotDistanceFromSurfaceFire,
-    // makeSpotDistanceFromTorchingTrees,
-    getSpotDistanceMountainTerrain,
-} from './Spotting.js'
+import { SpotDistanceFromSurfaceFire } from './SpotDistance.js'
 
 export class WfbxState {
     constructor() {
@@ -206,12 +201,12 @@ export class WfbxState {
         this.fireVectorRightFlank = makeRightFlankVector(this.fireSize, this.options.fireVectorFlameLengths)
     }
     makeSurfaceSpottingLevel() {
-        this.surfaceSpotting = makeSpotDistanceFromSurfaceFire(
+        this.surfaceSpotting = new SpotDistanceFromSurfaceFire(
             this.spotting.downwindCoverHt, this.spotting.downwindOpenCanopy,
-            this.windSpeed.at20ft, this.fireVectorHead.flameLength, this.options.propsLevel)
+            this.windSpeed.at20ft, this.fireVectorHead.flameLength)
     }
     updateSurfaceSpottingTerrain() {
-        this.surfaceSpotting.terrainDistance = getSpotDistanceMountainTerrain(
+        this.surfaceSpotting.updateTerrainDistance(
             this.surfaceSpotting.levelDistance,
             this.spotting.source,
             this.spotting.ridgeToValleyDist,

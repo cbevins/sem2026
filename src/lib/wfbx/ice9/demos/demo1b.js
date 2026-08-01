@@ -474,6 +474,8 @@ export function demo1b() {
         mod('Surface Fire Spotting Distance')
         input('spotting.downwindCoverHt', 100)
         input('spotting.downwindOpenCanopy', true)
+        // The following were previously input above,
+        // but would need to be input here if running stand-alone
         // input('spotting.windSpeedAt20ft', state.windSpeed.at20ft)
         // input('spotting.flameLength', state.fireVectorHead.flameLength)
         state.makeSurfaceSpottingLevel()

@@ -21,6 +21,7 @@ import { FireVectorHead, FireVectorBack, FireVectorRightFlank, FireVectorLeftFla
     FireVectorBeta, FireVectorBeta6, FireVectorPsi } from './FireVectors.js'
 import { WeightedFireBehavior } from './WeightedFireBehavior.js'
 import { SpotDistanceFromSurfaceFire } from './SpotDistance.js'
+import { SpotDistanceActiveCrownFire } from './SpotDistanceActiveCrownFire.js'
 
 export class WfbxState {
     constructor() {
@@ -90,6 +91,7 @@ export class WfbxState {
         this.fireVectorBeta6 = new FireVectorBeta6()
         this.fireVectorPsi = new FireVectorPsi()
         this.surfaceSpotting = new SpotDistanceFromSurfaceFire()
+        this.crownSpotting = new SpotDistanceActiveCrownFire()
     }
     makeActiveCrownFire() {
         this.activeCrownFire.update(
@@ -98,6 +100,20 @@ export class WfbxState {
             this.canopyFuels.heatPerUnitArea,
             this.windSpeed.at20ft)
     }
+    makeCrownSpottingLevel() {
+        this.crownSpotting.updateFromFirelineIntensity(
+            this.spotting.downwindCoverHt, // OR this.canopyStructure.height,
+            this.windSpeed.at20ft,
+            this.activeCrownFire.activeFirelineIntensity
+        )
+    }
+    updateCrownSpottingTerrain() {
+        this.crownSpotting.updateTerrainDistance(
+            this.spotting.source,
+            this.spotting.ridgeToValleyDist,
+            this.spotting.ridgeToValleyElev)
+    }
+
     makeFireShapeFromObservedFire() {
         this.fireShape.update(this.fireBehaviorObserved)
     }

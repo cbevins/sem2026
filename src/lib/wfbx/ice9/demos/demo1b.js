@@ -491,13 +491,22 @@ export function demo1b() {
         state.updateSurfaceSpottingTerrain()
         output('surfaceSpotting.terrainDistance')
     }
+
+    mod('SpotDistanceActiveCrownFire')
+    state.makeCrownSpottingLevel()
+    output('crownSpotting.firebrandHt')
+    output('crownSpotting.driftDistance')
+    output('crownSpotting.flatDistance')
+    output('crownSpotting.levelDistance')
+    state.updateCrownSpottingTerrain()
+    output('crownSpotting.terrainDistance')
 }
 
 // front matter
 console.log(new Date())
 const start = performance.now()
 
-// meat
+// body
 const state = new WfbxState()
 demo1b()
 

@@ -16,6 +16,7 @@ export { SlopeMap } from './SlopeMap.js'
 export { SlopeDirection } from './SlopeDirection.js'
 export { SlopeSteepness } from './SlopeSteepness.js'
 export {
+    getSpotDistanceMountainTerrain,
     SpotDistance,
     SpotDistanceFromBurningPile,
     SpotDistanceFromSurfaceFire,

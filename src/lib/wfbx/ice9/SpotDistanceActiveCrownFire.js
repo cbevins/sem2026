@@ -6,41 +6,46 @@
  * code cited above and my own 'dist2a.for' derivative (which is also the basis of the
  * C++ version in BehavePlus V6).
  */
+import {getSpotDistanceMountainTerrain } from './SpotDistance.js'
 
 export class SpotDistanceActiveCrownFire {
     constructor() {
         this.init()
     }
+
     init() {
-            this.firebrandHt = 0
-            this.flatDistance = 0
-            this.driftDistance = 0
-            this.flameLength = 0
-            this.windSpeedAtCanopyTop = 0
-            this.flameHeightAboveCanopy = 0
-            this.firebrandDropoutLayer = 0
-            this.crownFirelineIntensity = 0
-            this.canopyHt = 0
-            this.windSpeedAt20Ft = 0
+        this.levelDistance = 0
+        this.firebrandHt = 0
+        this.flatDistance = 0
+        this.driftDistance = 0
+        this.flameLength = 0
+        this.windSpeedAtCanopyTop = 0
+        this.flameHeightAboveCanopy = 0
+        this.firebrandDropoutLayer = 0
+        this.crownFirelineIntensity = 0
+        this.canopyHt = 0
+        this.windSpeedAt20Ft = 0
     }
-    updateFromFlameLength(canopyHt, ws20, flameLength, propsLevel=3) {
+
+    updateFromFlameLength(canopyHt, ws20, flameLength) {
         this.init()
         const crownFli = this.firelineIntensityThomas(flameLength)
         // makeSpotDistanceFromActiveCrownFire(canopyHt, ws20, flameLength)
-        this.updateFlatDistance(canopyHt, ws20, crownFli, propsLevel)
+        return this.updateFlatDistance(canopyHt, ws20, crownFli)
     }
-    updateFromFirelineIntensity(canopyHt, ws20, crownFli, propsLevel=3) {
+
+    updateFromFirelineIntensity(canopyHt, ws20, crownFli) {
         this.init()
-        this.updateFlatDistance(canopyHt, ws20, crownFli, propsLevel)
+        return this.updateFlatDistance(canopyHt, ws20, crownFli)
     }
+
     // Calculates crown firebrand dropout altitude and distance, drift distance,
     // and total flat terrain spot distance.
     // Thin wrapper around distance() that performs input/output units conversions
     updateFlatDistance(
         canopyHt,    // Average crown top height of forest cover (ft)
         ws20,        // Wind speed at 20-ft (ft/min)
-        crownFli,    // Crown fireline intensity (Btu/ft/s)
-        propsLevel)
+        crownFli)    // Crown fireline intensity (Btu/ft/s)
     {
         // Feet per meter
         const fpm = 3.2808
@@ -65,34 +70,44 @@ export class SpotDistanceActiveCrownFire {
 
         const [z, x, drift, spot, layer, flame] = this.distance(htop, fikwpm, utop, diam)
 
-        // Save results
+        // firebrand dropout plume coordinate height (ft)
+        this.firebrandHt = fpm * z
+        // firebrand dropout plume coordinate horizontal distance (ft)
+        this.flatDistance = fpm * x
+        // firebrand down-wind drift horizontal distance (ft)
+        this.driftDistance = fpm * drift
         // firebrand down-wind spotting distance on flat terrain (ft)
         this.levelDistance =  fpm * spot
-        if (propsLevel > 0) {
-            // firebrand dropout plume coordinate height (ft)
-            this.firebrandHt = fpm * z
-            // firebrand dropout plume coordinate horizontal distance (ft)
-            this.flatDistance = fpm * x
-            // firebrand down-wind drift horizontal distance (ft)
-            this.driftDistance = fpm * drift
-        }
-        if (propsLevel > 1) {
-            // Crown fire flame length (ft)
-            this.flameLength = this.flameLengthThomas(crownFli)
-            // Wind speed at canopy top (ft/min)
-            this.windSpeedAtCanopyTop = utop * 3.2808 * 60
-            // Flame height above the canopy (ft)
-            this.flameHeightAboveCanopy = flame * fpm
-            // Firebrand droput layer [0-50000]
-            this.firebrandDropoutLayer = layer
-            // Input or derived crown fireline intensity (Btu/ft/s)
-            this.crownFirelineIntensity = crownFli
-            // Input tree/vegetation ht used (ft)
-            this.canopyHt = canopyHt
-            // Input wind speed at 20 ft (ft/min)
-            this.windSpeedAt20Ft = ws20
-        }
+
+        // Crown fire flame length (ft)
+        this.flameLength = this.flameLengthThomas(crownFli)
+        // Wind speed at canopy top (ft/min)
+        this.windSpeedAtCanopyTop = utop * 3.2808 * 60
+        // Flame height above the canopy (ft)
+        this.flameHeightAboveCanopy = flame * fpm
+        // Firebrand droput layer [0-50000]
+        this.firebrandDropoutLayer = layer
+        // Input or derived crown fireline intensity (Btu/ft/s)
+        this.crownFirelineIntensity = crownFli
+        // Input tree/vegetation ht used (ft)
+        this.canopyHt = canopyHt
+        // Input wind speed at 20 ft (ft/min)
+        this.windSpeedAt20Ft = ws20
+        return this
     }
+
+    updateTerrainDistance(
+        location,           // 'midslopeWindward', 'valleyBottom', 'midslopeLeeward', or 'ridgeTop'
+        ridgeToValleyDist,  // Horizontal distance from ridge top to valley bottom (ft)
+        ridgeToValleyElev)  // Vertical distance from ridge top to valley bottom (ft)
+    {
+        this.location = location
+        this.ridgeToValleyDist = ridgeToValleyDist
+        this.ridgeToValleyElev = ridgeToValleyElev
+        this.terrainDistance = getSpotDistanceMountainTerrain(
+            this.levelDistance, location, ridgeToValleyDist, ridgeToValleyElev)
+    }
+
     /**
      * Adapted from Albini's MS FORTRAN PROGRAM DIST().
      *

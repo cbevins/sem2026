@@ -5,6 +5,35 @@ export const SpotSourceLocations = {
     ridgeTop:           { factor: 3, label: 'Ridge Top' }
 }
 
+// Calculates maximum spotting distance over mountainous terrain (ft)
+export function getSpotDistanceMountainTerrain(
+        flatDistance,       // Maximum spotting distance over flat terrain (ft)
+        location,           // 'midslopeWindward', 'valleyBottom', 'midslopeLeeward', or 'ridgeTop'
+        ridgeToValleyDist,  // Horizontal distance from ridge top to valley bottom (ft)
+        ridgeToValleyElev)  // Vertical distance from ridge top to valley bottom (ft)
+{
+    if (!Object.hasOwn(SpotSourceLocations, location))
+        throw new Error(`getSpotDistanceMountainTerrain() passed invalid location key '${location}'.`)
+
+    // This model uses flat and ridge-to-valley distances in miles, not ft
+    const flatMiles = flatDistance / 5280
+    const rvMiles = ridgeToValleyDist / 5280
+
+    let spotMiles = flatMiles
+    if (ridgeToValleyElev > 0 && ridgeToValleyDist > 0) {
+        const a1 = flatMiles / rvMiles
+        const b1 = ridgeToValleyElev / (10*Math.PI) / 1000
+        const factor = SpotSourceLocations[location].factor
+        let x = a1
+        for (let i=0; i<6; i++) {
+            x = a1 - b1 * (Math.cos(Math.PI * x - factor * Math.PI/2)
+            - Math.cos(factor * Math.PI/2))
+        }
+        spotMiles = x * rvMiles
+    }
+    return spotMiles * 5280
+}
+
 export class SpotDistance {
     constructor() {
         this.init()
@@ -72,42 +101,11 @@ export class SpotDistance {
         ridgeToValleyDist,  // Horizontal distance from ridge top to valley bottom (ft)
         ridgeToValleyElev)  // Vertical distance from ridge top to valley bottom (ft)
     {
-        this.getSpotDistanceMountainTerrain(this.flatDistance, location,
-            ridgeToValleyDist, ridgeToValleyElev)
-        return this
-    }
-
-    // Calculates maximum spotting distance over mountainous terrain (ft)
-    getSpotDistanceMountainTerrain(
-        flatDistance,       // Maximum spotting distance over flat terrain (ft)
-        location,           // 'midslopeWindward', 'valleyBottom', 'midslopeLeeward', or 'ridgeTop'
-        ridgeToValleyDist,  // Horizontal distance from ridge top to valley bottom (ft)
-        ridgeToValleyElev)  // Vertical distance from ridge top to valley bottom (ft)
-    {
-        if (!Object.hasOwn(SpotSourceLocations, location))
-            throw new Error(`SpotDistance.updateTerrainDistance() passed invalid location key '${location}'.`)
-        
         this.location = location
         this.ridgeToValleyDist = ridgeToValleyDist
         this.ridgeToValleyElev = ridgeToValleyElev
-
-        // This model uses flat and ridge-to-valley distances in miles, not ft
-        const flatMiles = flatDistance / 5280
-        const rvMiles = ridgeToValleyDist / 5280
-
-        let spotMiles = flatMiles
-        if (ridgeToValleyElev > 0 && ridgeToValleyDist > 0) {
-            const a1 = flatMiles / rvMiles
-            const b1 = ridgeToValleyElev / (10*Math.PI) / 1000
-            const factor = SpotSourceLocations[location].factor
-            let x = a1
-            for (let i=0; i<6; i++) {
-                x = a1 - b1 * (Math.cos(Math.PI * x - factor * Math.PI/2)
-                - Math.cos(factor * Math.PI/2))
-            }
-            spotMiles = x * rvMiles
-        }
-        return this.terrainDistance = spotMiles * 5280
+        this.terrainDistance = getSpotDistanceMountainTerrain(
+            this.levelDistance, location, ridgeToValleyDist, ridgeToValleyElev)
     }
 }
 

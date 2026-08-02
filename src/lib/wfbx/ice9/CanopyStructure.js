@@ -9,6 +9,8 @@ export class CanopyStructure {
         this.sheltersFuel = false
         this.midflameWsrf = 1
     }
+    // WfbxState has previously set any the object input properties,
+    // these methods are called to update dependent properties
     updateFromHeightBase() {
         this.length = Math.max(0, this.height - this.base)
         this.ratio = (this.height > 0) ? (this.length / this.height) : 0

@@ -107,7 +107,7 @@ export function makeFireShape(fireBehavior, propsLevel=0) {
         rotationCos,
         rotationSin,
         rotationCosInv,
-        rotationSinInv
+        rotationSinInv,
     }
     return pod
 }

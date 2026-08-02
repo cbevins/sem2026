@@ -1,8 +1,7 @@
 import {
-    makeSpotDistanceFromBurningPile,
-    makeSpotDistanceFromSurfaceFire,
-    makeSpotDistanceFromTorchingTrees,
-    getSpotDistanceMountainTerrain,
+    SpotDistanceFromBurningPile,
+    SpotDistanceFromSurfaceFire,
+    SpotDistanceFromTorchingTrees,
     SpotSourceLocations,
 } from '../Wfbx.js'
 
@@ -15,41 +14,45 @@ let downwindCoverHt = 50            // Downwind tree/vegetation cover height (ft
 let downwindOpenCanopy = true       // TRUE if downwind canopy is open, FALSE if downwind canopy is closed
 let windSpeedAt20Ft = 10 * 88       // Wind speed at 20 ft (ft/min)
 
+const surface = new SpotDistanceFromSurfaceFire()
+const pile = new SpotDistanceFromBurningPile()
+const trees = new SpotDistanceFromTorchingTrees()
+
 function addSurfaceFireSpotting(flameLength) {
     for(let location of locations) {
-        const flat = makeSpotDistanceFromSurfaceFire(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameLength)
-        const mtn = getSpotDistanceMountainTerrain(flat.flatDistance, location, ridgeToValleyDist, ridgeToValleyElev,)
+        surface.update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameLength)
+            .updateTerrainDistance(location, ridgeToValleyDist, ridgeToValleyElev,)
         table.push({type: 'surface', flame: flameLength, location,
-            firebrandHt: flat.firebrandHt.toFixed(2),
-            driftDist: flat.driftDistance.toFixed(2),
-            levelDist: flat.levelDistance.toFixed(2),
-            terrainDist: mtn.toFixed(2)})
+            firebrandHt: surface.firebrandHt.toFixed(2),
+            driftDist: surface.driftDistance.toFixed(2),
+            levelDist: surface.levelDistance.toFixed(2),
+            terrainDist: surface.terrainDistance.toFixed(2)})
     }
 }
 
 function addBurningPileSpotting(flameHt) {
     for(let location of locations) {
-        const flat = makeSpotDistanceFromBurningPile(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameHt)
-        const mtn = getSpotDistanceMountainTerrain(flat.flatDistance, location, ridgeToValleyDist, ridgeToValleyElev,)
+        pile.update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameHt)
+            .updateTerrainDistance(location, ridgeToValleyDist, ridgeToValleyElev,)
         table.push({type: 'pile', flame: flameHt, location,
-            firebrandHt: flat.firebrandHt.toFixed(2),
-            driftDist: flat.driftDistance.toFixed(2),
-            levelDist: flat.levelDistance.toFixed(2),
-            terrainDist: mtn.toFixed(2)})
+            firebrandHt: pile.firebrandHt.toFixed(2),
+            driftDist: pile.driftDistance.toFixed(2),
+            levelDist: pile.levelDistance.toFixed(2),
+            terrainDist: pile.terrainDistance.toFixed(2)})
     }
 }
 
 function addTorchingTreesSpotting(torchingTrees, treeDbh, treeHt, treeSpecies) {
     for(let location of locations) {
-        const flat = makeSpotDistanceFromTorchingTrees(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, 
+        trees.update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, 
             torchingTrees, treeDbh, treeHt, treeSpecies)
-        const mtn = getSpotDistanceMountainTerrain(flat.flatDistance, location, ridgeToValleyDist, ridgeToValleyElev,)
+            .updateTerrainDistance(location, ridgeToValleyDist, ridgeToValleyElev,)
         const flame = ''+torchingTrees+' '+treeSpecies+':'+treeDbh+','+treeHt
         table.push({type: 'trees', flame, location,
-            firebrandHt: flat.firebrandHt.toFixed(2),
-            driftDist: flat.driftDistance.toFixed(2),
-            levelDist: flat.levelDistance.toFixed(2),
-            terrainDist: mtn.toFixed(2)})
+            firebrandHt: trees.firebrandHt.toFixed(2),
+            driftDist: trees.driftDistance.toFixed(2),
+            levelDist: trees.levelDistance.toFixed(2),
+            terrainDist: trees.terrainDistance.toFixed(2)})
     }
 }
 

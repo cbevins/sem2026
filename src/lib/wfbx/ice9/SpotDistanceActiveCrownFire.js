@@ -8,15 +8,29 @@
  */
 
 export class SpotDistanceActiveCrownFire {
-    constructor(canopyHt=0, ws20=0, flameLength=0, propsLevel=3) {
-        this.updateFromFlameLength(canopyHt, ws20, flameLength, propsLevel)
+    constructor() {
+        this.init()
+    }
+    init() {
+            this.firebrandHt = 0
+            this.flatDistance = 0
+            this.driftDistance = 0
+            this.flameLength = 0
+            this.windSpeedAtCanopyTop = 0
+            this.flameHeightAboveCanopy = 0
+            this.firebrandDropoutLayer = 0
+            this.crownFirelineIntensity = 0
+            this.canopyHt = 0
+            this.windSpeedAt20Ft = 0
     }
     updateFromFlameLength(canopyHt, ws20, flameLength, propsLevel=3) {
+        this.init()
         const crownFli = this.firelineIntensityThomas(flameLength)
         // makeSpotDistanceFromActiveCrownFire(canopyHt, ws20, flameLength)
         this.updateFlatDistance(canopyHt, ws20, crownFli, propsLevel)
     }
     updateFromFirelineIntensity(canopyHt, ws20, crownFli, propsLevel=3) {
+        this.init()
         this.updateFlatDistance(canopyHt, ws20, crownFli, propsLevel)
     }
     // Calculates crown firebrand dropout altitude and distance, drift distance,

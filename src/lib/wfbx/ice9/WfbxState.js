@@ -1,7 +1,13 @@
+import { ActiveCrownFire } from './ActiveCrownFire.js'
 import { CanopyFuels } from './CanopyFuels.js'
 import { CanopyStructure } from './CanopyStructure.js'
+import { FireBehavior } from './FireBehavior.js'
 import { FirePosition } from './FirePosition.js'
+import { FireShape } from './FireShape.js'
+import { FireSize } from './FireSize.js'
+import { FuelBed } from './FuelBed.js'
 import { FuelCuring } from './FuelCuring.js'
+import { FuelIgnition } from './FuelIgnition.js'
 import { FuelModelCatalog } from './FuelModelCatalog.js'
 import { FuelMoisture } from './FuelMoisture.js'
 import { MidflameWindSpeed } from './MidflameWindSpeed.js'
@@ -11,16 +17,9 @@ import { SlopeDirection } from './SlopeDirection.js'
 import { SlopeSteepness } from './SlopeSteepness.js'
 import { WindDirection } from './WindDirection.js'
 import { WindSpeed } from './WindSpeed.js'
-import { makeActiveCrownFire } from './makeActiveCrownFire.js'
-import { makeFireBehavior } from './makeFireBehavior.js'
-import { makeFireShape } from './makeFireShape.js'
-import { makeFireSize } from './makeFireSize.js'
-import { makeHeadVector, makeBackVector, makeRightFlankVector, makeLeftFlankVector,
-    makeBetaVector, makeBeta6Vector, makePsiVector } from './makeFireVectors.js'
-import { makeFuelBed } from './makeFuelBed.js'
-import { makeFuelIgnition } from './makeFuelIgnition.js'
-import { makeWeightedFireBehavior } from './makeWeightedFireBehavior.js'
-import { getScorchHeight } from './utils.js'
+import { FireVectorHead, FireVectorBack, FireVectorRightFlank, FireVectorLeftFlank,
+    FireVectorBeta, FireVectorBeta6, FireVectorPsi } from './FireVectors.js'
+import { WeightedFireBehavior } from './WeightedFireBehavior.js'
 import { SpotDistanceFromSurfaceFire } from './SpotDistance.js'
 
 export class WfbxState {
@@ -40,11 +39,7 @@ export class WfbxState {
         this.fireBehaviorObserved = new ObservedFireBehavior()
         this.firePosition = new FirePosition()
         this.air = {temperature: 77}
-        this.tree = {
-            species: 'ABBA',
-            height: 60,
-            dbh: 1,
-        }
+        // Spotting distance inputs
         this.spotting = {
             // required by all 3 types
             downwindCoverHt: 0,
@@ -68,50 +63,49 @@ export class WfbxState {
             limitWindSpeedFactor: true,
             limitSpreadRateToWindSpeed: true,
             fuelModelWeighting: 'harmonic',      // arithmetic, harmonic
-            propsLevel: 3,
         }
         // these are created during execution via calls to makeSomething()
         this.fuelModel1 = {}
         this.fuelModel2 = {}
         this.fuelModelCrown = {}
-        this.fuelBed1 = {}
-        this.fuelBed2 = {}
-        this.fuelBedCrown = {}
-        this.fuelIgnition1 = {}
-        this.fuelIgnition2 = {}
-        this.fuelIgnitionCrown = {}
-        this.fireBehavior1 = {}
-        this.fireBehavior2 = {}
-        this.fireBehaviorWeighted = {}
-        this.fireBehaviorSurface = {}   // will refer to fireBehavior1 OR fireBehaviorWeighted
-        this.fireBehaviorCrown = {}
-        this.activeCrownFire = {}
-        this.fireShape = {}
-        this.fireSize = {}
-        this.fireVectorHead = {}
-        this.fireVectorBack = {}
-        this.fireVectorRightFlank = {}
-        this.fireVectorLeftFlank = {}
-        this.fireVectorBeta = {}
-        this.fireVectorBeta6 = {}
-        this.fireVectorPsi = {}
-        this.surfaceSpotting = {}
+        this.fuelBed1 = new FuelBed()
+        this.fuelBed2 = new FuelBed()
+        this.fuelBedCrown = new FuelBed()
+        this.fuelIgnition1 = new FuelIgnition()
+        this.fuelIgnition2 = new FuelIgnition()
+        this.fuelIgnitionCrown = new FuelIgnition()
+        this.fireBehavior1 = new FireBehavior()
+        this.fireBehavior2 = new FireBehavior()
+        this.fireBehaviorWeighted = new WeightedFireBehavior()
+        this.fireBehaviorSurface = {} // will refer to EITHER fireBehavior1 OR fireBehaviorWeighted
+        this.fireBehaviorCrown = new FireBehavior()
+        this.activeCrownFire = new ActiveCrownFire()
+        this.fireShape = new FireShape()
+        this.fireSize = new FireSize()
+        this.fireVectorHead = new FireVectorHead()
+        this.fireVectorBack = new FireVectorBack()
+        this.fireVectorRightFlank = new FireVectorRightFlank()
+        this.fireVectorLeftFlank = new FireVectorLeftFlank()
+        this.fireVectorBeta = new FireVectorBeta()
+        this.fireVectorBeta6 = new FireVectorBeta6()
+        this.fireVectorPsi = new FireVectorPsi()
+        this.surfaceSpotting = new SpotDistanceFromSurfaceFire()
     }
     makeActiveCrownFire() {
-        this.activeCrownFire = makeActiveCrownFire(
-            this.fireBehaviorCrown,
-            this.fireBehaviorSurface,
-            this.canopyFuels,
-            this.windSpeed.at20ft, this.options.propsLevel)
+        this.activeCrownFire.update(
+            this.fireBehaviorCrown.headingSpreadRate,
+            this.fireBehaviorSurface.heatPerUnitArea,
+            this.canopyFuels.heatPerUnitArea,
+            this.windSpeed.at20ft)
     }
     makeFireShapeFromObservedFire() {
-        this.fireShape = makeFireShape(this.fireBehaviorObserved)
+        this.fireShape.update(this.fireBehaviorObserved)
     }
     makeFireShapeFromSurfaceFire() {
-        this.fireShape = makeFireShape(this.fireBehaviorSurface)
+        this.fireShape.update(this.fireBehaviorSurface)
     }
     makeFireSize() {
-        this.fireSize = makeFireSize(this.fireShape, this.firePosition, this.options.propsLevel)
+        this.fireSize.update(this.fireShape, this.firePosition)
     }
     makeFuelModel1() {
         this.fuelModel1 = this.fuelCatalog.get(this.fuelKeys.fuelKey1)
@@ -123,25 +117,25 @@ export class WfbxState {
         this.fuelModelCrown = this.fuelCatalog.get(10)
     }
     makeFuelBed1() {
-        this.fuelBed1 = makeFuelBed(this.fuelModel1, this.fuelCuring, this.options.propsLevel)
+        this.fuelBed1.update(this.fuelModel1, this.fuelCuring)
     }
     makeFuelBed2() {
-        this.fuelBed2 = makeFuelBed(this.fuelModel2, this.fuelCuring, this.options.propsLevel)
+        this.fuelBed2.update(this.fuelModel2, this.fuelCuring)
     }
     makeFuelBedCrown() {
-        this.fuelBedCrown = makeFuelBed(this.fuelModelCrown, {curedHerb: 0}, this.options.propsLevel)
+        this.fuelBedCrown.update(this.fuelModelCrown, {curedHerb: 0})
     }
     makeFuelIgnition1() {
-        this.fuelIgnition1 = makeFuelIgnition(this.fuelBed1, this.fuelMoisture, this.options.propsLevel)
+        this.fuelIgnition1.update(this.fuelBed1, this.fuelMoisture)
     }
     makeFuelIgnition2() {
-        this.fuelIgnition2 = makeFuelIgnition(this.fuelBed2, this.fuelMoisture, this.options.propsLevel)
+        this.fuelIgnition2.update(this.fuelBed2, this.fuelMoisture)
     }
     makeFuelIgnitionCrown() {
-        this.fuelIgnitionCrown = makeFuelIgnition(this.fuelBedCrown, this.fuelMoisture, this.options.propsLevel)
+        this.fuelIgnitionCrown.update(this.fuelBedCrown, this.fuelMoisture)
     }
     makeSurfaceFireBehavior1() {
-        this.fireBehavior1 = makeFireBehavior(
+        this.fireBehavior1.update(
             this.fuelBed1,
             this.fuelIgnition1,
             this.midflame.windSpeed,
@@ -149,13 +143,12 @@ export class WfbxState {
             this.slopeSteepness.ratio,
             this.slopeDirection.aspectDegrees,
             this.options.limitWindSpeedFactor,
-            this.options.limitSpreadRateToWindSpeed,
-            this.options.propsLevel)
+            this.options.limitSpreadRateToWindSpeed)
         // This IS the surface fire behavior, UNLESS overridden by the weighted fire behavior
         this.fireBehaviorSurface = this.fireBehavior1
     }
     makeSurfaceFireBehavior2() {
-        this.fireBehavior2 = makeFireBehavior(
+        this.fireBehavior2.update(
             this.fuelBed2,
             this.fuelIgnition2,
             this.midflame.windSpeed,
@@ -163,11 +156,10 @@ export class WfbxState {
             this.slopeSteepness.ratio,
             this.slopeDirection.aspectDegrees,
             this.options.limitWindSpeedFactor,
-            this.options.limitSpreadRateToWindSpeed,
-            this.options.propsLevel)
+            this.options.limitSpreadRateToWindSpeed)
     }
     makeWeightedSurfaceFireBehavior() {
-        this.fireBehaviorWeighted = makeWeightedFireBehavior(
+        this.fireBehaviorWeighted.update(
             this.fireBehavior1,
             this.fireBehavior2,
             this.fuelKeys.fuelCover1,
@@ -175,39 +167,39 @@ export class WfbxState {
         this.fireBehaviorSurface = this.fireBehaviorWeighted
     }
     makeSurfaceFireBehaviorCrown() {
-        this.fireBehaviorCrown = makeFireBehavior(this.fuelBedCrown, this.fuelIgnitionCrown,
+        this.fireBehaviorCrown.update(this.fuelBedCrown, this.fuelIgnitionCrown,
             this.windSpeed.at20ft, this.windDirection.bearingDegrees,
-            0, 0, false, false, this.options.propsLevel)
+            // no slope ratio, no aspect, no wind limit, no spread rate limit
+            0, 0, false, false)
     }
     makeFireVectorBack() {
-        this.fireVectorBack = makeBackVector(this.fireSize, this.options.fireVectorFlameLengths)
+        this.fireVectorBack.update(this.fireSize, this.options.fireVectorFlameLengths)
     }
     makeFireVectorBeta() {
-        this.fireVectorBeta = makeBetaVector(this.fireSize, this.firePosition.angleFromHead, this.options.fireVectorFlameLengths)
+        this.fireVectorBeta.update(this.fireSize, this.firePosition.angleFromHead, this.options.fireVectorFlameLengths)
     }
     makeFireVectorBeta6() {
-        this.fireVectorBeta6 = makeBeta6Vector(this.fireSize, this.firePosition.angleFromHead, this.options.fireVectorFlameLengths)
+        this.fireVectorBeta6.update(this.fireSize, this.firePosition.angleFromHead, this.options.fireVectorFlameLengths)
     }
     makeFireVectorHead() {
-        this.fireVectorHead = makeHeadVector(this.fireSize, this.options.fireVectorFlameLengths)
+        this.fireVectorHead.update(this.fireSize, this.options.fireVectorFlameLengths)
     }
     makeFireVectorLeftFlank() {
-        this.fireVectorLeftFlank = makeLeftFlankVector(this.fireSize, this.options.fireVectorFlameLengths)
+        this.fireVectorLeftFlank.update(this.fireSize, this.options.fireVectorFlameLengths)
     }
     makeFireVectorPsi() {
-        this.fireVectorPsi = makePsiVector(this.fireSize, this.firePosition.angleFromHead, this.options.fireVectorFlameLengths)
+        this.fireVectorPsi.update(this.fireSize, this.firePosition.angleFromHead, this.options.fireVectorFlameLengths)
     }
     makeFireVectorRightFlank() {
-        this.fireVectorRightFlank = makeRightFlankVector(this.fireSize, this.options.fireVectorFlameLengths)
+        this.fireVectorRightFlank.update(this.fireSize, this.options.fireVectorFlameLengths)
     }
     makeSurfaceSpottingLevel() {
-        this.surfaceSpotting = new SpotDistanceFromSurfaceFire(
+        this.surfaceSpotting.update(
             this.spotting.downwindCoverHt, this.spotting.downwindOpenCanopy,
             this.windSpeed.at20ft, this.fireVectorHead.flameLength)
     }
     updateSurfaceSpottingTerrain() {
         this.surfaceSpotting.updateTerrainDistance(
-            this.surfaceSpotting.levelDistance,
             this.spotting.source,
             this.spotting.ridgeToValleyDist,
             this.spotting.ridgeToValleyElev)
@@ -220,17 +212,13 @@ export class WfbxState {
     }
     updateAngleFireVectorScorchHeights() {
         for(let vector of [this.fireVectorBeta, this.fireVectorBeta6, this.fireVectorPsi]) {
-            if (vector.firelineIntensity)
-                vector.scorchHeight = getScorchHeight(vector.firelineIntensity,
-                    this.air.temperature, this.midflameWindSpeed)
+            vector.updateScorchHeight(this.air.temperature, this.midflame.windSpeed)
         }
     }
     updateFixedFireVectorScorchHeights() {
         for(let vector of [this.fireVectorHead, this.fireVectorBack,
                 this.fireVectorRightFlank, this.fireVectorLeftFlank]) {
-            if (vector.firelineIntensity)
-                vector.scorchHeight = getScorchHeight(vector.firelineIntensity,
-                    this.air.temperature, this.midflameWindSpeed)
+            vector.updateScorchHeight(this.air.temperature, this.midflame.windSpeed)
         }
     }
     updateFuelCuringFromLiveMoisture() {
@@ -257,21 +245,6 @@ export class WfbxState {
             this.canopyStructure.midflameWsrf)
         this.midflame.updateMidflameWindSpeedFromWsrf20ft(this.windSpeed.at20ft)
     }
-    // updateScorchHeight1() {
-    //     this.fireBehavior1.scorchHeight = getScorchHeight(
-    //         this.fireBehavior1.firelineIntensity,
-    //         this.air.temperature, this.midflameWindSpeed)
-    // }
-    // updateScorchHeight2() {
-    //     this.fireBehavior2.scorchHeight = getScorchHeight(
-    //         this.fireBehavior2.firelineIntensity,
-    //         this.air.temperature, this.midflameWindSpeed)
-    // }
-    // updateScorchHeightWeighted() {
-    //     this.fireBehaviorWeighted.scorchHeight = getScorchHeight(
-    //         this.fireBehaviorWeighted.firelineIntensity,
-    //         this.air.temperature, this.midflameWindSpeed)
-    // }
     updateSlopeDirectionFromAspectCompass() {
         this.slopeDirection.updateSlopeDirectionFromAspectCompass()
     }

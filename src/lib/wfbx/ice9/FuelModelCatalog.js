@@ -30,10 +30,6 @@
  */
 import { StandardFuelModels } from "./StandardFuelModels.js"
 
-export function makeFuelCatalog() {
-    return new FuelModelCatalog()
-}
-
 export class FuelModelCatalog {
     constructor() {
         // Create the fuel model catalog with the requested fuel model groups

@@ -6,19 +6,11 @@ export const SpotSourceLocations = {
 }
 
 export class SpotDistance {
-    constructor(
-        downwindCoverHt=0,    // Downwind tree/vegetation cover height (ft).
-        downwindOpenCanopy=0, // TRUE if downwind canopy is open, FALSE if downwind canopy is closed
-        windSpeedAt20Ft=0)    // Wind speed at 20 ft (ft/min).
-    {
-        this.init(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft)
+    constructor() {
+        this.init()
     }
 
-    init(
-        downwindCoverHt=0,    // Downwind tree/vegetation cover height (ft).
-        downwindOpenCanopy=0, // TRUE if downwind canopy is open, FALSE if downwind canopy is closed
-        windSpeedAt20Ft=0)    // Wind speed at 20 ft (ft/min).
-    {
+    init(downwindCoverHt=0, downwindOpenCanopy=0, windSpeedAt20Ft=0) {
         // Store inputs
         this.downwindCoverHt = downwindCoverHt
         this.downwindOpenCanopy = downwindOpenCanopy
@@ -31,7 +23,13 @@ export class SpotDistance {
         this.levelDistance  = 0
         this.adjustedDownwindCoverHt = downwindCoverHt
         this.coverHt = 0
+
+        this.location = 'NONE'
+        this.ridgeToValleyDist = 0
+        this.ridgeToValleyElev = 0
+        this.terrainDistance = 0
     }
+    
     updateLevelDistance() {
         // Minimum valid cover ht used in calculation of flat terrain spotting distance
         this.criticalHt = (this.firebrandHt > 0) ? (2.2 * this.firebrandHt**0.337 - 4.0) : 0
@@ -69,8 +67,18 @@ export class SpotDistance {
         return distance * 5280
     }
 
-    // Calculates maximum spotting distance over mountainous terrain (ft)
     updateTerrainDistance(
+        location,           // 'midslopeWindward', 'valleyBottom', 'midslopeLeeward', or 'ridgeTop'
+        ridgeToValleyDist,  // Horizontal distance from ridge top to valley bottom (ft)
+        ridgeToValleyElev)  // Vertical distance from ridge top to valley bottom (ft)
+    {
+        this.getSpotDistanceMountainTerrain(this.flatDistance, location,
+            ridgeToValleyDist, ridgeToValleyElev)
+        return this
+    }
+
+    // Calculates maximum spotting distance over mountainous terrain (ft)
+    getSpotDistanceMountainTerrain(
         flatDistance,       // Maximum spotting distance over flat terrain (ft)
         location,           // 'midslopeWindward', 'valleyBottom', 'midslopeLeeward', or 'ridgeTop'
         ridgeToValleyDist,  // Horizontal distance from ridge top to valley bottom (ft)
@@ -105,40 +113,38 @@ export class SpotDistance {
 
 // Calculates maximum spotting distance from a burning pile.
 export class SpotDistanceFromBurningPile extends SpotDistance {
-    constructor(
+    constructor() {
+        super()
+    }
+    update(
         downwindCoverHt=0,    // Downwind tree/vegetation cover height (ft).
         downwindOpenCanopy=0, // TRUE if downwind canopy is open, FALSE if downwind canopy is closed
         windSpeedAt20Ft=0,    // Wind speed at 20 ft (ft/min).
         flameHt=0)            // Burning pile's flame height (ft)
     {
-        super(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft)
-        this.update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameHt)
-    }
-
-    update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameHt) {
         this.init(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft)
         this.flameHt = flameHt
-        if (this.windSpeedAt20Ft > 0 && this.flameHt > 0) {
+        if (windSpeedAt20Ft > 0 && flameHt > 0) {
             // Determine maximum firebrand height (ft)
             this.firebrandHt = 12.2 * this.flameHt
             this.updateLevelDistance()
         }
+        return this
     }
 }
 
 // Calculates maximum spotting distance from a surface fire.
 export class SpotDistanceFromSurfaceFire extends SpotDistance {
-    constructor(
+    constructor() {
+        super()
+    }
+    update(
         downwindCoverHt=0,    // Downwind tree/vegetation cover height (ft).
         downwindOpenCanopy=0, // TRUE if downwind canopy is open, FALSE if downwind canopy is closed
         windSpeedAt20Ft=0,    // Wind speed at 20 ft (ft/min).
         flameLength=0)        // Surface fire flame length (ft)
     {
-        super(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft)
-        this.update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameLength)
-    }
-
-    update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft, flameLength) {
+        this.init(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft)
         this.flameLength = flameLength
         
         // Determine maximum firebrand height (ft)
@@ -159,6 +165,7 @@ export class SpotDistanceFromSurfaceFire extends SpotDistance {
 
             this.updateLevelDistance()
         }
+        return this
     }
 }
 
@@ -212,7 +219,10 @@ const TorchB = [
 ]
 
 export class SpotDistanceFromTorchingTrees extends SpotDistance {
-    constructor(
+    constructor() {
+        super()
+    }
+    update(
         downwindCoverHt=0,    // Downwind tree/vegetation cover height (ft).
         downwindOpenCanopy=0, // TRUE if downwind canopy is open, FALSE if downwind canopy is closed
         windSpeedAt20Ft=0,    // Wind speed at 20 ft (ft/min).
@@ -221,13 +231,7 @@ export class SpotDistanceFromTorchingTrees extends SpotDistance {
         treeHt=0,             // Tree height (ft)
         treeSpecies='PSME')   // Tree species key
     {
-        super(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft)
-        this.update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft,
-            torchingTrees, treeDbh, treeHt, treeSpecies)
-    }
-
-    update(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft,
-            torchingTrees, treeDbh, treeHt, treeSpecies) {
+        this.init(downwindCoverHt, downwindOpenCanopy, windSpeedAt20Ft)
         this.torchingTrees = torchingTrees
         this.treeDbh = treeDbh
         this.treeHt = treeHt
@@ -261,5 +265,6 @@ export class SpotDistanceFromTorchingTrees extends SpotDistance {
 
             this.updateLevelDistance()
         }
+        return this
     }
 }

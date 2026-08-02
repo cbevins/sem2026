@@ -1,7 +1,13 @@
+export { ActiveCrownFire } from './ActiveCrownFire.js'
 export { CanopyFuels } from './CanopyFuels.js'
 export { CanopyStructure } from './CanopyStructure.js'
+export { FireBehavior } from './FireBehavior.js'
 export { FirePosition } from './FirePosition.js'
+export { FireShape } from './FireShape.js'
+export { FireSize } from './FireSize.js'
+export { FuelBed } from './FuelBed.js'
 export { FuelCuring } from './FuelCuring.js'
+export { FuelIgnition } from './FuelIgnition.js'
 export { FuelModelCatalog } from './FuelModelCatalog.js'
 export { FuelMoisture } from './FuelMoisture.js'
 export { MidflameWindSpeed } from './MidflameWindSpeed.js'
@@ -17,24 +23,20 @@ export {
     SpotSourceLocations,
 } from './SpotDistance.js'
 export { SpotDistanceActiveCrownFire } from './SpotDistanceActiveCrownFire.js'
+export { WeightedFireBehavior } from './WeightedFireBehavior.js'
 export { WindDirection } from './WindDirection.js'
 export { WindSpeed } from './WindSpeed.js'
-export { makeActiveCrownFire } from './makeActiveCrownFire.js'
-export { makeFireBehavior } from './makeFireBehavior.js'
-export { makeFireShape } from './makeFireShape.js'
-export { makeFireSize } from './makeFireSize.js'
 export {
-    makeHeadVector,
-    makeBackVector,
-    makeRightFlankVector,
-    makeLeftFlankVector,
-    makeBetaVector,
-    makeBeta6Vector,
-    makePsiVector
-} from './makeFireVectors.js'
+    FireVectorHead,
+    FireVectorBack,
+    FireVectorRightFlank,
+    FireVectorLeftFlank,
+    FireVectorBeta,
+    FireVectorBeta6,
+    FireVectorPsi
+} from './FireVectors.js'
 export { makeFuelBed } from './makeFuelBed.js'
 export { makeFuelIgnition } from './makeFuelIgnition.js'
-export { makeWeightedFireBehavior } from './makeWeightedFireBehavior.js'
 export {
     fraction,
     getFlameLength,
@@ -42,10 +44,3 @@ export {
     toDegrees,
     toRadians,
 } from './utils.js'
-export {
-    makeSpotDistanceFromBurningPile,
-    makeSpotDistanceFromSurfaceFire,
-    makeSpotDistanceFromTorchingTrees,
-    getSpotDistanceMountainTerrain,
-    SpotSourceLocations,
-} from './Spotting.js'

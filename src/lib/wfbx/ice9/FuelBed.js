@@ -2,20 +2,44 @@
  * The FuelBed class does as much processing of Fuel Model parameters as possible
  * up to the application of moisture, wind, and slope conditions.
  */
+import { fraction } from './utils.js'
 export class FuelBed {
-    constructor(fuelModel=null, fuelCuring=null, propLevels=0) {
-        this.fuelModel = fuelModel
-        this.fuelCuring = fuelCuring
-        this.propLevels = propLevels
-        this.update(fuelModel, fuelCuring, propLevels)
+    constructor () {
+        this.init()
+    }
+    init() {
+        this.depth = 1
+        this.dead = {}
+        this.live = {}
+        this.savr = 0
+        this.packingRatio = 0
+        this.propagatingFluxRatio = 0
+        this.liveMextFactor = 0
+        this.bulkDensity = 0
+        this.residenceTime = 0
+        this.slopeK = 0
+        this.windB = 0
+        this.windI = 0
+        this.windK = 0
+        this.midflameWsrf = 0
+        this.ovendryLoad = 0
+        this.surfaceArea = 0
+        this.volume = 0
+        this.packingRatioFraction = 0
+        this.packingRatioOpt = 0
+        this.reactionVelocityExp = 0
+        this.reactionVelocityMax = 0
+        this.reactionVelocityOpt = 0
+        this.savr15 = 0
+        this.windC = 0
+        this.windE = 0
     }
 
-    update(fuelModel, fuelCuring, propsLevel=0) {
-        this.fuelModel = fuelModel
-        this.fuelCuring = fuelCuring
-        const dead = new FuelBedLife('dead', fuelModel, fuelCuring, propsLevel)
+    update( fuelModel,      // Reference to a FuelModel
+            fuelCuring) {   // Reference to a FuelCuring instance
+        const dead = new FuelBedLife().update('dead', fuelModel, fuelCuring)
         dead.mext = fuelModel.deadMext
-        const live = new FuelBedLife('live', fuelModel, fuelCuring, propsLevel)
+        const live = new FuelBedLife().update('live', fuelModel, fuelCuring)
         live.mext = 5   // will be re-determined by the parent FuelBed
 
         // Accumulate fuel bed total surface area (ft2), ovendry load (lb/ft2), and volume (ft3)
@@ -65,18 +89,18 @@ export class FuelBed {
         dead.reactionIntensityDry = reactionVelocityOpt * dead.heatSource
         live.reactionIntensityDry = reactionVelocityOpt * live.heatSource
 
-        // The live fuel moisture content of extinction factor represents the ratio
-        // of dead-to-live fuel mass that must be raised to ignition.  It is constant
-        // within a fuel bed, and applies ONLY to the LIVE fuel bed life category.
+        // The live fuel moisture content of extinction factor represents
+        // the ratio of dead-to-live fuel mass that must be raised to ignition.
+        // It is constant within a fuel bed, and applies ONLY to the LIVE fuel bed life category.
         // It was first described by Rothermel (1972) on page 35 and subsequently
         // refined in BEHAVE and BehavePlus to use the 'effective fuel load' and
         // 'effective heating number' to determine the ratio of fine dead to fine live fuels.
         // See Rothermel (1972) eq 88 on page 35.
-        const liveMextFactor = 2.9 * (dead.fineFuelLoad / live.fineFuelLoad)
+        const liveMextFactor = (live.fineFuelLoad > 0) ? 2.9 * (dead.fineFuelLoad / live.fineFuelLoad) : 0
 
         // Open-canopy midflame wind speed reduction factor
         const f = Math.min(6, Math.max(fuelModel.depth, 0.1))
-        const fuelMidflameWsrf = 1.83 / Math.log((20 + 0.36 * f) / (0.13 * f))
+        const midflameWsrf = 1.83 / Math.log((20 + 0.36 * f) / (0.13 * f))
 
         //----------------------------------------------------------------------------------
         // The following are used by FireBehavior and therefore are saved as properties
@@ -128,7 +152,7 @@ export class FuelBed {
         const windK = (packingRatioFraction > 0 && windE > 0) ?
             windC * packingRatioFraction**-windE : 0
 
-        this.depth = fuelModel.depth
+        this.depth= fuelModel.depth
         this.dead = dead
         this.live = live
         this.savr = savr
@@ -141,36 +165,44 @@ export class FuelBed {
         this.windB = windB
         this.windI = windI
         this.windK = windK
-        this.fuelMidflameWsrf = fuelMidflameWsrf
-        
-        if (propsLevel >= 1) {
+        this.midflameWsrf = midflameWsrf
         this.ovendryLoad = ovendryLoad
         this.surfaceArea = surfaceArea
         this.volume = volume
-        }
-        // Only save these for testing and/or debugging
-        if (propsLevel >= 2) {
-            this.packingRatioFraction = packingRatioFraction
-            this.packingRatioOpt = packingRatioOpt
-            this.reactionVelocityExp = reactionVelocityExp
-            this.reactionVelocityMax = reactionVelocityMax
-            this.reactionVelocityOpt = reactionVelocityOpt
-            this.savr15 = savr15
-            this.windC = windC
-            this.windE = windE
-        }
+        this.packingRatioFraction = packingRatioFraction
+        this.packingRatioOpt = packingRatioOpt
+        this.reactionVelocityExp = reactionVelocityExp
+        this.reactionVelocityMax = reactionVelocityMax
+        this.reactionVelocityOpt = reactionVelocityOpt
+        this.savr15 = savr15
+        this.windC = windC
+        this.windE = windE
         return this
     }
 }
 
 /**
- * The FuelbedLife class converts Fuel Model parameters into a
- * 'dead' and a 'live' fuel bed following the weighting procedures
- * described by Rothermel (1972) in the section titled 'Formulation
- * of Fire Spread Model'.
+ * The FuelBedLife class converts Fuel Model parameters into a 'dead' or 'live'
+ * fuel bed following the weighting procedures described by Rothermel (1972)
+ * in the section titled 'Formulation of Fire Spread Model'.
  */
-class FuelBedLife {
-    contructor(category, fuelModel, fuelCuring, propsLevel) {
+export class FuelBedLife {
+    constructor() {
+        this.init()
+    }
+    init() {
+        this.fineFuelLoad = 0
+        this.heatSource = 0
+        this.netLoad = 0
+        this.ovendryLoad = 0
+        this.particles = {}
+        this.savr = 0
+        this.surfaceArea = 0
+        this.volume = 0
+        this.heat = 0
+        this.mineralDamping = 0
+    }
+    update(category, fuelModel, fuelCuring) {
         // Since fuel updates are generally processed much less frequently
         // than moisture updates, do as much computation as possible here
         // NOTE that inputs is passed in since it may contain FuelParticle curingClass data
@@ -239,7 +271,7 @@ class FuelBedLife {
                 // From Rothermel (1972) equations 14 (p 8, 26) and 77 (p 32):
                 const effHeating = (particle.savr > 0) ? Math.exp(-138 / particle.savr) : 0
 
-                // Save fuel particle properties that are needed for next step
+                // Save fuel particle properties that are needed for the next step
                 tmpParticles.push({
                     effHeating,
                     effectiveMineral: particle.effectiveMineral,
@@ -286,7 +318,7 @@ class FuelBedLife {
 
         // Life category mineral damping coefficient
         lifeMineralDamping = (lifeEffectiveMineral > 0)
-            ? Math.max(0, Math.min(1, (0.174 / lifeEffectiveMineral**0.19))) : 1
+            ? fraction(0.174 / lifeEffectiveMineral**0.19) : 1
         
         // Life category heat source contribution to reaction intensity
         lifeHeatSource = lifeNetLoad * lifeHeat * lifeMineralDamping
@@ -296,16 +328,14 @@ class FuelBedLife {
         this.heatSource = lifeHeatSource
         this.netLoad = lifeNetLoad
         this.ovendryLoad = lifeOvendryLoad
-        this.particles = lifeParticles   // nested object
+        this.particles = lifeParticles,  // nested object
         this.savr = lifeSavr
         this.surfaceArea = lifeSurfaceArea
         this.volume = lifeVolume
-
         // Informational, part of Rothermel basic equation
-        if (propsLevel >= 1) {
-            this.heat = lifeHeat
-            this.mineralDamping = lifeMineralDamping
-        }
+        this.heat = lifeHeat
+        this.mineralDamping = lifeMineralDamping
+        return this
     }
     
     // Returns a size class index [0-5]

@@ -291,7 +291,7 @@ export class FuelBedLife {
         // their weighting factors and accumulate the life category weighted properties
         for(let particle of tmpParticles) {
             // particle surface area weighting and size class surface area weighting
-            const surfaceAreaWtg = particle.surfaceArea / lifeSurfaceArea
+            const surfaceAreaWtg = (lifeSurfaceArea > 0) ? (particle.surfaceArea / lifeSurfaceArea) : 0
 
             // life category savr is surface area weighted weighted average of particle savr
             lifeSavr += particle.savr * surfaceAreaWtg

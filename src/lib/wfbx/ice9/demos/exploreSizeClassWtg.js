@@ -4,7 +4,8 @@ const state = new WfbxState()
 const table = []
 
 export function run() {
-    console.log('exploreSizeClassWtg', new Date())
+    console.log(new Date())
+    console.log('exploreSizeClassWtg - What are the 1h, 10h,, and 100h weighting factors for each fuel model?')
     
     const fuelKeys = state.fuelCatalog.getStringKeys()
     state.fuelCuring.curedHerb = 0

@@ -3,8 +3,10 @@ import {WfbxState} from '../WfbxState.js'
 const state = new WfbxState()
 const table = []
 
-export function run() {
-    console.log('exploreWindFactor', new Date())
+export function run(wind1, slope1, wind2, slope2) {
+    console.log(new Date())
+    console.log('exploreWindFactor - how do wind and slope factors and spread rate change')
+    console.log(`when going from wind ${wind1} slope ${slope1} to wind ${wind2} slope ${slope2}?`)
 
     state.fuelMoisture.moistureDead1h = 0.01
     state.fuelMoisture.moistureDead10h = 0.01
@@ -46,5 +48,5 @@ export function run() {
     }
 }
 
-run()
+run(88, 0.1, 880, 1)
 console.table(table)

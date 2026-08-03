@@ -113,8 +113,8 @@ export class FireBehavior {
 
         //----------------------------------------------------------------------
         // Part 5 - fire spread rate and effective wind after applying Rothermel's effective wind speed limit
-        // YES : Rothermel's limit applied (effective wind speed < 0.9 Rxi)
-        // NO  : Andrew's limit applied (spread rate < effective wind speed)
+        // YES : Rothermel's wind factor limit is applied (effective wind speed <= 0.9 Rxi)
+        // NO  : Andrew's spread rate limit is applied (spread rate <= effective wind speed)
         //----------------------------------------------------------------------
 
         p5.weff = Math.min(p3.weff, p4.weff)
@@ -123,17 +123,22 @@ export class FireBehavior {
 
         //----------------------------------------------------------------------
         // Part 6 - fire spread rate and effective wind after applying Andrews' RoS limit
-        // NO  : Rothermel's limit applied (effective wind speed < 0.9 Rxi)
-        // YES : Andrew's limit applied (spread rate < effective wind speed)
+        // NO  : Rothermel's wind factor limit is applied (effective wind speed <= 0.9 Rxi)
+        // YES : Andrew's spread rate limit is applied (spread rate <= effective wind speed)
         //----------------------------------------------------------------------
 
         // If the spread rate exceeds the effective wind speed AND the effective
         // wind speed exceeds 1 mph, then the spread rate is reduced back to the
         // effective wind speed. This was a late change request by project head
         // Pat Andrews to BehavePlus Version 6.
-        p6.ros = (p3.ros > p3.weff && p3.weff > 88) ? p3.weff : p3.ros
-        p6.phi = (p1.ros > 0) ?  p6.ros / p1.ros - 1 : 0
-        p6.weff = this.calcEffectiveWindSpeed(p6.phi, windB, windI)
+        p6.ros = p3.ros
+        p6.phi = p3.phi
+        p6.weff = p3.weff
+        if (p3.ros > p3.weff && p3.weff > 88) {
+            p6.ros = p3.weff// reduce spread rate to the effective wind speed
+            p6.phi = (p1.ros > 0) ?  p6.ros / p1.ros - 1 : 0
+            p6.weff = this.calcEffectiveWindSpeed(p6.phi, windB, windI)
+        }
 
         //----------------------------------------------------------------------
         // Part 7 - both Rothermel's and Andrew's limits are applied
@@ -141,14 +146,22 @@ export class FireBehavior {
         // YES : Andrew's limit applied (spread rate < effective wind speed)
         //----------------------------------------------------------------------
 
-        p7.ros =  (p5.ros > p5.weff && p5.weff > 88) ? p5.weff : p5.ros
-        p7.phi = (p1.ros > 0) ?  p7.ros / p1.ros - 1 : 0
-        p7.weff = this.calcEffectiveWindSpeed(p7.phi, windB, windI)
+        // Begin with Rothermel's wind factor < fire power limited values
+        p7.ros = p5.ros
+        p7.phi = p5.phi
+        p7.weff = p5.weff
+        // Apply Andrew's spread rate < wind speed assertion
+        if (p5.ros > p5.weff && p5.weff > 88) {
+            p7.ros = p5.weff    // reduce spread rate to the effective wind speed
+            p7.phi = (p1.ros > 0) ?  p7.ros / p1.ros - 1 : 0
+            p7.weff = this.calcEffectiveWindSpeed(p7.phi, windB, windI)
+        }
 
         //----------------------------------------------------------------------
         // Part 8 - apply the appropriate spread rate, spread rate factor, and
         // effective wind speed, depending upin configuration
         //----------------------------------------------------------------------
+
         let p
         // limit wind coefficient to 0.9 * (windSpeed / reactionIntensity)
         if (limitWindSpeedFactor) 

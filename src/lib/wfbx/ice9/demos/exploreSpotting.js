@@ -68,4 +68,6 @@ let treeHt = 100        // Tree height (ft)
 let treeSpecies = 'PSME'     // Tree species index (1=DF, 4=PP)
 addTorchingTreesSpotting(torchingTrees, treeDbh, treeHt, treeSpecies)
 
+console.log(new Date())
+console.log('exploreSpotting - simple demo/test of spotting distance from surface fire, burning pile, and torching trees.')
 console.table(table)

@@ -8,8 +8,9 @@ function setDeadMc(value) {
     state.fuelMoisture.moistureDead100h = value
 }
 export function run() {
-    console.log('exploreDead1hSensitivity', new Date())
-    
+    console.log(new Date())
+    console.log('\nexploreDead1hSensitivity')
+    console.log('\nQ: How much does 10h and 100h moistures need to change to match a 1% change in 1h?')
     const fuelKeys = state.fuelCatalog.getStringKeys()
     state.fuelCuring.curedHerb = 0
     state.fuelMoisture.moistureLiveHerb = 1

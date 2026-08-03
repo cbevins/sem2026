@@ -51,15 +51,19 @@ function input(key, value) {
 function output(key) {
     const {ref, prop} = refProp(key)
     let value = ref[prop]
-    if (typeof value === "string") value=trunc(value, widVal)
+    if (typeof value === "string") {
+        value = trunc(value, widVal)
+    } else if (typeof value === "number") {
+        value = (value.toFixed(6)).padStart(14)
+    }
     table.push({type: 'out', key, value})
 }
 
 function mod(key) {
     const n = Math.trunc((widKey - key.length)/2)
     const pad = ''.padStart(n, '-')
-    key = pad+key+pad
-    table.push({type: 'mod', key, value: ''.padStart(widVal, '-')})
+    let title = pad+key+pad
+    table.push({type: 'mod', key: title, value: ''.padStart(widVal, '-')})
 }
 
 export function demo1b() {

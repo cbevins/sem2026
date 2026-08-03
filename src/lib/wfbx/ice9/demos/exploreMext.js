@@ -14,9 +14,13 @@ function setLiveMc(value) {
     state.fuelMoisture.moistureLiveStem = value
 }
 
-export function run() {
-    console.log('exploreMext - How Does Fuel Moisture Affect Live Mext?', new Date())
-    
+export function run(deadMc, liveMc) {
+    console.log(new Date())
+    console.log('exploreMext - How does fuel moisture affect live mext when:')
+    console.log('dead moisture =', deadMc, 'and live moisture =', liveMc, '?')
+    setDeadMc(deadMc)
+    setLiveMc(liveMc)
+
     const fuelKeys = state.fuelCatalog.getStringKeys()
     state.fuelCuring.curedHerb = 0
     for(let fuelKey of fuelKeys) {
@@ -24,8 +28,6 @@ export function run() {
         state.makeFuelModel1()
         state.makeFuelBed1()
         if (state.fuelBed1.ovendryLoad>0) {
-            setDeadMc(0.1)
-            setLiveMc(0.5)
             state.makeFuelIgnition1()
             table.push({fuelKey,
                 deadMext: state.fuelIgnition1.dead.mext.toFixed(4),
@@ -36,5 +38,5 @@ export function run() {
     }
 }
 
-run()
+run(0.10, 0.50)
 console.table(table)

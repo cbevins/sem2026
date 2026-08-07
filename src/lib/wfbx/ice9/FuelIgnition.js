@@ -12,7 +12,7 @@ export class FuelIgnition {
 
     init() {
         this.reactionIntensity = 0
-        this.noWindSpreadRat = 0
+        this.noWindSpreadRate = 0
         this.heatPreIgn = 0
         this.heatSink = 0
         this.heatSource = 0

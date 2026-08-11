@@ -111,8 +111,8 @@ function showNoAffect() {
         const fm1 = 0.0
         state.fuelKeys.fuelKey1 = fuelKey
         state.makeFuelModel1()
-        const deadMext = state.fuelModel1.deadMext
-        const fmx = Math.trunc(100 * (deadMext - 0.01))/100
+        // const deadMext = state.fuelModel1.deadMext
+        // const fmx = Math.trunc(100 * (deadMext - 0.01))/100
         state.makeFuelBed1()
         state.midflameWindSpeed = 0
         table.push(_showNoAffect(fuelKey, fm0, fm0, fm0, `Baseline all at ${fm0}% fm`))
@@ -124,7 +124,8 @@ function showNoAffect() {
     }
     console.table(table)
 }
-function etamAtMext(mext) {
+export function etamAtMext(mext) {
+    const table = []
     for(let fm=0.01; fm<=mext; fm+=0.01) {
         const r = fm / mext
         const etam = 1 - 2.59*r + 5.11*r*r - 3.52*r*r*r
@@ -137,7 +138,7 @@ function etamAtMext(mext) {
 function fmt2(v) { return Math.trunc(100*v)/100 }
 function fmt4(v) { return Math.trunc(10000*v)/10000 }
 
-function etamRatios() {
+export function etamRatios() {
     const table = []
     for(let r=0; r<=1; r+=0.01) {
         const etam = 1 - 2.59*r + 5.11*r*r - 3.52*r*r*r
@@ -156,7 +157,7 @@ function etamRatios() {
     console.table(table)
 }
 
-function rAtEtam(eStep=0.05) {
+export function rAtEtam(eStep=0.05) {
     const table = []
     for(let e=1; e>=eStep; e-=eStep) {
         const r = solveRForE(e)
@@ -183,7 +184,7 @@ function solveRForE(e, initialGuess=0.5, tolerance=1e-7, maxIterations=100) {
     }
     return r; // Returns best approximation after max iterations
 }
-function fmCombos() {
+export function fmCombos() {
     const t =
        2 * 12**3
     + 12 * 15**3

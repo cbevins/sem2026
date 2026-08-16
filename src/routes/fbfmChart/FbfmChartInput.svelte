@@ -19,35 +19,35 @@
     // Controller handlers
     function changeCuredHerb(newValue) {
         input.curedHerb = newValue/100
-        update({...input})
+        update(input)
     }
     function changeDead1h(newValue) {
         input.moistureDead1h = newValue/100
-        update({...input})
+        update(input)
     }
     function changeDead10h(newValue) {
         input.moistureDead10h = newValue/100
-        update({...input})
+        update(input)
     }
     function changeDead100h(newValue) {
         input.moistureDead100h = newValue/100
-        update({...input})
+        update(input)
     }
     function changeLiveHerb(newValue) {
         input.moistureLiveHerb = newValue/100
-        update({...input})
+        update()
     }
     function changeLiveStem(newValue) {
         input.moistureLiveStem = newValue/100
-        update({...input})
+        update(input)
     }
     function changeMidflameMph(newValue) {
         input.midflameWindSpeed = 88 * newValue
-        update({...input})
+        update(input)
     }
     function changeSlopeDegrees(newValue) {
         input.slopeRatio = slopeRatio(newValue)
-        update({...input})
+        update(input)
     }
     // function degrees(radians) { return radians * (180 / Math.PI) }
     function radians(degrees) { return degrees * (Math.PI / 180) }

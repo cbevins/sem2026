@@ -1,6 +1,5 @@
 <script>
     let {results, yflame=true} = $props()
-    console.log('CHART')
 
     // SVG dimensions, borders
     let svg = {width: 850, height: 850, padt: 25, padb: 25, padr: 25, padl: 25}

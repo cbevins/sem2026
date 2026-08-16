@@ -2,6 +2,10 @@
     import MenuPage from "$lib/svelte/MenuPage.svelte"
     let title = 'SEM2006 Projects'
     let items = [{
+        route: '/fbfmChart',
+        title: 'FBFM Chart [CURRENT PROJECT] (7/10/26)',
+        brief: 'Fire behavior fuel models dynamic chart',
+    },{
         route: '/raster-fire-map',
         title: 'Raster Fire Map [CURRENT PROJECT] (5/14/26)',
         brief: 'Fire front expansion on a FireMap that displays onto a HTML Canvas',

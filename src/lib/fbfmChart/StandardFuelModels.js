@@ -195,7 +195,7 @@ export const StandardFuelModels = [
             {...Dead1, ovendryLoad: 0.092, savr: 3000, heat: 8000},
             {...Dead10, ovendryLoad: 0.046, heat: 8000},
             {...Dead100, ovendryLoad: 0.023, heat: 8000},
-            {...Herb, ovendryLoad: 0.023, savr: 1500, heat: 8000},
+            {...Stem, ovendryLoad: 0.023, savr: 1500, heat: 8000},
         ],
     },
     { number: 3,

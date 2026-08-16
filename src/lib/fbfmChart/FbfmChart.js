@@ -2,7 +2,6 @@ import { FuelModelCatalog } from "./FuelModelCatalog.js"
 import { FuelBed } from "./FuelBed.js"
 import { FuelIgnition } from "./FuelIgnition.js"
 import { FireBehavior } from "./FireBehavior.js"
-import { getNiceTicks } from "./getNiceTicks.js"
 
 export class FbfmChart {
     constructor() {
@@ -27,10 +26,9 @@ export class FbfmChart {
             moistureLiveHerb: 0.3,
             moistureLiveStem: 0.3,
             midflameWindSpeed: 40*88,
-            // Assume no slope, or wind blows upslope
             slopeRatio: 0,
             windBearing: 0,
-            aspect: 180
+            slopeAspect: 180
         }
         this.prev = {...this.data}
         this.results = {}
@@ -58,14 +56,20 @@ export class FbfmChart {
             const fireBehavior = new FireBehavior()
             fireBehavior.update(fuelBed, fuelIgnition,
                 this.data.midflameWindSpeed, this.data.windBearing,
-                this.data.slopeRatio, this.data.aspect)
+                this.data.slopeRatio, this.data.slopeAspect)
             this.fuel[fuelKey] = {fuelKey, isCurable, selected: true,
                 fuelModel, fuelBed, fuelIgnition, fireBehavior}
         }
         this.saveResults()
     }
+
     fmt2(x) { return Math.trunc(100*x)/100 }
     fmt4(x) { return Math.trunc(10000*x)/10000 }
+
+    getFuels() {
+        return Object.values(this.fuel)
+    }
+    
     saveResults() {
         this.results = {}
         for(let fuelKey of this.fuelKeys) {
@@ -101,29 +105,6 @@ export class FbfmChart {
         }
         fuel.fuelIgnition.update(fuel.fuelBed, data)
         fuel.fireBehavior.update(fuel.fuelBed, fuel.fuelIgnition,
-            data.midflameWindSpeed, data.windBearing, data.slopeRatio, data.aspect)
+            data.midflameWindSpeed, data.windBearing, data.slopeRatio, data.slopeAspect)
     }
 }
-
-console.log(new Date())
-console.log('run.js - Dynamice Fire Behavior Fuel Model Chart')
-const t1 = performance.now()
-const chart = new FbfmChart()
-const t2 = performance.now()
-const data = {...chart.data, curedHerb: 1, moistureDead1h: 0.05}
-chart.update(data)
-const t3 = performance.now()
-console.table(chart.results)
-console.log('new FbfmChart', t2-t1, 'msec')
-console.log('update()', t3-t2, 'msec')
-
-let maxRos = 0, maxFli=0, maxFlame=0
-for (let fuel of Object.values(chart.results)) {
-    maxRos = Math.max(maxRos, fuel.rosFpm)
-    maxFli = Math.max(maxFli, fuel.fli)
-    maxFlame = Math.max(maxFlame, fuel.flame)
-}
-console.log('maxRos=',maxRos, 'maxFli=', maxFli, 'maxFlame=', maxFlame)
-console.log('ros ticks =', getNiceTicks(0, maxRos))
-console.log('fli ticks =', getNiceTicks(0, maxFli))
-console.log('flame ticks =', getNiceTicks(0, maxFlame))

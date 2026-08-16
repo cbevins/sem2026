@@ -38,7 +38,7 @@ export class FbfmChart {
     initFuels() {
         this.catalog = new FuelModelCatalog()
         this.fuelKeys = [
-            '1','2','3','4','5','6','7','8','9','10','11','12','13',
+            '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
             'gr1', 'gr2', 'gr3', 'gr4', 'gr5', 'gr6',  'gr7', 'gr8', 'gr9',
             'gs1', 'gs2', 'gs3', 'gs4',
             'sh1', 'sh2', 'sh3', 'sh4', 'sh5',  'sh6', 'sh7', 'sh8', 'sh9',
@@ -75,13 +75,10 @@ export class FbfmChart {
         for(let fuelKey of this.fuelKeys) {
             const fuel = this.fuel[fuelKey]
             if (fuel.selected) {
-                const rosFpm = fuel.fireBehavior.headingSpreadRate
-                const rosCph = rosFpm * 60 / 66
                 this.results[fuelKey] = {fuelKey,
-                    rosFpm: this.fmt2(rosFpm),
-                    rosCph: this.fmt2(rosCph),
-                    fli: this.fmt2(fuel.fireBehavior.firelineIntensity),
-                    flame: this.fmt2(fuel.fireBehavior.flameLength),
+                    ros: fuel.fireBehavior.headingSpreadRate,
+                    fli: fuel.fireBehavior.firelineIntensity,
+                    flame: fuel.fireBehavior.flameLength,
                 }
             }
         }

@@ -35,7 +35,7 @@
     }
     function changeLiveHerb(newValue) {
         input.moistureLiveHerb = newValue/100
-        update()
+        update(input)
     }
     function changeLiveStem(newValue) {
         input.moistureLiveStem = newValue/100
@@ -55,10 +55,11 @@
     function slopeRatio(degrees) { return Math.tan(radians(degrees)) }
 </script>
 
-<div class="flex flex-col w-80 gap-y-0 py-2">
-    <RangeSlider label="Wind (mi/h)" min={0} max={20} step={1} ticStep={5} value={10}
+<h1 class='w-full text-center'>Fire Behavior Inputs</h1>
+<div class="flex flex-col w-80 gap-y-0 py-0">
+    <RangeSlider label="Midflm Wind" min={0} max={20} step={1} ticStep={5} value={10}
         units="mph" onValueChange={changeMidflameMph}/>
-    <RangeSlider label="Slope (deg)" min={0} max={80} step={1} ticStep={10} value={0}
+    <RangeSlider label="Slope Steep" min={0} max={80} step={1} ticStep={10} value={0}
         units="deg" onValueChange={changeSlopeDegrees}/>
     <RangeSlider label="Dead 1-h" min={0} max={40} step={1} ticStep={5} value={5}
         units="%" onValueChange={changeDead1h}/>

@@ -1,5 +1,5 @@
 <script>
-    // 1. Define Props with Runes
+    // Define Props with Runes
     let { 
         label = "Volume",  
         units="", 
@@ -11,12 +11,12 @@
         onValueChange          
     } = $props();
 
-    // 2. Derived State for Ticks and Fill Percentage
+    // Derived State for Ticks and Fill Percentage
     const ticksCount = $derived(Math.floor((max - min) / ticStep) + 1);
     const ticks = $derived(Array.from({ length: ticksCount }, (_, i) => min + i * ticStep));
     const fillPercentage = $derived(((value - min) / (max - min)) * 100);
 
-    // 3. Handle Input Updates
+    // Handle Input Updates
     function handleInput(e) {
         const newValue = Number(e.target.value);
         value = newValue;
@@ -25,15 +25,15 @@
     </script>
 
     <!-- Parent Grid: 5 columns force the text label, active value, min bound, track, and max bound onto one ultra-tight line -->
-    <div class="grid grid-cols-[4.5rem_3rem_auto_1fr_auto] gap-x-2 items-center w-full select-none h-5">
+    <div class="grid grid-cols-[4.5rem_3rem_0.5rem_1fr_auto] gap-x-1 items-center w-full select-none h-5">
     
     <!-- Column 1: Static Left Label -->
-    <span class="text-xs font-semibold text-slate-500 tracking-wide truncate">
+    <span class="text-[10px] font-semibold text-slate-500 tracking-wide truncate">
         {label}
     </span>
 
     <!-- Column 2: Real-time Value Label -->
-    <div class="text-xs font-bold text-indigo-600 tabular-nums text-right">
+    <div class="text-[10px] font-bold text-indigo-600 tabular-nums text-right">
         {value} {units}
     </div>
 
@@ -46,12 +46,7 @@
     <div class="relative flex items-center h-full mx-1">
         
         <!-- The Native Range Input Slider -->
-        <input 
-        type="range" 
-        {min} 
-        {max} 
-        {step}
-        {value}
+        <input type="range" {min} {max} {step} {value}
         oninput={handleInput}
         list="slider-ticks"
         style="background: linear-gradient(to right, rgb(79, 70, 229) 0%, rgb(79, 70, 229) {fillPercentage}%, rgb(226, 232, 240) {fillPercentage}%, rgb(226, 232, 240) 100%);"
@@ -95,7 +90,7 @@
     <!-- Hidden native datalist kept for keyboard snapping -->
     <datalist id="slider-ticks">
         {#each ticks as tick}
-        <option value={tick}></option>
+            <option value={tick}></option>
         {/each}
     </datalist>
     </div>

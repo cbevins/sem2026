@@ -152,6 +152,7 @@ export class FuelBed {
         const windK = (packingRatioFraction > 0 && windE > 0) ?
             windC * packingRatioFraction**-windE : 0
 
+        this.code = fuelModel.code
         this.depth= fuelModel.depth
         this.dead = dead
         this.live = live

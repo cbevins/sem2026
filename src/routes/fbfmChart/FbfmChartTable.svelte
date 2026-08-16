@@ -21,7 +21,7 @@
         {#each results as result}
         <tr>
             {@render item(result.fuelKey)}
-            {@render item(result.rosFpm.toFixed(2))}
+            {@render item(result.ros.toFixed(2))}
             {@render item(result.fli.toFixed(0))}
             {@render item(result.flame.toFixed(2))}
         </tr>

@@ -158,6 +158,7 @@ export class FuelBed {
         this.live = live
         this.savr = savr
         this.packingRatio = packingRatio
+        this.packingRatioFraction = packingRatioFraction
         this.propagatingFluxRatio = propagatingFluxRatio
         this.liveMextFactor = liveMextFactor
         this.bulkDensity = bulkDensity

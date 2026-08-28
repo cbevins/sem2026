@@ -9,6 +9,14 @@ export function clamp(value, minVal, maxVal) {
     return Math.max(minVal, Math.min(maxVal, value))
 }
 
+export function fmt1(x) { return Math.trunc(10*x)/10 }
+export function fmt2(x) { return Math.trunc(100*x)/100 }
+export function fmt3(x) { return Math.trunc(1000*x)/1000 }
+export function fmt4(x) { return Math.trunc(10000*x)/10000 }
+export function fmt5(x) { return Math.trunc(100000*x)/10000 }
+export function fmt6(x) { return Math.trunc(1000000*x)/1000000 }
+export function fmt7(x) { return Math.trunc(10000000*x)/10000000 }
+
 export function fraction(f) {
     return Math.max(0, Math.min(1, f))
 }

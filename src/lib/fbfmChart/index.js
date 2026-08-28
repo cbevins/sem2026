@@ -6,3 +6,4 @@ export { FuelModelCatalog } from './FuelModelCatalog.js'
 export { fraction } from './utils.js'
 export { getNiceTicks } from './getNiceTicks.js'
 export { StandardFuelModels } from "./StandardFuelModels.js"
+export { fmt1, fmt2, fmt3, fmt4, fmt5, fmt6, fmt7 } from './utils.js'

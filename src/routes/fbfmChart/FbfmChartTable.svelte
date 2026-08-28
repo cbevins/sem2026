@@ -1,5 +1,5 @@
 <script>
-    let {results} = $props()
+    let {data} = $props()
 </script>
 
 {#snippet head(content)}
@@ -17,13 +17,23 @@
             {@render head('RoS (ft/min)')}
             {@render head('FLI (Btu/ft/s)')}
             {@render head('Flame (ft)')}
+            {@render head('Depth')}
+            {@render head('savr (1/ft)')}
+            {@render head('DeadMx')}
+            {@render head('LiveMx')}
+            {@render head('WSRF')}
         </tr>
-        {#each results as result}
+        {#each data as fuel}
         <tr>
-            {@render item(result.fuelKey)}
-            {@render item(result.ros.toFixed(2))}
-            {@render item(result.fli.toFixed(0))}
-            {@render item(result.flame.toFixed(2))}
+            {@render item(fuel.fuelKey)}
+            {@render item(fuel.ros.toFixed(2))}
+            {@render item(fuel.fli.toFixed(0))}
+            {@render item(fuel.flame.toFixed(2))}
+            {@render item(fuel.depth.toFixed(0))}
+            {@render item(fuel.savr.toFixed(0))}
+            {@render item(fuel.deadMext.toFixed(2))}
+            {@render item(fuel.liveMext.toFixed(2))}
+            {@render item(fuel.wsrf.toFixed(4))}
         </tr>
         {/each}
     </tbody>

@@ -31,20 +31,31 @@ export class FbfmChart {
             slopeAspect: 180
         }
         this.prev = {...this.data}
-        this.results = {}
     }
 
     // Creates and initializes all the fire behavior fuel models
     initFuels() {
         this.catalog = new FuelModelCatalog()
+        // Fuel models of interest (ignore non-burnable and custom fuels)
         this.fuelKeys = [
             '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
-            'gr1', 'gr2', 'gr3', 'gr4', 'gr5', 'gr6',  'gr7', 'gr8', 'gr9',
+            'gr1', 'gr2', 'gr3', 'gr4', 'gr5', 'gr6', 'gr7', 'gr8', 'gr9',
             'gs1', 'gs2', 'gs3', 'gs4',
-            'sh1', 'sh2', 'sh3', 'sh4', 'sh5',  'sh6', 'sh7', 'sh8', 'sh9',
+            'sh1', 'sh2', 'sh3', 'sh4', 'sh5', 'sh6', 'sh7', 'sh8', 'sh9',
             'tu1', 'tu2', 'tu3', 'tu4', 'tu5',
-            'tl1', 'tl2', 'tl3',  'tl4', 'tl5', 'tl6', 'tl7', 'tl8', 'tl9',
+            'tl1', 'tl2', 'tl3', 'tl4', 'tl5', 'tl6', 'tl7', 'tl8', 'tl9',
             'sb1', 'sb2', 'sb3', 'sb4']
+        // Fuel model groups
+        this.fuelGroups = {
+            '13': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'],
+            gr: ['gr1', 'gr2', 'gr3', 'gr4', 'gr5', 'gr6',  'gr7', 'gr8', 'gr9'],
+            gs: ['gs1', 'gs2', 'gs3', 'gs4'],
+            sh: ['sh1', 'sh2', 'sh3', 'sh4', 'sh5',  'sh6', 'sh7', 'sh8', 'sh9'],
+            tu: ['tu1', 'tu2', 'tu3', 'tu4', 'tu5'],
+            tl: ['tl1', 'tl2', 'tl3', 'tl4', 'tl5', 'tl6', 'tl7', 'tl8', 'tl9'],
+            sb: ['sb1', 'sb2', 'sb3', 'sb4']
+        }
+        // Create each fuel object
         this.fuel = {}
         for(let fuelKey of this.fuelKeys) {
             const isCurable = this.catalog.isCurable(fuelKey)
@@ -57,43 +68,41 @@ export class FbfmChart {
             fireBehavior.update(fuelBed, fuelIgnition,
                 this.data.midflameWindSpeed, this.data.windBearing,
                 this.data.slopeRatio, this.data.slopeAspect)
-            this.fuel[fuelKey] = {fuelKey, isCurable, selected: true,
-                fuelModel, fuelBed, fuelIgnition, fireBehavior}
+            this.fuel[fuelKey] = {
+                fuelKey,
+                label: fuelKey.toUpperCase(),
+                isCurable,
+                isActive: true,
+                fuelModel,
+                fuelBed,
+                fuelIgnition,
+                fireBehavior,
+            }
         }
-        this.saveResults()
-    }
-
-    fmt2(x) { return Math.trunc(100*x)/100 }
-    fmt4(x) { return Math.trunc(10000*x)/10000 }
-
-    getFuels() {
-        return Object.values(this.fuel)
-    }
-    
-    saveResults() {
-        this.results = {}
-        for(let fuelKey of this.fuelKeys) {
-            const fuel = this.fuel[fuelKey]
-            if (fuel.selected) {
-                this.results[fuelKey] = {fuelKey,
-                    ros: fuel.fireBehavior.headingSpreadRate,
-                    fli: fuel.fireBehavior.firelineIntensity,
-                    flame: fuel.fireBehavior.flameLength,
-                }
+        // Add group to each fuel
+        for (const [groupKey, fuelKeys] of Object.entries(this.fuelGroups)) {
+            for(let fuelKey of fuelKeys) {
+                this.fuel[fuelKey].group = groupKey
             }
         }
     }
+
+    // Returns an array of all the fuel objects
+    getFuels() {
+        return Object.values(this.fuel)
+    }
+
     update(data) {
         this.data = {...data}
         for(let fuelKey of this.fuelKeys) {
             const fuel = this.fuel[fuelKey]
-            if (fuel.selected)
+            if (fuel.isActive)
                 this.updateFuel(fuel, data)
         }
         this.prev = {...data}
-        this.saveResults()
         return this
     }
+
     updateFuel(fuel, data) {
         // Only 16 of the 53 fuel models have curable live herb fuels,
         // so only rebuild their fuel beds and only when cured herb fraction changes
@@ -102,6 +111,7 @@ export class FbfmChart {
         }
         fuel.fuelIgnition.update(fuel.fuelBed, data)
         fuel.fireBehavior.update(fuel.fuelBed, fuel.fuelIgnition,
-            data.midflameWindSpeed, data.windBearing, data.slopeRatio, data.slopeAspect)
+            data.midflameWindSpeed, data.windBearing,
+            data.slopeRatio, data.slopeAspect)
     }
 }

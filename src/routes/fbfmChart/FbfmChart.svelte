@@ -3,24 +3,39 @@
 	import FbfmChartInput from './FbfmChartInput.svelte';
     import FbfmChartSvg from './FbfmChartSvg.svelte'
     import FbfmChartTable from './FbfmChartTable.svelte'
-    import FbfmChartFuelSelector from './FbfmChartFuelSelector.svelte'
+    // import FbfmChartFuelSelector from './FbfmChartFuelSelector.svelte'
 
     console.clear()
     let chart = new FbfmChart()
-    let active = {}
-    for(let fuelKey of chart.fuelKeys)
-        active[fuelKey] = false
-    let activeFuels = $state(active)
+    let data = $state(getData())
 
-    let results = $state(Object.values(chart.results))
-    function update(input) {
+    // FbfmChartInput.svelte callback function
+    function updatedInput(input) {
         chart.update(input)
-        results = Object.values(chart.results)
+        data = getData()
     }
-    function onFuelSelect(active) {
-        activeFuels = active
+    function getData() {
+        const d = []
+        for(let fuelKey of chart.fuelKeys) {
+            // fuel{} has label, group, isActive, and raw properties
+            const fuel = chart.fuel[fuelKey]
+            // These are promoted and renamed from fuel{} for convenience
+            const ros = fuel.fireBehavior.headingSpreadRate
+            const fli = fuel.fireBehavior.firelineIntensity
+            const flame = fuel.fireBehavior.flameLength
+            // The following are only shown in the table and may be dropped
+            const deadMext = fuel.fuelIgnition.dead.mext
+            const depth = fuel.fuelBed.depth
+            const liveMext = fuel.fuelIgnition.live.mext
+            const savr = fuel.fuelBed.savr
+            const wsrf = fuel.fuelBed.midflameWsrf
+            d.push({fuel, fuelKey, ros, fli, flame, deadMext, depth, liveMext, savr, wsrf})
+        }
+        return d
     }
-    $inspect(activeFuels)
+    // function onFuelSelect(active) {
+    //     activeFuels = active
+    // }
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-[360px_1fr] gap-6 p-6 bg-gray-50 min-h-screen">
@@ -28,25 +43,25 @@
     <div class="flex flex-col gap-4">
         <!-- Row 1 -->
         <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-            <FbfmChartInput {update} />
+            <FbfmChartInput {updatedInput} />
         </div>
         <!-- Row 2 -->
         <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-            <FbfmChartFuelSelector {onFuelSelect} {activeFuels}  />
+            <!-- <FbfmChartFuelSelector {onFuelSelect} {activeFuels}  /> -->
         </div>
         <!-- Row 3 -->
         <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-            Units Selector
+            <!-- Units Selector -->
         </div>
     </div>
 
     <!-- Right Side: Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
     <h1 class="w-full text-center">Fire Spread Rate and Flame Length by Fuel Model</h1>
-        <FbfmChartSvg {results} {activeFuels}/>
+        <FbfmChartSvg {data}/>
     </div>
 </div>
 
 <div class="mt-4 ml-4 mr-4 w-auto">
-    <FbfmChartTable {results}/>
+    <FbfmChartTable {data}/>
 </div>

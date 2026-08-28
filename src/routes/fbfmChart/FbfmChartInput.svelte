@@ -1,7 +1,8 @@
 <script>
     import RangeSlider from './RangeSlider.svelte'
 
-    let {update} = $props()
+    // Parent component callback function
+    let {updatedInput} = $props()
 
     let input = $state({
         curedHerb: 2/3,
@@ -19,35 +20,35 @@
     // Controller handlers
     function changeCuredHerb(newValue) {
         input.curedHerb = newValue/100
-        update(input)
+        updatedInput(input)
     }
     function changeDead1h(newValue) {
         input.moistureDead1h = newValue/100
-        update(input)
+        updatedInput(input)
     }
     function changeDead10h(newValue) {
         input.moistureDead10h = newValue/100
-        update(input)
+        updatedInput(input)
     }
     function changeDead100h(newValue) {
         input.moistureDead100h = newValue/100
-        update(input)
+        updatedInput(input)
     }
     function changeLiveHerb(newValue) {
         input.moistureLiveHerb = newValue/100
-        update(input)
+        updatedInput(input)
     }
     function changeLiveStem(newValue) {
         input.moistureLiveStem = newValue/100
-        update(input)
+        updatedInput(input)
     }
     function changeMidflameMph(newValue) {
         input.midflameWindSpeed = 88 * newValue
-        update(input)
+        updatedInput(input)
     }
     function changeSlopeDegrees(newValue) {
         input.slopeRatio = slopeRatio(newValue)
-        update(input)
+        updatedInput(input)
     }
     // function degrees(radians) { return radians * (180 / Math.PI) }
     function radians(degrees) { return degrees * (Math.PI / 180) }

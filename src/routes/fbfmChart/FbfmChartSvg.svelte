@@ -3,7 +3,8 @@
     let {data, yvar='flame'} = $props()
 
     // SVG dimensions, borders
-    let svg = {width: 850, height: 650, padt: 25, padb: 25, padr: 25, padl: 25}
+    // let svg = {width: 850, height: 650, padt: 25, padb: 25, padr: 25, padl: 25}
+    let svg = {width: 450, height: 650, padt: 25, padb: 25, padr: 25, padl: 25}
     svg.dataWid = svg.width - svg.padl - svg.padr
     svg.dataHt = svg.height - svg.padt - svg.padb
     svg.rosFactor = svg.dataWid / 800
@@ -54,11 +55,11 @@
                 const y = (yvar==='flame')
                     ? svg.padt + (svg.dataHt - item.flame * svg.flameFactor)
                     : svg.padt + (svg.dataHt - item.fli * svg.fliFactor)
-                const fill = groupColor[item.fuel.group] 
-                d.push({label: item.fuel.label, x, y, fill, group: item.fuel.group})
+                const fill = groupColor[item.fuel.groupKey] 
+                d.push({label: item.fuel.label, x, y, fill, group: item.fuel.groupKey})
             }
         }
-        console.log(d)
+        // console.log(d)
         return d
     }
 </script>

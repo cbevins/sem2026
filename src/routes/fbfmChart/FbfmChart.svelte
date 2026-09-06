@@ -1,9 +1,9 @@
 <script>
-    import { FbfmChart } from '$lib/fbfmChart/index.js'
-	import FbfmChartInput from './FbfmChartInput.svelte';
+    import { FbfmChart } from './FbfmChart.js'
+	import FbfmChartInput from './FbfmChartInput.svelte'
     import FbfmChartSvg from './FbfmChartSvg.svelte'
     import FbfmChartTable from './FbfmChartTable.svelte'
-    // import FbfmChartFuelSelector from './FbfmChartFuelSelector.svelte'
+    import FbfmChartFuelSelector from './FbfmChartFuelSelector.svelte'
 
     console.clear()
     let chart = new FbfmChart()
@@ -14,10 +14,12 @@
         chart.update(input)
         data = getData()
     }
+
+    // Returns an array of higher-level fuel objects for easier display in tables/charts
     function getData() {
         const d = []
         for(let fuelKey of chart.fuelKeys) {
-            // fuel{} has label, group, isActive, and raw properties
+            // 'fuel' object has label, group, isActive, and raw properties
             const fuel = chart.fuel[fuelKey]
             // These are promoted and renamed from fuel{} for convenience
             const ros = fuel.fireBehavior.headingSpreadRate
@@ -33,35 +35,49 @@
         }
         return d
     }
-    // function onFuelSelect(active) {
-    //     activeFuels = active
-    // }
+
+    // FbfmChartFuelSelector.svelte callback function
+    function onFuelToggle(active) {
+        // activeFuels = active
+    }
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-[360px_1fr] gap-6 p-6 bg-gray-50 min-h-screen">
-    <!-- Left Side: Input Form -->
-    <div class="flex flex-col gap-4">
-        <!-- Row 1 -->
-        <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-            <FbfmChartInput {updatedInput} />
-        </div>
-        <!-- Row 2 -->
-        <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-            <!-- <FbfmChartFuelSelector {onFuelSelect} {activeFuels}  /> -->
-        </div>
-        <!-- Row 3 -->
-        <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-            <!-- Units Selector -->
+<!-- Display page -->
+<div>
+    <!-- Controls and Chart -->
+    <div>
+        <div class="grid grid-cols-1 md:grid-cols-[360px_1fr] gap-6 p-6 bg-gray-50 min-h-screen">
+            
+            <!-- Right Side: Chart -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <h1 class="w-full text-center">Fire Spread Rate and Flame Length by Fuel Model</h1>
+                <FbfmChartSvg {data}/>
+            </div>
+
+            <!-- Left Side: Controls -->
+            <div class="flex flex-col gap-4">
+
+                <!-- Row 1 contains Inputs Form -->
+                <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
+                    <FbfmChartInput {updatedInput} />
+                </div>
+
+                <!-- Row 2 contains Fuel Selector -->
+                <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
+                    <FbfmChartFuelSelector {onFuelToggle} {data} groups={chart.fuelGroups} />
+                </div>
+
+                <!-- Row 3 contains Settings (units of measure, chart dimensions, axis bounds) -->
+                <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
+                    Settings
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Right Side: Table -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-    <h1 class="w-full text-center">Fire Spread Rate and Flame Length by Fuel Model</h1>
-        <FbfmChartSvg {data}/>
+    <!-- Fuel Model Properties Table  -->
+    <div class="mt-4 ml-4 mr-4 w-auto">
+    Fuel Model Properties
+        <FbfmChartTable {data}/>
     </div>
-</div>
-
-<div class="mt-4 ml-4 mr-4 w-auto">
-    <FbfmChartTable {data}/>
 </div>

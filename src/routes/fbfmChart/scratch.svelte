@@ -1,4 +1,20 @@
+<!--  DYNAMIC STYLING EXAMPLE -->
+<script>
+    let status = 'active' // e.g., 'active', 'pending', 'error'
+    const user = {status: 'Active'}
+</script>
+<!--  -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+    {user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+    {user.status}
+</span>
 
+<!-- DYNAMICE STYLING USING data-* ATTRIBUTES -->
+<div data-status={status} class="data-[status=active]:bg-green-500 data-[status=pending]:bg-yellow-500 data-[status=error]:bg-red-500 p-4">
+    Status content
+</div>
+
+<!--  -->
 {#snippet clearGroupButton(groupKey)}
     <button
         type="button"

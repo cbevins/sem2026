@@ -1,215 +1,86 @@
 
-export const FbfmFuelStyles = {
-    '1': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '2': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '3': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '4': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '5': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '6': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '7': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '8': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '9': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '10': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '11': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    '12': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
+export const FbfmGroupStyles = {
     '13': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
+        active: "bg-rose-400 focus:ring-rose-300",
+        inactive: "bg-gray-100 text-gray-700",
     },
-    'gr1': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
+    'gr': {
+        active: "bg-orange-400 focus:ring-orange-300",
+        inactive: "bg-gray-100 text-gray-700",
     },
-    'gr2': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
+    'gs': {
+        active: "bg-lime-400 focus:ring-lime-300",
+        inactive: "bg-gray-100 text-gray-700",
     },
-    'gr3': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
+    'sh': {
+        active: "bg-green-400 focus:ring-green-300",
+        inactive: "bg-gray-100 text-gray-700",
     },
-    'gr4': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
+    'tu': {
+        active: "bg-emerald-400 focus:ring-emerald-300",
+        inactive: "bg-gray-100 text-gray-700",
     },
-    'gr5': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
+    'tl': {
+        active: "bg-teal-400 focus:ring-teal-30",
+        inactive: "bg-gray-100 text-gray-700",
     },
-    'gr6': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
+    'sb': {
+        active: "bg-red-400 focus:ring-red-300",
+        inactive: "bg-gray-100 text-gray-700",
     },
-    'gr7': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'gr8': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'gr9': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'gs1': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'gs2': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'gs3': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'gs4': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh1': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh2': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh3': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh4': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh5': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh6': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh7': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh8': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sh9': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tu1': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tu2': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tu3': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tu4': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tu5': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl1': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl2': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl3': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl4': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl5': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl6': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl7': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl8': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'tl9': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sb1': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sb2': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sb3': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    },
-    'sb4': {
-        activeStyle: "bg-emerald-600 focus:ring-emerald-500",
-        inactiveStyle: "bg-gray-100 text-gray-700",
-    }
+}
+export const FbfmFuelStyles = {
+    '1': {...FbfmGroupStyles[13]},
+    '2': {...FbfmGroupStyles[13]},
+    '3': {...FbfmGroupStyles[13]},
+    '4': {...FbfmGroupStyles[13]},
+    '5': {...FbfmGroupStyles[13]},
+    '6': {...FbfmGroupStyles[13]},
+    '7': {...FbfmGroupStyles[13]},
+    '8': {...FbfmGroupStyles[13]},
+    '9': {...FbfmGroupStyles[13]},
+    '10': {...FbfmGroupStyles[13]},
+    '11': {...FbfmGroupStyles[13]},
+    '12': {...FbfmGroupStyles[13]},
+    '13': {...FbfmGroupStyles[13]},
+    'gr1': {...FbfmGroupStyles['gr']},
+    'gr2': {...FbfmGroupStyles['gr']},
+    'gr3': {...FbfmGroupStyles['gr']},
+    'gr4': {...FbfmGroupStyles['gr']},
+    'gr5': {...FbfmGroupStyles['gr']},
+    'gr6': {...FbfmGroupStyles['gr']},
+    'gr7': {...FbfmGroupStyles['gr']},
+    'gr8': {...FbfmGroupStyles['gr']},
+    'gr9': {...FbfmGroupStyles['gr']},
+    'gs1': {...FbfmGroupStyles['gs']},
+    'gs2': {...FbfmGroupStyles['gs']},
+    'gs3': {...FbfmGroupStyles['gs']},
+    'gs4': {...FbfmGroupStyles['gs']},
+    'sh1': {...FbfmGroupStyles['sh']},
+    'sh2': {...FbfmGroupStyles['sh']},
+    'sh3': {...FbfmGroupStyles['sh']},
+    'sh4': {...FbfmGroupStyles['sh']},
+    'sh5': {...FbfmGroupStyles['sh']},
+    'sh6': {...FbfmGroupStyles['sh']},
+    'sh7': {...FbfmGroupStyles['sh']},
+    'sh8': {...FbfmGroupStyles['sh']},
+    'sh9': {...FbfmGroupStyles['sh']},
+    'tu1': {...FbfmGroupStyles['tu']},
+    'tu2': {...FbfmGroupStyles['tu']},
+    'tu3': {...FbfmGroupStyles['tu']},
+    'tu4': {...FbfmGroupStyles['tu']},
+    'tu5': {...FbfmGroupStyles['tu']},
+    'tl1': {...FbfmGroupStyles['tl']},
+    'tl2': {...FbfmGroupStyles['tl']},
+    'tl3': {...FbfmGroupStyles['tl']},
+    'tl4': {...FbfmGroupStyles['tl']},
+    'tl5': {...FbfmGroupStyles['tl']},
+    'tl6': {...FbfmGroupStyles['tl']},
+    'tl7': {...FbfmGroupStyles['tl']},
+    'tl8': {...FbfmGroupStyles['tl']},
+    'tl9': {...FbfmGroupStyles['tl']},
+    'sb1': {...FbfmGroupStyles['sb']},
+    'sb2': {...FbfmGroupStyles['sb']},
+    'sb3': {...FbfmGroupStyles['sb']},
+    'sb4': {...FbfmGroupStyles['sb']},
 }

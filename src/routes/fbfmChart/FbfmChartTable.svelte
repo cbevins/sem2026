@@ -1,10 +1,10 @@
 <script>
     import ScrollableTable from './ScrollableTable.svelte'
 
-    let {chart} = $props()
-    let table = $derived(buildTable(chart))
+    let {data} = $props()
+    let table = $derived(buildTable(data))
 
-    function buildTable(chart) {
+    function buildTable(data) {
         const center = 'p-2 text-gray-900 text-center'
         const left   = 'p-2 text-gray-900 text-left'
         const right  = 'p-2 text-gray-900 text-right'
@@ -13,7 +13,8 @@
             idKey: 'fuelKey',
             cols: [
                 {key: 'fuelKey', headers: ['Fuel'], css: left},
-                {key: 'isActive', headers: ['Active'], css: center},
+                {key: 'groupKey', headers: ['Group'], css: left},
+                {key: 'isCurable', headers: ['Curable'], css: center},
                 {key: 'ros', headers: ['RoS', '(ft/min)'], css: right},
                 {key: 'fli', headers: ['FLI', '(Btu/ft/s)'], css: right},
                 {key: 'flame', headers: ['Flame', '(ft)'], css: right},
@@ -24,18 +25,21 @@
                 {key: 'wsrf', headers: ['WSRF', '(ratio)'], css: right},
             ]
         }
-        for(let fuelKey of chart.fuelKeys) {
+        // Perform any units conversions, rounding, etc here
+        for(let item of data) {
+            const fuelKey = item.fuelKey
             t.data.push({
                 fuelKey,
-                isActive: chart.isActive(fuelKey),
-                ros: chart.ros(fuelKey).toFixed(2),
-                fli: chart.fli(fuelKey).toFixed(0),
-                flame: chart.flame(fuelKey).toFixed(2),
-                depth: chart.depth(fuelKey).toFixed(2),
-                savr: chart.savr(fuelKey).toFixed(0),
-                deadMext: chart.deadMext(fuelKey).toFixed(2),
-                liveMext: chart.liveMext(fuelKey).toFixed(2),
-                wsrf: chart.wsrf(fuelKey).toFixed(2),
+                groupKey: item.groupKey,
+                isCurable: item.isCurable,
+                ros: item.ros.toFixed(2),
+                fli: item.fli.toFixed(0),
+                flame: item.flame.toFixed(2),
+                depth: item.depth.toFixed(2),
+                savr: item.savr.toFixed(0),
+                deadMext: item.deadMext.toFixed(2),
+                liveMext: item.liveMext.toFixed(2),
+                wsrf: item.wsrf.toFixed(2),
             })
         }
         return t

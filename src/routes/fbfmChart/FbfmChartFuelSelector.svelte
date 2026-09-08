@@ -1,28 +1,34 @@
 <script>
-import { FbfmFuelStyles as Style } from "./FbfmFuelStyles.js"
+    import { FbfmFuelGroups } from "./FbfmFuelStyles.js"
+    import { FbfmFuelStyles as Style } from "./FbfmFuelStyles.js"
 
-    let {chart,
+    let {
+        selectedFbfm,
         onFuelToggle,   // callback function to toggle a single fuel model
+        onGroupToggle,
     } = $props()
-
-    function toggleFuelModel(fuelKey) {
-        // console.log('Button toggled', fuelKey)
+    
+    const groupsArray = []
+    for (let group of Object.values(FbfmFuelGroups)) {
+        groupsArray.push(group)
+    }
+    function toggleFuel(fuelKey) {
         onFuelToggle(fuelKey)
     }
-
-//------------------------------------------
+    function toggleGroup(groupKey, isActive) {
+        onGroupToggle(groupKey, isActive)
+    }
+    const buttonCss = "w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold tracking-wide select-none shadow-sm transition-all duration-200 ease-in-out active:scale-95"
 </script>
 
-<!-- GR row -->
-{#each chart.getGroupsArray() as group}
-    <div class="flex flex-row justify-center items-center gap-1 px-2">
-        <h1>{group.groupKey}</h1>
+{#each groupsArray as group}
+    <div class="flex flex-row items-center gap-1 px-2">
+        {group.groupKey}
+        <button onclick={() => toggleGroup(group, true)} class="{buttonCss}">All</button>
+        <button onclick={() => toggleGroup(group, false)} class="w-8 {buttonCss}">None</button>
         {#each group.fuelKeys as fuelKey}
-            <button type='button', onclick={() => toggleFuelModel(fuelKey)}
-                class="w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold tracking-wide 
-                select-none shadow-sm
-                transition-all duration-200 ease-in-out active:scale-95
-                {chart.fuel[fuelKey].isActive ? `${Style[fuelKey].active}` : `${Style[fuelKey].inactive}`}"
+            <button onclick={() => toggleFuel(fuelKey)} class="{buttonCss}
+                {selectedFbfm[fuelKey] ? `${Style[fuelKey].active}` : `${Style[fuelKey].inactive}`}"
             >
                 {fuelKey}
             </button>

@@ -1,4 +1,4 @@
 <script>
-    import FbfmChart from './FbfmChart2.svelte'
+    import FbfmChart from './FbfmChart.svelte'
 </script>
 <FbfmChart/>

@@ -1,6 +1,6 @@
 export function getNiceTicks(min, max, targetCount = 5) {
     const range = max - min
-    if (range === 0) return { min, max, step: 1, ticks: [min] }
+    if (range === 0) return { min, max, step: 1, tics: [min] }
 
     const roughStep = range / targetCount
     const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)))
@@ -16,10 +16,10 @@ export function getNiceTicks(min, max, targetCount = 5) {
     const niceMin = Math.floor(min / step) * step
     const niceMax = Math.ceil(max / step) * step
 
-    const ticks = []
+    const tics = []
     for (let val = niceMin; val <= niceMax + step * 1e-9; val += step) {
-        ticks.push(Number(val.toFixed(10)))
+        tics.push(Number(val.toFixed(10)))
     }
 
-    return { min: niceMin, max: niceMax, step, ticks }
+    return { min: niceMin, max: niceMax, step, tics }
 }

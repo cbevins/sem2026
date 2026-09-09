@@ -56,7 +56,6 @@
     function slopeRatio(degrees) { return Math.tan(radians(degrees)) }
 </script>
 
-<h1 class='w-full text-center'>Fire Behavior Inputs</h1>
 <div class="flex flex-col w-80 gap-y-0 py-0">
     <RangeSlider label="Midflm Wind" min={0} max={20} step={1} ticStep={5} value={10}
         units="mph" onValueChange={changeMidflameMph}/>

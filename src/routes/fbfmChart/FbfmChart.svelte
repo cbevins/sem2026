@@ -5,8 +5,6 @@
     import FbfmChartSvg from './FbfmChartSvg.svelte'
     import FbfmChartTable from './FbfmChartTable.svelte'
 
-	// let fuelSelectorDialogIsOpen = $state(false);
-	// let fuelSelectorDialogRef = $state();
     let behavior = new FbfmBehavior()
     let rawData = $state(behavior.getData())
 
@@ -15,18 +13,6 @@
     for(let fuelKey of behavior.fuelKeys)
         selected[fuelKey] = true
     let selectedFbfm = $state({...selected})
-
-    // let chart = new FbfmChart()
-	function toggleFuelSelector() {
-		// if (fuelSelectorDialogIsOpen) {
-		// 	fuelSelectorDialogIsOpen = false
-		// 	fuelSelectorDialogRef?.close()
-		// } else {
-		// 	fuelSelectorDialogIsOpen = true
-		// 	// CRITICAL: .show() keeps the rest of the web page fully interactive
-		// 	fuelSelectorDialogRef?.show() 
-		// }
-	}
 
     // FbfmChartFuelSelector.svelte callback function
     function onFuelToggle(fuelKey) {
@@ -48,41 +34,113 @@
         behavior.update(input)
         rawData = behavior.getData()
     }
+    //------------------------------
+    let fuelSelectorIsOpen = $state(false)
+	let fuelSelectorDialogRef = $state()
+
+	function toggleFuelSelectorDialog() {
+		if (fuelSelectorIsOpen) {
+			fuelSelectorIsOpen = false;
+			fuelSelectorDialogRef?.close();
+		} else {
+			fuelSelectorIsOpen = true;
+			// CRITICAL: .show() keeps the rest of the web page fully interactive
+			fuelSelectorDialogRef?.show(); 
+		}
+	}
+    //------------------------------
+    let inputsIsOpen = $state(false)
+	let inputsDialogRef = $state()
+
+	function toggleInputsDialog() {
+		if (inputsIsOpen) {
+			inputsIsOpen = false;
+			inputsDialogRef?.close();
+		} else {
+			inputsIsOpen = true;
+			// CRITICAL: .show() keeps the rest of the web page fully interactive
+			inputsDialogRef?.show(); 
+		}
+	}
+
 </script>
 
 <!-- Display page -->
 <div>
+    <!-- Fuel Selector Dialog -->
+    <button onclick={toggleFuelSelectorDialog}
+        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition cursor-pointer"
+    >
+        {fuelSelectorIsOpen ? 'Close Fuel Models' : 'Select Fuel Models'}
+    </button>
+
+    <!-- Modeless Dialog Element
+        - 'fixed' positioning classes (bottom-5 right-5) stop it from blocking the screen center
+        - 'z-30' ensures no underlying elements show through
+    -->
+    <dialog bind:this={fuelSelectorDialogRef}
+        class="fixed top-12 right-5 m-0 z-30 rounded-xl p-0 shadow-2xl border border-gray-200 bg-white open:flex open:flex-col"
+    >
+        <!-- Panel Layout Wrapper -->
+        <div class="w-120 p-5">
+            <!-- Panel Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                <h3 class="font-semibold text-gray-900">Select Fuel Models to Display</h3>
+                <button onclick={() => { fuelSelectorIsOpen = false; fuelSelectorDialogRef?.close(); }}
+                    class="text-gray-400 hover:text-gray-600 text-sm font-bold cursor-pointer"
+                >
+                    ✕
+                </button>
+            </div>
+            <!-- Panel Content Body -->
+            <div class="py-3 text-sm text-gray-600 leading-normal space-y-2">
+                <FbfmChartFuelSelector {selectedFbfm} {onFuelToggle} {onGroupToggle}/>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Fire Behavior Inputs Dialog -->
+    <button onclick={toggleInputsDialog}
+        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition cursor-pointer"
+    >
+        {inputsIsOpen ? 'Close Fire Behavior Inputs' : 'Edit Fire Behavior Inputs'}
+    </button>
+
+    <!-- Modeless Dialog Element
+        - 'fixed' positioning classes (bottom-5 right-5) stop it from blocking the screen center
+        - 'z-30' ensures no underlying elements show through
+    -->
+    <dialog bind:this={inputsDialogRef}
+        class="fixed top-20 right-5 m-0 z-30 rounded-xl p-0 shadow-2xl border border-gray-200 bg-white open:flex open:flex-col"
+    >
+        <!-- Panel Layout Wrapper -->
+        <div class="w-120 p-5">
+            <!-- Panel Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                <h3 class="font-semibold text-gray-900">Fire Behavior Inputs</h3>
+                <button 
+                    onclick={() => { inputsIsOpen = false; inputsDialogRef?.close(); }}
+                    class="text-gray-400 hover:text-gray-600 text-sm font-bold cursor-pointer"
+                >
+                    ✕
+                </button>
+            </div>
+
+            <!-- Panel Content Body -->
+            <div class="py-3 text-sm text-gray-600 leading-normal space-y-2">
+                <FbfmChartInput {updatedInput} />
+            </div>
+            
+        </div>
+    </dialog>
 
     <!-- Controls and Chart -->
     <div>
-        <div class="grid grid-cols-1 md:grid-cols-[360px_1fr] gap-6 p-6 bg-gray-50 min-h-screen">
-
-            <!-- Left Side: Controls -->
-            <div class="flex flex-col gap-4">
-
-                <!-- Row 1 contains Inputs Form -->
-                <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-                    <FbfmChartInput {updatedInput} />
-                </div>
-
-                <!-- Row 2 contains Fuel Selector -->
-                <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-                    <FbfmChartFuelSelector {selectedFbfm} {onFuelToggle} {onGroupToggle}/>
-                </div>
-
-                <!-- Row 3 contains Settings (units of measure, chart dimensions, axis bounds) -->
-                <div class="bg-white p-2 rounded-lg shadow-md space-y-4">
-                    Settings Go Here
-                </div>
-            </div>
-                        
             <!-- Right Side: Chart -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <h1 class="w-full text-center">Fire Spread Rate and Flame Length by Fuel Model</h1>
                 <FbfmChartSvg data={rawData} {selectedFbfm} />
             </div>
-
-        </div>
     </div>
 
     <!-- Fuel Model Properties Table  -->

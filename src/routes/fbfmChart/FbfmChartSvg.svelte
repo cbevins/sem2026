@@ -116,14 +116,19 @@
 {#snippet textRotate(x, y, str, deg, size=12, stroke='black')}
     <text x={x} y={y} 
         text-anchor='middle' dominant-baseline='central'
-        stroke={stroke} font-size={size} font-family='sans-serif'
+        stroke={stroke} font-size={size} font-family='inter'
         transform="rotate({deg}, {x}, {y})"
         font-weight='light'>{str}</text>
 {/snippet}
 
 {#snippet text(x, y, str, anchor="middle", size=12, stroke='black')}
     <text x={x} y={y} text-anchor={anchor} alignment-baseline='middle'
-        stroke={stroke} font-size={size} font-family='sans-serif' font-weight='light'>
+        stroke={stroke} font-size={size} 
+        font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+        text-rendering="geometricPrecision"
+        stroke-width="0.25"
+        letter-spacing="1"
+        font-weight='100'>
         {str}
     </text>
 {/snippet}
@@ -163,10 +168,11 @@
             'middle', 18)}
 
         <!-- Input Legend  -->
+        {@render text(svg.plotLeft+100, svg.plotTop+15, 'Fire Behavior Conditions', 'middle', 10)}
         {#each inputProp as prop, i}
-            {@render text(svg.plotLeft+10, svg.plotTop+(i+1)*10, prop.name, 'start', 10)}
-            {@render text(svg.plotLeft+150, svg.plotTop+(i+1)*10, input[prop.key].toFixed(prop.dec), 'end', 10)}
-            {@render text(svg.plotLeft+160, svg.plotTop+(i+1)*10, prop.units, 'start', 10)}
+            {@render text(svg.plotLeft+10, svg.plotTop+(i+3)*10, prop.name, 'start', 10)}
+            {@render text(svg.plotLeft+180, svg.plotTop+(i+3)*10, input[prop.key].toFixed(prop.dec), 'end', 10)}
+            {@render text(svg.plotLeft+183, svg.plotTop+(i+3)*10, prop.units, 'start', 10)}
         {/each}
 
         <!-- X -axis horizontal gridlines -->
@@ -185,7 +191,7 @@
             {@render text(svg.plotRight+2, y, axis.y.tics[i], 'start')}
         {/each}
         <!-- {@render text(svg.plotLeft-35, svg.plotMidY, varLabel[yvar].name)} -->
-        {@render textRotate(svg.plotLeft-35, svg.plotMidY, '('+varLabel[yvar].name+')', 270, 16)}
+        {@render textRotate(svg.plotLeft-35, svg.plotMidY, varLabel[yvar].name, 270, 16)}
         {@render textRotate(svg.plotLeft-15, svg.plotMidY, '('+varLabel[yvar].units+')', 270, 12)}
 
         <!-- Sprites -->

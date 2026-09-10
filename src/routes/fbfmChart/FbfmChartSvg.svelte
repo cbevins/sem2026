@@ -1,7 +1,7 @@
 <script>
     import { FbfmFuelGroups as Group } from "./FbfmFuelStyles.js"
     import { getNiceTicks } from "./getNiceTicks.js"
-
+    import { svgText } from './SvgSnippets.svelte'
     let {
         data,
         selectedFbfm,
@@ -14,6 +14,17 @@
         ros: {name: 'Fire Spread Rate', units: 'ft/min'},
         flame: {name: 'Flame Length', units: 'ft'},
         fli: {name: 'Fireline Intensity', units: 'Btu/ft/s'},
+    }
+    // Base text style
+    const chartText={
+        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        stroke: 'black', fontSize: 16,
+        dominantBaseline: 'central',
+        textRendering: "geometricPrecision",
+        strokeWidth: 0.25,
+        letterSpacing: 1,
+        fontWeight: 'lighter',
+        textAnchor: 'middle',
     }
     const inputProp = [
         {key: 'midflameWindSpeed', name: 'Midflame Wind Speed', units: 'ft/min', dec: 0},
@@ -162,10 +173,12 @@
             fill='none' stroke='black'/>
 
         <!-- Titles -->
-        {@render text(svg.plotMidX, 25, 'Map of Fuel Model Behavior', 'middle', 20)}
-        {@render text(svg.plotMidX, 42, 'by ', 'middle', 16)}
-        {@render text(svg.plotMidX, 60, 'by ' + varLabel[xvar].name +' and ' +varLabel[yvar].name,
-            'middle', 18)}
+        {@render svgText({...chartText, str:'Chart of Fire Behavior Fuel Models',
+            x: svg.plotMidX, y: 25, fontSize: 20})}
+        {@render svgText({...chartText, str: 'by',
+            x: svg.plotMidX, y: 42, fontSize: 16})}
+        {@render svgText({...chartText, str: varLabel[xvar].name +' and ' +varLabel[yvar].name,
+            x: svg.plotMidX, y: 60, fontSize: 18})}
 
         <!-- Input Legend  -->
         {@render text(svg.plotLeft+100, svg.plotTop+15, 'Fire Behavior Conditions', 'middle', 10)}
@@ -178,8 +191,8 @@
         <!-- X -axis horizontal gridlines -->
         {#each tics.x as x, i}
             <line x1={x} y1={svg.plotTop} x2={x} y2={svg.plotBot} stroke='black'/>
-            {@render text(x, svg.plotTop-10, axis.x.tics[i])}
-            {@render text(x, svg.plotBot+10, axis.x.tics[i])}
+            {@render svgText({...chartText, x: x, y: svg.plotTop-10, str: axis.x.tics[i], fontSize: 12})}
+            {@render svgText({...chartText, x: x, y: svg.plotBot+10, str: axis.x.tics[i], fontSize: 12})}
         {/each}
         {@render text(svg.plotMidX, svg.plotBot+25, varLabel[xvar].name, 'middle', 16)}
         {@render text(svg.plotMidX, svg.plotBot+40, '('+varLabel[xvar].units+')', 'middle', 12)}
@@ -187,8 +200,10 @@
         <!-- Y-axis horizontal gridlines -->
         {#each tics.y as y, i}
             <line x1={svg.plotLeft} y1={y} x2={svg.plotRight} y2={y} stroke='black'/>
-            {@render text(svg.plotLeft-2, y, axis.y.tics[i], 'end')}
-            {@render text(svg.plotRight+2, y, axis.y.tics[i], 'start')}
+            {@render svgText({...chartText, x: svg.plotLeft-2, y: y, str: axis.y.tics[i],
+                fontSize: 12, textAnchor: 'end'})}
+            {@render svgText({...chartText, x: svg.plotRight+2, y: y, str: axis.y.tics[i],
+                fontSize: 12, textAnchor: 'start'})}
         {/each}
         <!-- {@render text(svg.plotLeft-35, svg.plotMidY, varLabel[yvar].name)} -->
         {@render textRotate(svg.plotLeft-35, svg.plotMidY, varLabel[yvar].name, 270, 16)}

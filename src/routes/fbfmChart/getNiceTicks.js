@@ -10,6 +10,7 @@ export function getNiceTicks(min, max, targetCount = 5) {
     if (residual <= 1) niceResidual = 1
     else if (residual <= 2) niceResidual = 2
     else if (residual <= 5) niceResidual = 5
+    else if (residual <= 7) niceResidual = 7
     else niceResidual = 10
 
     const step = niceResidual * magnitude

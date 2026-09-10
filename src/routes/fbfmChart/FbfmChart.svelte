@@ -1,5 +1,5 @@
 <script>
-    import { FbfmBehavior } from './FbfmBehavior.js'
+    import { FbfmBehavior, FbfmInput } from './FbfmBehavior.js'
     import FbfmChartFuelSelector from './FbfmChartFuelSelector.svelte'
 	import FbfmChartInput from './FbfmChartInput.svelte'
     import FbfmChartSvg from './FbfmChartSvg.svelte'
@@ -7,6 +7,7 @@
 
     let behavior = new FbfmBehavior()
     let rawData = $state(behavior.getData())
+    let input = $state({...FbfmInput})
 
     // Build selected fuel object
     let selected = {}
@@ -30,9 +31,10 @@
     }
 
     // FbfmChartInput.svelte callback function
-    function updatedInput(input) {
-        behavior.update(input)
+    function updatedInput(inp) {
+        behavior.update(inp)
         rawData = behavior.getData()
+        input = {...inp}
     }
     //------------------------------
     let fuelSelectorIsOpen = $state(false)
@@ -139,7 +141,7 @@
             <!-- Right Side: Chart -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <h1 class="w-full text-center">Fire Spread Rate and Flame Length by Fuel Model</h1>
-                <FbfmChartSvg data={rawData} {selectedFbfm} />
+                <FbfmChartSvg data={rawData} {selectedFbfm} {input}/>
             </div>
     </div>
 

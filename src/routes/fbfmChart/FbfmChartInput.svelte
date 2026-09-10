@@ -1,21 +1,23 @@
 <script>
     import RangeSlider from './RangeSlider.svelte'
+    import { FbfmInput } from './fbfmBehavior.js'
 
     // Parent component callback function
     let {updatedInput} = $props()
 
-    let input = $state({
-        curedHerb: 2/3,
-        moistureDead1h: 0.1,
-        moistureDead10h: 0.01,
-        moistureDead100h: 0.01,
-        moistureLiveHerb: 0.3,
-        moistureLiveStem: 0.3,
-        midflameWindSpeed: 40*88,
-        slopeRatio: 0,
-        windBearing: 0,
-        slopeAspect: 180,
-    })
+    // let input = $state({
+    //     curedHerb: 2/3,
+    //     moistureDead1h: 0.1,
+    //     moistureDead10h: 0.01,
+    //     moistureDead100h: 0.01,
+    //     moistureLiveHerb: 0.3,
+    //     moistureLiveStem: 0.3,
+    //     midflameWindSpeed: 40*88,
+    //     slopeRatio: 0,
+    //     windBearing: 0,
+    //     slopeAspect: 180,
+    // })
+    let input = $state({...FbfmInput})
 
     // Controller handlers
     function changeCuredHerb(newValue) {

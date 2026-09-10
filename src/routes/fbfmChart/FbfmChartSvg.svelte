@@ -2,8 +2,36 @@
     import { FbfmFuelGroups as Group } from "./FbfmFuelStyles.js"
     import { getNiceTicks } from "./getNiceTicks.js"
 
-    let {data, selectedFbfm, xvar='ros', yvar='flame'} = $props()
+    let {
+        data,
+        selectedFbfm,
+        xvar='ros',
+        yvar='flame',
+        input={},
+    } = $props()
 
+    const varLabel = {
+        ros: {name: 'Fire Spread Rate', units: 'ft/min'},
+        flame: {name: 'Flame Length', units: 'ft'},
+        fli: {name: 'Fireline Intensity', units: 'Btu/ft/s'},
+    }
+    const inputProp = [
+        {key: 'midflameWindSpeed', name: 'Midflame Wind Speed', units: 'ft/min', dec: 0},
+        {key: 'slopeRatio', name: 'Slope Steepness', units: 'degrees', dec: 0},
+        {key: 'moistureDead1h', name: 'Dead 1-h Fuel Moisture', units: 'ratio', dec: 2},
+        {key: 'moistureDead10h', name: 'Dead 1-h Fuel Moisture', units: 'ratio', dec: 2},
+        {key: 'moistureDead100h', name: 'Dead 1-h Fuel Moisture', units: 'ratio', dec: 2},
+        {key: 'moistureLiveHerb', name: 'Live Herb Fuel Moisture', units: 'ratio', dec: 2},
+        {key: 'moistureLiveStem', name: 'Live Stem Fuel Moisture', units: 'ratio', dec: 2},
+        {key: 'curedHerb', name: 'Cured Herb Fraction', units: 'ratio', dec: 2},
+        // {key: 'windBearing', name: 'Wind Bearing', units: 'deg'},
+        // {key: 'slopeAspect', name: 'Apsect', units: ''},
+        // The following wind speed options are not yet implemented
+        // windSpeedAt: 'midflame',    // 'midflame', '20ft', or'10m'
+        // canopyHt: 0,
+        // canopyBase: 0,
+        // canopyFill: 0,
+    ]
     // NOTE: at midflame wind 20, 80-deg slope, 100% cured herb, and min fuel moisture, max values are:
     // ros = 11,362 ft/min, flame = 225 ft, and fli = 734,868 Btu/ft/s
     let settings = $state({
@@ -12,30 +40,25 @@
     })
 
     let bounds = $derived(updateBounds(data))
-$inspect(bounds)
     let axis = $derived(updateAxis(bounds, settings))
     let svg = $derived(updateSvg(axis))
     let tics = $derived(updateTics(axis, svg))
-    // 'sprites' is an array of selected fuel model plot markers {label, x, y, fill, group}
     let sprites = $derived(updateSprites(data, svg, xvar, yvar))
     let containerHeight = "h-[650px]" 
-$inspect(axis)       
+
     function updateAxis(bounds, settings) {
         const xmin = (settings.x.fixedMin) ? settings.x.minVal : bounds.xmin
         const xmax = (settings.x.fixedMax) ? settings.x.maxVal : bounds.xmax
         const ymin = (settings.y.fixedMin) ? settings.y.minVal : bounds.ymin
         const ymax = (settings.y.fixedMax) ? settings.y.maxVal : bounds.ymax
-        // nice() returns {min, max, step, tics}
+        // getNiceTicks() returns {min, max, step, tics}
         let x = getNiceTicks(xmin, xmax, settings.x.tics)
         let y = getNiceTicks(ymin, ymax, settings.y.tics)
         return {x, y}
     }
 
     function updateBounds(data) {
-        let xmin = 99999999999
-        let ymin = 99999999999
-        let xmax = 0
-        let ymax = 0
+        let xmin = 99999999999, ymin = 99999999999, xmax = 0, ymax = 0
         for(let fuel of data) {
             if (selectedFbfm[fuel.fuelKey]) {
                 xmin = Math.min(xmin, fuel[xvar])
@@ -62,18 +85,23 @@ $inspect(axis)
     
     // SVG dimensions, borders, plot size, axis
     function updateSvg(axis) {
-        let s = {width: 1250, height: 650, padt: 25, padb: 25, padr: 25, padl: 25}
+        let s = {width: 1250, height: 650, padt: 100, padb: 50, padr: 50, padl: 50}
         s.plotWd = s.width - s.padl - s.padr
         s.plotHt = s.height - s.padt - s.padb
         s.plotTop = s.padt
         s.plotBot = s.height - s.padb
         s.plotLeft = s.padl
         s.plotRight = s.width - s.padr
+        s.plotMidX = s.plotLeft + (s.plotRight - s.plotLeft) / 2
+        s.plotMidY = s.plotTop + (s.plotBot - s.plotTop) / 2
         s.xScalar = s.plotWd / axis.x.max
         s.yScalar = s.plotHt / axis.y.max
         return s
     }
     
+    // function xpos(xval) { return svg.plotLeft + xval * svg.xScalar }
+    // function ypos(yval) { return svg.plotBot - yval * svg.yScalar }
+
     function updateTics(axis, svg) {
         let t = {x: [], y: []}
         for(let xval of axis.x.tics)
@@ -83,6 +111,30 @@ $inspect(axis)
         return t
     }
 </script>
+
+<!--  -->
+{#snippet textRotate(x, y, str, deg, size=12, stroke='black')}
+    <text x={x} y={y} 
+        text-anchor='middle' dominant-baseline='central'
+        stroke={stroke} font-size={size} font-family='sans-serif'
+        transform="rotate({deg}, {x}, {y})"
+        font-weight='light'>{str}</text>
+{/snippet}
+
+{#snippet text(x, y, str, anchor="middle", size=12, stroke='black')}
+    <text x={x} y={y} text-anchor={anchor} alignment-baseline='middle'
+        stroke={stroke} font-size={size} font-family='sans-serif' font-weight='light'>
+        {str}
+    </text>
+{/snippet}
+
+{#snippet sprite(s)}
+    <circle cx={s.x} cy={s.y} r=10 fill={s.fill}/>
+    <text x={s.x} y={s.y}
+        text-anchor='middle' alignment-baseline='middle'
+        stroke='black' font-size=8 font-family='sans-serif'
+        font-weight='light'>{s.label}</text>
+{/snippet}
 
 <!-- 1. The Scrollable Window Wrapper
     - 'overflow-auto' Added to the outer container to automatically introduce scrollbars
@@ -103,23 +155,42 @@ $inspect(axis)
         <!-- Plot border -->
         <rect x='{svg.padl}' y='{svg.padt}' width='{svg.plotWd}' height='{svg.plotHt}'
             fill='none' stroke='black'/>
-        
-        <!-- X -axis horizontal gridlines -->
-        {#each tics.x as x}
-            <line x1={x} y1={svg.plotTop} x2={x} y2={svg.plotBot} stroke='black'/>
-        {/each}
-        <!-- Y-axis horizontal gridlines -->
-        {#each tics.y as y}
-            <line x1={svg.plotLeft} y1={y} x2={svg.plotRight} y2={y} stroke='black'/>
+
+        <!-- Titles -->
+        {@render text(svg.plotMidX, 25, 'Map of Fuel Model Behavior', 'middle', 20)}
+        {@render text(svg.plotMidX, 42, 'by ', 'middle', 16)}
+        {@render text(svg.plotMidX, 60, 'by ' + varLabel[xvar].name +' and ' +varLabel[yvar].name,
+            'middle', 18)}
+
+        <!-- Input Legend  -->
+        {#each inputProp as prop, i}
+            {@render text(svg.plotLeft+10, svg.plotTop+(i+1)*10, prop.name, 'start', 10)}
+            {@render text(svg.plotLeft+150, svg.plotTop+(i+1)*10, input[prop.key].toFixed(prop.dec), 'end', 10)}
+            {@render text(svg.plotLeft+160, svg.plotTop+(i+1)*10, prop.units, 'start', 10)}
         {/each}
 
+        <!-- X -axis horizontal gridlines -->
+        {#each tics.x as x, i}
+            <line x1={x} y1={svg.plotTop} x2={x} y2={svg.plotBot} stroke='black'/>
+            {@render text(x, svg.plotTop-10, axis.x.tics[i])}
+            {@render text(x, svg.plotBot+10, axis.x.tics[i])}
+        {/each}
+        {@render text(svg.plotMidX, svg.plotBot+25, varLabel[xvar].name, 'middle', 16)}
+        {@render text(svg.plotMidX, svg.plotBot+40, '('+varLabel[xvar].units+')', 'middle', 12)}
+
+        <!-- Y-axis horizontal gridlines -->
+        {#each tics.y as y, i}
+            <line x1={svg.plotLeft} y1={y} x2={svg.plotRight} y2={y} stroke='black'/>
+            {@render text(svg.plotLeft-2, y, axis.y.tics[i], 'end')}
+            {@render text(svg.plotRight+2, y, axis.y.tics[i], 'start')}
+        {/each}
+        <!-- {@render text(svg.plotLeft-35, svg.plotMidY, varLabel[yvar].name)} -->
+        {@render textRotate(svg.plotLeft-35, svg.plotMidY, '('+varLabel[yvar].name+')', 270, 16)}
+        {@render textRotate(svg.plotLeft-15, svg.plotMidY, '('+varLabel[yvar].units+')', 270, 12)}
+
         <!-- Sprites -->
-        {#each sprites as sprite}
-            <circle cx='{sprite.x}' cy='{sprite.y}' r=10 fill='{sprite.fill}'/>
-            <text x='{sprite.x}' y='{sprite.y}'
-                text-anchor='middle' alignment-baseline='middle'
-                stroke='black' font-size=8 font-family='sans-serif'
-                font-weight='light'>{sprite.label}</text>
+        {#each sprites as s}
+            {@render sprite(s)}
         {/each}
     </svg>
 </div>

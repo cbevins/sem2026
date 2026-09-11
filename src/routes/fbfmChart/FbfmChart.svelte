@@ -4,6 +4,7 @@
 	import FbfmChartInput from './FbfmChartInput.svelte'
     import FbfmChartSvg from './FbfmChartSvg.svelte'
     import FbfmChartTable from './FbfmChartTable.svelte'
+    import DraggableDialog from './DraggableDialog.svelte'
 
     let behavior = new FbfmBehavior()
     let rawData = $state(behavior.getData())
@@ -36,33 +37,21 @@
         rawData = behavior.getData()
         input = {...inp}
     }
-    //------------------------------
-    let fuelSelectorIsOpen = $state(false)
-	let fuelSelectorDialogRef = $state()
 
-	function toggleFuelSelectorDialog() {
-		if (fuelSelectorIsOpen) {
-			fuelSelectorIsOpen = false;
-			fuelSelectorDialogRef?.close();
-		} else {
-			fuelSelectorIsOpen = true;
-			// CRITICAL: .show() keeps the rest of the web page fully interactive
-			fuelSelectorDialogRef?.show(); 
-		}
+	let fuelIsOpen = $state(false)
+	let inputIsOpen = $state(false)
+	let tableIsOpen = $state(false)
+
+	function toggleFuelDialog() {
+		fuelIsOpen = ! fuelIsOpen
 	}
-    //------------------------------
-    let inputsIsOpen = $state(false)
-	let inputsDialogRef = $state()
 
-	function toggleInputsDialog() {
-		if (inputsIsOpen) {
-			inputsIsOpen = false;
-			inputsDialogRef?.close();
-		} else {
-			inputsIsOpen = true;
-			// CRITICAL: .show() keeps the rest of the web page fully interactive
-			inputsDialogRef?.show(); 
-		}
+	function toggleInputDialog() {
+		inputIsOpen = ! inputIsOpen
+	}
+
+	function toggleTableDialog() {
+		tableIsOpen = ! tableIsOpen
 	}
 
 </script>
@@ -70,84 +59,51 @@
 <!-- Display page -->
 <div>
     <!-- Fuel Selector Dialog -->
-    <button onclick={toggleFuelSelectorDialog}
-        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition cursor-pointer"
-    >
-        {fuelSelectorIsOpen ? 'Close Fuel Models' : 'Select Fuel Models'}
-    </button>
+    <button onclick={toggleFuelDialog}
+		class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+	> {fuelIsOpen ? 'Close Fuel Selector' : 'Select Fuel Models'}</button>
 
-    <!-- Modeless Dialog Element
-        - 'fixed' positioning classes (bottom-5 right-5) stop it from blocking the screen center
-        - 'z-30' ensures no underlying elements show through
-    -->
-    <dialog bind:this={fuelSelectorDialogRef}
-        class="fixed top-12 right-5 m-0 z-30 rounded-xl p-0 shadow-2xl border border-gray-200 bg-white open:flex open:flex-col"
-    >
-        <!-- Panel Layout Wrapper -->
-        <div class="w-120 p-5">
-            <!-- Panel Header -->
-            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-                <h3 class="font-semibold text-gray-900">Select Fuel Models to Display</h3>
-                <button onclick={() => { fuelSelectorIsOpen = false; fuelSelectorDialogRef?.close(); }}
-                    class="text-gray-400 hover:text-gray-600 text-sm font-bold cursor-pointer"
-                >
-                    ✕
-                </button>
-            </div>
-            <!-- Panel Content Body -->
-            <div class="py-3 text-sm text-gray-600 leading-normal space-y-2">
-                <FbfmChartFuelSelector {selectedFbfm} {onFuelToggle} {onGroupToggle}/>
-            </div>
-        </div>
-    </dialog>
+	<DraggableDialog isOpen={fuelIsOpen} onclose={toggleFuelDialog}>
+		{#snippet header()}
+			<h3 class="m-0 text-sm font-bold text-gray-900">Select the Fuel Models to Display</h3>
+		{/snippet}
+        <FbfmChartFuelSelector {selectedFbfm} {onFuelToggle} {onGroupToggle}/>
+	</DraggableDialog>
 
-    <!-- Fire Behavior Inputs Dialog -->
-    <button onclick={toggleInputsDialog}
-        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition cursor-pointer"
-    >
-        {inputsIsOpen ? 'Close Fire Behavior Inputs' : 'Edit Fire Behavior Inputs'}
-    </button>
+    <!-- Fuel Selector Dialog -->
+    <button onclick={toggleInputDialog}
+		class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+	> {inputIsOpen ? 'Close Input Form' : 'Change Fire Behavior Inputs'}</button>
 
-    <!-- Modeless Dialog Element
-        - 'fixed' positioning classes (bottom-5 right-5) stop it from blocking the screen center
-        - 'z-30' ensures no underlying elements show through
-    -->
-    <dialog bind:this={inputsDialogRef}
-        class="fixed top-20 right-5 m-0 z-30 rounded-xl p-0 shadow-2xl border border-gray-200 bg-white open:flex open:flex-col"
-    >
-        <!-- Panel Layout Wrapper -->
-        <div class="w-120 p-5">
-            <!-- Panel Header -->
-            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-                <h3 class="font-semibold text-gray-900">Fire Behavior Inputs</h3>
-                <button 
-                    onclick={() => { inputsIsOpen = false; inputsDialogRef?.close(); }}
-                    class="text-gray-400 hover:text-gray-600 text-sm font-bold cursor-pointer"
-                >
-                    ✕
-                </button>
-            </div>
+	<DraggableDialog isOpen={inputIsOpen} onclose={toggleInputDialog}>
+		{#snippet header()}
+			<h3 class="m-0 text-sm font-bold text-gray-900">Update Fire Behavior Inputs</h3>
+		{/snippet}
+        <FbfmChartInput {updatedInput} />
+	</DraggableDialog>
 
-            <!-- Panel Content Body -->
-            <div class="py-3 text-sm text-gray-600 leading-normal space-y-2">
-                <FbfmChartInput {updatedInput} />
-            </div>
-            
-        </div>
-    </dialog>
+    <!-- Fuel Model Table Dialog -->
+    <button onclick={toggleTableDialog}
+		class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+	> {tableIsOpen ? 'Close Fuel Model Table' : 'View Fuel Model Table'}</button>
 
-    <!-- Controls and Chart -->
+	<DraggableDialog isOpen={tableIsOpen} onclose={toggleTableDialog}>
+		{#snippet header()}
+			<h3 class="m-0 text-sm font-bold text-gray-900">Fuel Model Properties under Current Fire Behavior Inputs</h3>
+		{/snippet}
+        <FbfmChartTable data={rawData}/>
+	</DraggableDialog>
+
+    <!-- Chart -->
     <div>
-            <!-- Right Side: Chart -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <h1 class="w-full text-center">Fire Spread Rate and Flame Length by Fuel Model</h1>
-                <FbfmChartSvg data={rawData} {selectedFbfm} {input}/>
-            </div>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <FbfmChartSvg data={rawData} {selectedFbfm} {input}/>
+        </div>
     </div>
 
     <!-- Fuel Model Properties Table  -->
-    <div class="mt-4 ml-4 mr-4 w-auto text-center">
-        Fuel Model Properties
+    <div class="mt-4 ml-4 mr-4 border w-auto text-center">
+        Fuel Model Properties under Current Fire Behavior Inputs
         <FbfmChartTable data={rawData}/>
     </div>
 </div>

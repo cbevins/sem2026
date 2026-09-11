@@ -1,7 +1,7 @@
 <script>
     import { FbfmFuelGroups as Group } from "./FbfmFuelStyles.js"
     import { getNiceTicks } from "./getNiceTicks.js"
-    import { svgText } from './SvgSnippets.svelte'
+    import { svgText, svgTextRotate } from './SvgSnippets.svelte'
     let {
         data,
         selectedFbfm,
@@ -123,27 +123,6 @@
     }
 </script>
 
-<!--  -->
-{#snippet textRotate(x, y, str, deg, size=12, stroke='black')}
-    <text x={x} y={y} 
-        text-anchor='middle' dominant-baseline='central'
-        stroke={stroke} font-size={size} font-family='inter'
-        transform="rotate({deg}, {x}, {y})"
-        font-weight='light'>{str}</text>
-{/snippet}
-
-{#snippet text(x, y, str, anchor="middle", size=12, stroke='black')}
-    <text x={x} y={y} text-anchor={anchor} alignment-baseline='middle'
-        stroke={stroke} font-size={size} 
-        font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
-        text-rendering="geometricPrecision"
-        stroke-width="0.25"
-        letter-spacing="1"
-        font-weight='100'>
-        {str}
-    </text>
-{/snippet}
-
 {#snippet sprite(s)}
     <circle cx={s.x} cy={s.y} r=10 fill={s.fill}/>
     <text x={s.x} y={s.y}
@@ -151,7 +130,6 @@
         stroke='black' font-size=8 font-family='sans-serif'
         font-weight='light'>{s.label}</text>
 {/snippet}
-
 <!-- 1. The Scrollable Window Wrapper
     - 'overflow-auto' Added to the outer container to automatically introduce scrollbars
     only when the child SVG's footprint physically exceeds the boundary limits of the parent div.
@@ -181,11 +159,15 @@
             x: svg.plotMidX, y: 60, fontSize: 18})}
 
         <!-- Input Legend  -->
-        {@render text(svg.plotLeft+100, svg.plotTop+15, 'Fire Behavior Conditions', 'middle', 10)}
+        {@render svgText({...chartText, x: svg.plotLeft+100, y: svg.plotTop+15, str: 'Fire Behavior Conditions',
+            textAnchor: 'middle', fontSize: 10})}
         {#each inputProp as prop, i}
-            {@render text(svg.plotLeft+10, svg.plotTop+(i+3)*10, prop.name, 'start', 10)}
-            {@render text(svg.plotLeft+180, svg.plotTop+(i+3)*10, input[prop.key].toFixed(prop.dec), 'end', 10)}
-            {@render text(svg.plotLeft+183, svg.plotTop+(i+3)*10, prop.units, 'start', 10)}
+            {@render svgText({...chartText, x: svg.plotLeft+10, y: svg.plotTop+(i+3)*10, str: prop.name, 
+                textAnchor: 'start', fontSize: 10})}
+            {@render svgText({...chartText, x: svg.plotLeft+180, y: svg.plotTop+(i+3)*10, str: input[prop.key].toFixed(prop.dec), 
+                textAnchor: 'end', fontSize: 10})}
+            {@render svgText({...chartText, x: svg.plotLeft+183, y: svg.plotTop+(i+3)*10, str: prop.units, 
+                textAnchor: 'start', fontSize: 10})}
         {/each}
 
         <!-- X -axis horizontal gridlines -->
@@ -194,8 +176,10 @@
             {@render svgText({...chartText, x: x, y: svg.plotTop-10, str: axis.x.tics[i], fontSize: 12})}
             {@render svgText({...chartText, x: x, y: svg.plotBot+10, str: axis.x.tics[i], fontSize: 12})}
         {/each}
-        {@render text(svg.plotMidX, svg.plotBot+25, varLabel[xvar].name, 'middle', 16)}
-        {@render text(svg.plotMidX, svg.plotBot+40, '('+varLabel[xvar].units+')', 'middle', 12)}
+        {@render svgText({...chartText, x: svg.plotMidX, y: svg.plotBot+25, str: varLabel[xvar].name, 
+            textAnchor: 'middle', fontSize: 16})}
+        {@render svgText({...chartText, x: svg.plotMidX, y: svg.plotBot+40, str: '('+varLabel[xvar].units+')', 
+            textAnchor: 'middle', fontSize: 12})}
 
         <!-- Y-axis horizontal gridlines -->
         {#each tics.y as y, i}
@@ -205,9 +189,10 @@
             {@render svgText({...chartText, x: svg.plotRight+2, y: y, str: axis.y.tics[i],
                 fontSize: 12, textAnchor: 'start'})}
         {/each}
-        <!-- {@render text(svg.plotLeft-35, svg.plotMidY, varLabel[yvar].name)} -->
-        {@render textRotate(svg.plotLeft-35, svg.plotMidY, varLabel[yvar].name, 270, 16)}
-        {@render textRotate(svg.plotLeft-15, svg.plotMidY, '('+varLabel[yvar].units+')', 270, 12)}
+        {@render svgTextRotate({...chartText, x: svg.plotLeft-35, y: svg.plotMidY, str: varLabel[yvar].name,
+            degrees: 270, fontSize: 16})}
+        {@render svgTextRotate({...chartText, x: svg.plotLeft-15, y: svg.plotMidY, str: '('+varLabel[yvar].units+')',
+            degrees: 270, fontSize: 14})}
 
         <!-- Sprites -->
         {#each sprites as s}

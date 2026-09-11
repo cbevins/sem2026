@@ -1,7 +1,7 @@
 <!-- SVG element snippets -->
 <!-- IMPORTANT! Must delcare script as a *module* -->
 <script module>
-    export { svgText }
+    export { svgText, svgTextRotate }
 </script>
 
 {#snippet svgText({str='',
@@ -80,4 +80,9 @@
         x={x}
         y={y}
     >{str}</text>
+{/snippet}
+
+<!-- Uses the 'degrees' attribute to rotate around the middle -->
+{#snippet svgTextRotate(attr)}
+    {@render svgText({...attr, transform: `rotate(${attr.degrees}, ${attr.x}, ${attr.y})`})}
 {/snippet}

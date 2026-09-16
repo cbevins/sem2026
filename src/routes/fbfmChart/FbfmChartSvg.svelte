@@ -26,7 +26,8 @@
         fontWeight: 'lighter',
         textAnchor: 'middle',
     }
-    const inputProp = [
+    // Input legend
+    const inputLegend = [
         {key: 'midflameWindSpeed', name: 'Midflame Wind Speed', units: 'ft/min', dec: 0},
         {key: 'slopeRatio', name: 'Slope Steepness', units: 'degrees', dec: 0},
         {key: 'moistureDead1h', name: 'Dead 1-h Fuel Moisture', units: 'ratio', dec: 2},
@@ -49,7 +50,7 @@
         x: {tics: 5, fixedMin: false, minVal: 0, fixedMax: false, maxVal: 11000}, // good min-max for 'ros'
         y: {tics: 5, fixedMin: false, minVal: 0, fixedMax: false, maxVal: 250}, // good min-max for 'flame'
     })
-
+    
     let bounds = $derived(updateBounds(data))
     let axis = $derived(updateAxis(bounds, settings))
     let svg = $derived(updateSvg(axis))
@@ -161,7 +162,7 @@
         <!-- Input Legend  -->
         {@render svgText({...chartText, x: svg.plotLeft+100, y: svg.plotTop+15, str: 'Fire Behavior Conditions',
             textAnchor: 'middle', fontSize: 10})}
-        {#each inputProp as prop, i}
+        {#each inputLegend as prop, i}
             {@render svgText({...chartText, x: svg.plotLeft+10, y: svg.plotTop+(i+3)*10, str: prop.name, 
                 textAnchor: 'start', fontSize: 10})}
             {@render svgText({...chartText, x: svg.plotLeft+180, y: svg.plotTop+(i+3)*10, str: input[prop.key].toFixed(prop.dec), 

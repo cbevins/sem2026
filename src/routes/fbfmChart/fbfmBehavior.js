@@ -14,6 +14,7 @@ export const FbfmInput = {
     moistureLiveHerb: 0.3,
     moistureLiveStem: 0.3,
     midflameWindSpeed: 40*88,
+    slopeDegrees: 0,
     slopeRatio: 0,
     windBearing: 0,
     slopeAspect: 180,

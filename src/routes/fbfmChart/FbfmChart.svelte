@@ -32,7 +32,7 @@
     }
 
     // FbfmChartInput.svelte callback function
-    function updatedInput(inp) {
+    function updateInput(inp) {
         behavior.update(inp)
         rawData = behavior.getData()
         input = {...inp}
@@ -70,7 +70,7 @@
         <FbfmChartFuelSelector {selectedFbfm} {onFuelToggle} {onGroupToggle}/>
 	</DraggableDialog>
 
-    <!-- Fuel Selector Dialog -->
+    <!-- Fire Behavior Input Dialog -->
     <button onclick={toggleInputDialog}
 		class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 	> {inputIsOpen ? 'Close Input Form' : 'Change Fire Behavior Inputs'}</button>
@@ -79,7 +79,7 @@
 		{#snippet header()}
 			<h3 class="m-0 text-sm font-bold text-gray-900">Update Fire Behavior Inputs</h3>
 		{/snippet}
-        <FbfmChartInput {updatedInput} />
+        <FbfmChartInput {updateInput} currentInput={input}/>
 	</DraggableDialog>
 
     <!-- Fuel Model Table Dialog -->

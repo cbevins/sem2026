@@ -108,7 +108,7 @@ export class FbfmChart {
                 fuel.update(inputs)
             }
         }
-        this.prev = {...input}
+        this.prev = {...inputs}
         return this
     }
 

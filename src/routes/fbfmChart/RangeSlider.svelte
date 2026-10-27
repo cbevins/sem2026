@@ -25,10 +25,10 @@
     </script>
 
     <!-- Parent Grid: 5 columns force the text label, active value, min bound, track, and max bound onto one ultra-tight line -->
-    <div class="grid grid-cols-[4.5rem_3rem_0.5rem_1fr_auto] gap-x-1 items-center w-full select-none h-5">
+    <div class="grid grid-cols-[7rem_3rem_auto_1fr_auto] gap-x-1 w-full select-none h-5">
     
     <!-- Column 1: Static Left Label -->
-    <span class="text-[10px] font-semibold text-slate-500 tracking-wide truncate">
+    <span class="text-[10px] font-semibold text-slate-500 text-left tracking-wide truncate">
         {label}
     </span>
 
@@ -38,12 +38,12 @@
     </div>
 
     <!-- Column 3: Min Value Indicator -->
-    <span class="text-[10px] font-medium text-slate-400 tabular-nums select-none">
+    <span class="text-[10px] font-medium text-slate-400 tabular-nums text-right select-none">
         {min}
     </span>
 
     <!-- Column 4: Slider Bar Track (Pips layered inside) -->
-    <div class="relative flex items-center h-full mx-1">
+    <div class="relative flex items-center h-full mx-0">
         
         <!-- The Native Range Input Slider -->
         <input type="range" {min} {max} {step} {value}
@@ -83,7 +83,7 @@
     </div>
 
     <!-- Column 5: Max Value Indicator -->
-    <span class="text-[10px] font-medium text-slate-400 tabular-nums select-none">
+    <span class="text-[10px] font-medium text-slate-400 text-left tabular-nums select-none">
         {max}
     </span>
 

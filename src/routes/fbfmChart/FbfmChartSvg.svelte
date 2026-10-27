@@ -11,9 +11,9 @@
     } = $props()
 
     const varLabel = {
-        ros: {name: 'Fire Spread Rate', units: 'ft/min'},
-        flame: {name: 'Flame Length', units: 'ft'},
-        fli: {name: 'Fireline Intensity', units: 'Btu/ft/s'},
+        ros: {name: 'Fire Spread Rate', units: 'ft/min', factor: 1},
+        flame: {name: 'Flame Length', units: 'ft', factor: 1},
+        fli: {name: 'Fireline Intensity', units: 'Btu/ft/s', factor: 1},
     }
     // Base text style
     const chartText={
@@ -29,7 +29,8 @@
     // Input legend
     const inputLegend = [
         {key: 'midflameWindSpeed', name: 'Midflame Wind Speed', units: 'ft/min', dec: 0},
-        {key: 'slopeRatio', name: 'Slope Steepness', units: 'degrees', dec: 0},
+        {key: 'slopeDegrees', name: 'Slope Steepness', units: 'degrees', dec: 0},
+        {key: 'slopeRatio', name: 'Slope Steepness', units: 'ratio', dec: 2},
         {key: 'moistureDead1h', name: 'Dead 1-h Fuel Moisture', units: 'ratio', dec: 2},
         {key: 'moistureDead10h', name: 'Dead 1-h Fuel Moisture', units: 'ratio', dec: 2},
         {key: 'moistureDead100h', name: 'Dead 1-h Fuel Moisture', units: 'ratio', dec: 2},
@@ -47,8 +48,8 @@
     // NOTE: at midflame wind 20, 80-deg slope, 100% cured herb, and min fuel moisture, max values are:
     // ros = 11,362 ft/min, flame = 225 ft, and fli = 734,868 Btu/ft/s
     let settings = $state({
-        x: {tics: 5, fixedMin: false, minVal: 0, fixedMax: false, maxVal: 11000}, // good min-max for 'ros'
-        y: {tics: 5, fixedMin: false, minVal: 0, fixedMax: false, maxVal: 250}, // good min-max for 'flame'
+        x: {tics: 7, fixedMin: true, minVal: 0, fixedMax: true, maxVal: 11000}, // good min-max for 'ros'
+        y: {tics: 5, fixedMin: true, minVal: 0, fixedMax: true, maxVal: 250}, // good min-max for 'flame'
     })
     
     let bounds = $derived(updateBounds(data))
